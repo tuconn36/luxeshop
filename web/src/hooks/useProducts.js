@@ -15,19 +15,23 @@ export function useProducts(filters = {}, page = 1, perPage = 12) {
 
       try {
         const queryParams = {};
-        
+
         if (filters.category) {
           queryParams.category = filters.category;
         }
-        
+
+        if (filters.brand) {
+          queryParams.brand = filters.brand;
+        }
+
         if (filters.minPrice !== undefined) {
           queryParams.minPrice = filters.minPrice;
         }
-        
+
         if (filters.maxPrice !== undefined) {
           queryParams.maxPrice = filters.maxPrice;
         }
-        
+
         if (filters.search) {
           queryParams.search = filters.search;
         }
@@ -38,18 +42,32 @@ export function useProducts(filters = {}, page = 1, perPage = 12) {
 
         const result = await productsAPI.getList(page, perPage, queryParams);
 
-        setProducts(result.items);
-        setTotalPages(result.totalPages);
-        setTotalItems(result.totalItems);
+        setProducts(result.items || []);
+        setTotalPages(result.totalPages || 0);
+        setTotalItems(result.totalItems || 0);
       } catch (err) {
-        setError(err.message);
+        console.warn('Failed to fetch products:', err.message);
+        
+        // Provide user-friendly error messages
+        let userMessage = 'Không thể tải sản phẩm. Vui lòng thử lại sau.';
+        
+        if (err.isNetworkError) {
+          userMessage = 'Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng.';
+        } else if (err.status === 500) {
+          userMessage = 'Server đang gặp sự cố. Vui lòng thử lại sau.';
+        } else if (err.status === 404) {
+          userMessage = 'Không tìm thấy sản phẩm.';
+        }
+        
+        setError(userMessage);
+        setProducts([]);
       } finally {
         setLoading(false);
       }
     };
 
     fetchProducts();
-  }, [filters.category, filters.minPrice, filters.maxPrice, filters.search, filters.sort, page, perPage]);
+  }, [filters.category, filters.brand, filters.minPrice, filters.maxPrice, filters.search, filters.sort, page, perPage]);
 
   return { products, loading, error, totalPages, totalItems };
 }

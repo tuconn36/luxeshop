@@ -1,11 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../config/database');
+const { authMiddleware, adminMiddleware } = require('../middleware/auth');
 
 // GET all products with filters
 router.get('/', async (req, res) => {
   try {
-    const { category, minPrice, maxPrice, search, sort = 'created_at', page = 1, limit = 12 } = req.query;
+    const { category, brand, minPrice, maxPrice, search, sort = 'created_at', page = 1, limit = 12 } = req.query;
     
     let query = 'SELECT * FROM products WHERE 1=1';
     const params = [];
@@ -14,6 +15,12 @@ router.get('/', async (req, res) => {
     if (category) {
       query += ` AND category = $${paramCount}`;
       params.push(category);
+      paramCount++;
+    }
+
+    if (brand) {
+      query += ` AND tags @> $${paramCount}`;
+      params.push(JSON.stringify([brand]));
       paramCount++;
     }
 
@@ -81,8 +88,8 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// POST create product (admin only - add auth middleware later)
-router.post('/', async (req, res) => {
+// POST create product (admin only)
+router.post('/', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const { name, description, price, original_price, category, stock, featured, images, materials, sizes, colors, tags } = req.body;
 
@@ -100,7 +107,7 @@ router.post('/', async (req, res) => {
 });
 
 // PUT update product (admin only)
-router.put('/:id', async (req, res) => {
+router.put('/:id', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const { name, description, price, original_price, category, stock, featured, images, materials, sizes, colors, tags } = req.body;
 
@@ -126,7 +133,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // DELETE product (admin only)
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', authMiddleware, adminMiddleware, async (req, res) => {
   try {
     const result = await pool.query('DELETE FROM products WHERE id = $1 RETURNING id', [req.params.id]);
 

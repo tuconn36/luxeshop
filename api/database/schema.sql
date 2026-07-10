@@ -7,8 +7,23 @@ CREATE TABLE IF NOT EXISTS users (
     phone VARCHAR(50),
     address TEXT,
     avatar VARCHAR(255),
+    role VARCHAR(20) DEFAULT 'user',
+    has_password BOOLEAN DEFAULT TRUE,
+    dob DATE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create OTP codes table
+CREATE TABLE IF NOT EXISTS otp_codes (
+    id SERIAL PRIMARY KEY,
+    otp_id VARCHAR(100) UNIQUE NOT NULL,
+    code VARCHAR(8) NOT NULL,
+    identifier VARCHAR(255) NOT NULL,
+    method VARCHAR(10) NOT NULL,
+    verified BOOLEAN DEFAULT FALSE,
+    expires_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Create products table
@@ -65,6 +80,10 @@ CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id);
 CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
 CREATE INDEX IF NOT EXISTS idx_reviews_product_id ON reviews(product_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_user_id ON reviews(user_id);
+CREATE INDEX IF NOT EXISTS idx_otp_codes_otp_id ON otp_codes(otp_id);
+CREATE INDEX IF NOT EXISTS idx_otp_codes_identifier ON otp_codes(identifier);
+CREATE INDEX IF NOT EXISTS idx_otp_codes_expires_at ON otp_codes(expires_at);
+CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone);
 
 -- Insert sample data for products
 INSERT INTO products (name, description, price, original_price, category, stock, featured, images, materials, sizes, colors, tags) VALUES

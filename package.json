@@ -3,15 +3,14 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "dev": "concurrently --kill-others --raw \"npm run dev --prefix apps/web\" \"npm run dev --prefix apps/pocketbase\"",
-    "build": "concurrently --raw \"npm run build --prefix apps/web\"",
-    "start": "concurrently --kill-others --raw \"npm run start --prefix apps/pocketbase\"",
-    "lint": "concurrently --raw \"npm run lint --prefix apps/web\""
+    "dev": "concurrently --kill-others --raw \"npm run dev --prefix api\" \"npm run dev --prefix web\"",
+    "build": "concurrently --raw \"npm run build --prefix web\"",
+    "start": "npm run start --prefix api",
+    "start:web": "npm run preview --prefix web",
+    "lint": "concurrently --raw \"npm run lint --prefix web\"",
+    "install:all": "npm install --prefix api && npm install --prefix web"
   },
   "devDependencies": {
     "concurrently": "^9.1.2"
-  },
-  "workspaces": [
-    "apps/*"
-  ]
+  }
 }
