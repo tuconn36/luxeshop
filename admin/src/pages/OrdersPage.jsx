@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { ordersAPI } from '../lib/api'
 import {
-  formatVND, formatDate, formatDateShort, getStatusInfo, getPaymentStatusInfo, STATUS_OPTIONS
+  formatVND, formatDate, formatDateShort, getStatusInfo, getPaymentStatusInfo, STATUS_OPTIONS, imgUrl
 } from '../lib/utils'
 import { useToast } from '../components/ui/Toast'
 import PageHeader from '../components/ui/PageHeader'
@@ -335,7 +335,7 @@ function OrderDetailModal({ order, loading, onClose, onUpdateStatus }) {
                         <img
                           src={(() => {
                             const src = it.image || it.images[0]
-                            return src.startsWith('http') ? src : `http://localhost:5000${src}`
+                            return src.startsWith('http') ? src : imgUrl(src)
                           })()}
                           alt={it.name}
                           className="w-full h-full object-cover"

@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, ShoppingCart, User, Menu, X, Phone, Globe, Tag, MapPin, Moon, Sun, ChevronDown } from 'lucide-react';
+import { Search, ShoppingCart, User, Menu, X, Phone, Globe, Tag, Moon, Sun, ChevronDown } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext.jsx';
 import { useCart } from '@/hooks/useCart.js';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { getContactLabel } from '@/lib/userDisplay.js';
 import OTPLoginModal from '@/components/auth/OTPLoginModal.jsx';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -23,7 +24,9 @@ export default function Header() {
   const [showAccessoriesMegaMenu, setShowAccessoriesMegaMenu] = useState(false);
   const [showTopBar, setShowTopBar] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const menuTimeoutRef = React.useRef(null);
+  const searchInputRef = React.useRef(null);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -193,12 +196,35 @@ export default function Header() {
     if (searchQuery.trim()) {
       navigate(`/products?search=${encodeURIComponent(searchQuery)}`);
       setSearchQuery('');
+      setIsSearchOpen(false);
     }
   };
 
+  const openSearch = () => {
+    setIsSearchOpen(true);
+    setTimeout(() => searchInputRef.current?.focus(), 250);
+  };
+
+  const closeSearch = () => {
+    setIsSearchOpen(false);
+  };
+
+  useEffect(() => {
+    if (!isSearchOpen) return;
+    const handleKey = (e) => {
+      if (e.key === 'Escape') closeSearch();
+    };
+    window.addEventListener('keydown', handleKey);
+    document.body.style.overflow = 'hidden';
+    return () => {
+      window.removeEventListener('keydown', handleKey);
+      document.body.style.overflow = '';
+    };
+  }, [isSearchOpen]);
+
   const handleLogout = () => {
     logout();
-    navigate('/');
+    navigate('/', { replace: true });
   };
 
   // Shop pages also use overlay style
@@ -422,46 +448,27 @@ export default function Header() {
             </nav>
 
             <div className="hidden md:flex items-center gap-1">
-              <form onSubmit={handleSearch} className="relative hidden xl:block">
-                <Input
-                  type="text"
-                  placeholder="Tìm kiếm sản phẩm..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className={`w-52 h-9 pl-10 pr-4 rounded-full text-sm transition-all duration-300 ${
-                    isOverlay
-                      ? 'bg-white/15 border-white/25 text-white placeholder:text-white/60 focus:bg-white/20 focus:border-white/40'
-                      : 'bg-muted/50 border-transparent focus:bg-background focus:border-border'
-                  }`}
-                />
-                <Search className={`absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 ${
-                  isOverlay ? 'text-white/50' : 'text-muted-foreground'
-                }`} />
-              </form>
-
               <TooltipProvider delayDuration={0}>
                 <Tooltip>
-                  <TooltipTrigger>
-                    <Button variant="ghost" size="icon" className={`rounded-full ${iconBtnClass}`}>
-                      <MapPin className="w-[18px] h-[18px]" />
-                    </Button>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={openSearch}
+                      className={`flex items-center justify-center w-9 h-9 rounded-full transition-colors ${iconBtnClass}`}
+                    >
+                      <Search className="w-[18px] h-[18px]" />
+                    </button>
                   </TooltipTrigger>
-                  <TooltipContent side="bottom" sideOffset={8}>
-                    <p className="font-medium">Cửa hàng LUXE</p>
-                    <p className="text-xs opacity-75">Tìm cửa hàng gần bạn</p>
-                  </TooltipContent>
+                  <TooltipContent side="bottom" sideOffset={8}>Tìm kiếm</TooltipContent>
                 </Tooltip>
 
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <div className="relative group">
                       <button
-                        onClick={() => {
-                          if (!currentUser) {
-                            navigate('/login?redirect=/cart');
-                          } else {
-                            navigate('/cart');
-                          }
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          navigate('/cart');
                         }}
                       >
                         <Button variant="ghost" size="icon" className={`rounded-full ${iconBtnClass}`}>
@@ -540,7 +547,7 @@ export default function Header() {
                           <span className={`text-sm font-medium hidden xl:inline-block max-w-[100px] truncate ${
                             isOverlay ? 'text-white/90' : ''
                           }`}>
-                            {currentUser.name || currentUser.email || currentUser.phone}
+                            {currentUser.name || getContactLabel(currentUser)}
                           </span>
                         </Button>
                       </Link>
@@ -559,7 +566,7 @@ export default function Header() {
                     {currentUser ? (
                       <>
                         <p className="font-medium">Tài khoản</p>
-                        <p className="text-xs opacity-75">{currentUser.name || currentUser.email || currentUser.phone}</p>
+                        <p className="text-xs opacity-75">{currentUser.name || getContactLabel(currentUser)}</p>
                       </>
                     ) : (
                       <p>Đăng nhập</p>
@@ -608,7 +615,7 @@ export default function Header() {
                   const handleClick = () => {
                     setMobileMenuOpen(false);
                     if (item.requiresAuth && !currentUser) {
-                      navigate('/login?redirect=/cart');
+                      setIsLoginModalOpen(true);
                     } else {
                       navigate(item.to);
                     }
@@ -897,6 +904,66 @@ export default function Header() {
           </div>
         </div>
       )}
+
+      {/* Search Overlay */}
+      <div
+        className={`fixed inset-x-0 top-0 z-[60] transition-transform duration-500 ease-out ${
+          isSearchOpen ? 'translate-y-0' : '-translate-y-full'
+        }`}
+      >
+        <div className="bg-background/95 backdrop-blur-xl border-b border-border shadow-2xl">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-serif text-lg font-semibold tracking-wide">Tìm kiếm sản phẩm</h3>
+              <button
+                onClick={closeSearch}
+                className="flex items-center justify-center w-9 h-9 rounded-full text-foreground/80 hover:text-foreground hover:bg-muted transition-colors"
+                aria-label="Đóng tìm kiếm"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <form onSubmit={handleSearch} className="relative">
+              <Input
+                ref={searchInputRef}
+                type="text"
+                placeholder="Bạn muốn tìm gì hôm nay? (áo, quần, giày, túi...)"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full h-14 pl-14 pr-32 rounded-full text-base border-2 border-border focus:border-primary"
+              />
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+              <Button
+                type="submit"
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full px-5 h-10"
+              >
+                Tìm
+              </Button>
+            </form>
+            <div className="mt-5 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+              <span className="mr-1">Gợi ý:</span>
+              {['Áo thun', 'Quần jean', 'Giày sneaker', 'Túi xách', 'Áo khoác'].map((kw) => (
+                <button
+                  key={kw}
+                  type="button"
+                  onClick={() => setSearchQuery(kw)}
+                  className="px-3 py-1 rounded-full border border-border hover:border-primary hover:text-primary transition-colors"
+                >
+                  {kw}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Backdrop */}
+      <div
+        onClick={closeSearch}
+        className={`fixed inset-0 z-[55] bg-black/50 backdrop-blur-sm transition-opacity duration-500 ${
+          isSearchOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+        }`}
+      />
 
       <OTPLoginModal 
         isOpen={isLoginModalOpen} 

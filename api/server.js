@@ -25,10 +25,10 @@ app.use(helmet({
   crossOriginEmbedderPolicy: false,
 }));
 
-// 2. Rate Limiting - Giới hạn số request
+// 2. Rate Limiting - Giới hạn số request API trên production
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 phút
-  max: 100,
+  max: 500,
   message: { error: 'Quá nhiều yêu cầu, vui lòng thử lại sau.' },
   standardHeaders: true,
   legacyHeaders: false,
@@ -37,16 +37,17 @@ const limiter = rateLimit({
 // Rate limit cho auth routes (nghiêm ngặt hơn)
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: 20,
   message: { error: 'Quá nhiều lần thử, vui lòng thử lại sau.' },
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 // 3. Slow Down - Làm chậm khi có quá nhiều request
-// express-slow-down v2 yêu cầu delayMs là function
 const speedLimiter = slowDown({
   windowMs: 15 * 60 * 1000,
-  delayAfter: 50,
-  delayMs: (used) => (used - 50) * 500,
+  delayAfter: 200,
+  delayMs: (used) => (used - 200) * 250,
 });
 
 // 4. HPP - Chống HTTP Parameter Pollution
@@ -58,7 +59,7 @@ function parseOrigins() {
   if (!raw) {
     return NODE_ENV === 'production'
       ? []
-      : ['http://localhost:3000', 'http://localhost:5173', 'http://127.0.0.1:3000', 'http://localhost:4173'];
+      : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173', 'http://127.0.0.1:3000', 'http://127.0.0.1:3001', 'http://localhost:4173'];
   }
   // Hỗ trợ cả dấu phẩy và khoảng trắng
   return raw.split(/[,\s]+/).map((s) => s.trim()).filter(Boolean);
@@ -78,10 +79,13 @@ const corsOptions = {
 };
 app.use(cors(corsOptions));
 
-// Áp dụng rate limiting
-app.use(limiter);
+// Chỉ giới hạn lưu lượng public trên production. Nếu bật ở development,
+// HMR và React StrictMode có thể dùng hết quota rồi làm mọi API trả 429.
+if (NODE_ENV === 'production') {
+  app.use('/api', limiter);
+  app.use('/api', speedLimiter);
+}
 app.use('/api/auth', authLimiter);
-app.use(speedLimiter);
 
 // ============ MIDDLEWARE ============
 
@@ -101,6 +105,9 @@ app.use('/api/products', require('./routes/products'));
 app.use('/api/orders', require('./routes/orders'));
 app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/users', require('./routes/users'));
+app.use('/api/wishlist', require('./routes/wishlist'));
+app.use('/api/payment', require('./routes/payment'));
+app.use('/', require('./routes/sitemap'));
 
 // Health check
 app.get('/health', (req, res) => {

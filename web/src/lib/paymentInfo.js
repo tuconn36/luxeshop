@@ -12,7 +12,7 @@ export const PAYMENT_INFO = {
     ]
   },
   bank: {
-    label: 'Chuyển khoản ngân hàng',
+    label: 'Chuyển khoản ngân hàng (thủ công)',
     shortLabel: 'Chuyển khoản',
     icon: 'Building2',
     description: 'Quý khách chuyển khoản qua ngân hàng. Đơn hàng sẽ được xử lý sau khi nhận được thanh toán.',
@@ -41,6 +41,19 @@ export const PAYMENT_INFO = {
       'Hỗ trợ thanh toán qua app MoMo trên điện thoại',
       'Xử lý tự động trong vòng 1-5 phút',
       'Hoàn tiền nhanh chóng nếu có sự cố'
+    ]
+  },
+  vietqr: {
+    label: 'Thanh toán QR (VietQR)',
+    shortLabel: 'QR ngân hàng',
+    icon: 'QrCode',
+    description: 'Quét mã QR bằng app ngân hàng để thanh toán. Hỗ trợ tất cả ngân hàng nội địa Việt Nam.',
+    transferNote: 'Hệ thống tự động xác nhận khi chuyển khoản thành công (qua Sepay). Bạn cũng có thể bấm "Tôi đã CK xong" để đẩy nhanh xử lý.',
+    details: [
+      'Mở app ngân hàng bất kỳ (Vietcombank, MbBank, Techcombank, ...) → quét QR',
+      'Số tiền và nội dung CK được điền sẵn — chỉ cần xác nhận',
+      'Đơn hàng tự động cập nhật trạng thái trong vài giây',
+      'Không cần nhập thủ công STK hay nội dung'
     ]
   }
 };

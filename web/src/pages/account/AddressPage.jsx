@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-import { MapPin, Plus, Trash2 } from 'lucide-react';
+import { MapPin, Plus, Trash2, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { addressesAPI } from '@/lib/api.js';
 import { useAuth } from '@/contexts/AuthContext.jsx';
+import { CITIES, getDistricts } from '@/lib/vietnamLocations.js';
 
 export default function AddressPage() {
   const { currentUser } = useAuth();
@@ -14,6 +15,7 @@ export default function AddressPage() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deletingId, setDeletingId] = useState(null);
+  const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({
     name: '',
     phone: '',
@@ -22,6 +24,21 @@ export default function AddressPage() {
     district: '',
     is_default: false,
   });
+  const [availableDistricts, setAvailableDistricts] = useState([]);
+
+  // Update districts when city changes
+  useEffect(() => {
+    if (form.city) {
+      const districts = getDistricts(form.city);
+      setAvailableDistricts(districts);
+      // Reset district if it's not in the new city's districts
+      if (form.district && !districts.includes(form.district)) {
+        setForm((prev) => ({ ...prev, district: '' }));
+      }
+    } else {
+      setAvailableDistricts([]);
+    }
+  }, [form.city, form.district]);
 
   // Tải danh sách địa chỉ của user hiện tại
   useEffect(() => {
@@ -43,24 +60,49 @@ export default function AddressPage() {
 
   const resetForm = () => {
     setForm({ name: '', phone: '', address: '', city: '', district: '', is_default: false });
+    setEditingId(null);
   };
 
-  const handleAdd = async (e) => {
+  const handleEdit = (addr) => {
+    setForm({
+      name: addr.name,
+      phone: addr.phone,
+      address: addr.address,
+      city: addr.city || '',
+      district: addr.district || '',
+      is_default: addr.is_default || false,
+    });
+    setEditingId(addr.id);
+    setShowForm(true);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!currentUser?.id) {
       toast.error('Vui lòng đăng nhập để lưu địa chỉ');
       return;
     }
+    
     try {
       setSaving(true);
-      const created = await addressesAPI.create(currentUser.id, form);
-      setAddresses((prev) => [created, ...prev]);
+      
+      if (editingId) {
+        // Update existing address
+        const updated = await addressesAPI.update(currentUser.id, editingId, form);
+        setAddresses((prev) => prev.map((a) => (a.id === editingId ? updated : a)));
+        toast.success('Đã cập nhật địa chỉ');
+      } else {
+        // Create new address
+        const created = await addressesAPI.create(currentUser.id, form);
+        setAddresses((prev) => [created, ...prev]);
+        toast.success('Đã thêm địa chỉ');
+      }
+      
       resetForm();
       setShowForm(false);
-      toast.success('Đã thêm địa chỉ');
     } catch (err) {
-      console.error('Create address error:', err);
-      toast.error(err?.message || 'Không thể thêm địa chỉ');
+      console.error('Save address error:', err);
+      toast.error(err?.message || 'Không thể lưu địa chỉ');
     } finally {
       setSaving(false);
     }
@@ -141,19 +183,33 @@ export default function AddressPage() {
                 )}
               </div>
             </div>
-            <button
-              type="button"
-              onClick={() => handleDelete(addr.id)}
-              disabled={deletingId === addr.id}
-              className="text-gray-400 hover:text-red-500 disabled:opacity-50"
-            >
-              <Trash2 className="w-4 h-4" />
-            </button>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                onClick={() => handleEdit(addr)}
+                className="text-gray-400 hover:text-blue-500 disabled:opacity-50"
+                title="Chỉnh sửa"
+              >
+                <Pencil className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDelete(addr.id)}
+                disabled={deletingId === addr.id}
+                className="text-gray-400 hover:text-red-500 disabled:opacity-50"
+                title="Xóa"
+              >
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         ))}
 
         {showForm && (
-          <form onSubmit={handleAdd} className="border rounded-lg p-4 space-y-3">
+          <form onSubmit={handleSubmit} className="border rounded-lg p-4 space-y-3">
+            <h3 className="font-semibold text-sm">
+              {editingId ? 'Chỉnh sửa địa chỉ' : 'Thêm địa chỉ mới'}
+            </h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <Label>Họ tên</Label>
@@ -185,22 +241,37 @@ export default function AddressPage() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label>Quận / Huyện</Label>
-                <Input
-                  value={form.district}
-                  onChange={(e) => setForm({ ...form, district: e.target.value })}
-                  required
-                  className="mt-1"
-                />
-              </div>
-              <div>
-                <Label>Tỉnh / Thành phố</Label>
-                <Input
+                <Label>Tỉnh / Thành phố *</Label>
+                <select
                   value={form.city}
                   onChange={(e) => setForm({ ...form, city: e.target.value })}
                   required
-                  className="mt-1"
-                />
+                  className="mt-1 w-full h-10 px-3 py-2 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option value="">-- Chọn tỉnh/thành --</option>
+                  {CITIES.map((city) => (
+                    <option key={city} value={city}>
+                      {city}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <Label>Quận / Huyện *</Label>
+                <select
+                  value={form.district}
+                  onChange={(e) => setForm({ ...form, district: e.target.value })}
+                  required
+                  disabled={!form.city}
+                  className="mt-1 w-full h-10 px-3 py-2 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <option value="">-- Chọn quận/huyện --</option>
+                  {availableDistricts.map((district) => (
+                    <option key={district} value={district}>
+                      {district}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
             <label className="flex items-center gap-2 text-sm">
@@ -218,7 +289,7 @@ export default function AddressPage() {
                 disabled={saving}
                 className="bg-black text-white px-4 py-2 text-sm font-semibold uppercase hover:bg-gray-800"
               >
-                {saving ? 'Đang lưu...' : 'Lưu'}
+                {saving ? 'Đang lưu...' : (editingId ? 'Cập nhật' : 'Lưu')}
               </Button>
               <button
                 type="button"

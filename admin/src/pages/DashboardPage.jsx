@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { productsAPI, ordersAPI, usersAPI } from '../lib/api'
-import { formatVND, formatDateShort, getStatusInfo } from '../lib/utils'
+import { formatVND, formatDateShort, getStatusInfo, imgUrl } from '../lib/utils'
 import PageHeader from '../components/ui/PageHeader'
 import StatCard from '../components/ui/StatCard'
 import StatusBadge from '../components/ui/StatusBadge'
@@ -156,7 +156,7 @@ export default function DashboardPage() {
                   <div className="w-10 h-10 rounded-lg bg-slate-100 overflow-hidden shrink-0">
                     {p.images?.[0] ? (
                       <img
-                        src={p.images[0].startsWith('http') ? p.images[0] : `http://localhost:5000${p.images[0]}`}
+                        src={p.images[0].startsWith('http') ? p.images[0] : imgUrl(p.images[0])}
                         alt={p.name}
                         className="w-full h-full object-cover"
                         onError={(e) => { e.currentTarget.style.display = 'none' }}

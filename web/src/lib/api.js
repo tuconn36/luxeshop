@@ -1,4 +1,16 @@
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+
+// Base URL for static files (uploads, images). Falls back to API origin by stripping /api.
+export const ASSET_BASE = (import.meta.env.VITE_ASSET_BASE)
+  || (import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '') : 'http://localhost:5001');
+
+export function resolveAssetUrl(path) {
+  if (!path) return null;
+  if (/^https?:\/\//i.test(path)) return path;
+  if (path.startsWith('/')) return `${ASSET_BASE}${path}`;
+  return `${ASSET_BASE}/${path}`;
+}
+
 const API_TIMEOUT = 10000; // 10 seconds timeout
 
 // Helper function for API calls with timeout
@@ -80,10 +92,10 @@ export async function checkAPIHealth() {
 
 // Auth API
 export const authAPI = {
-  login: (email, password) => 
+  login: (identifier, password) =>
     apiCall('/auth/login', {
       method: 'POST',
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ identifier, password }),
     }),
   
   register: (userData) =>
@@ -181,7 +193,6 @@ export const ordersAPI = {
     }),
 
   getMyOrders: (userId) => apiCall(`/orders/user/${userId}`),
-
   // Alias for backwards compatibility
   getAll: function () {
     const userStr = localStorage.getItem('user');
@@ -201,6 +212,13 @@ export const ordersAPI = {
     apiCall(`/orders/${id}/status`, {
       method: 'PUT',
       body: JSON.stringify({ status: 'cancelled' }),
+    }),
+
+  // User tự hủy đơn của mình (an toàn hơn `cancel` ở trên — có verify quyền sở hữu
+  // và chỉ cho phép khi đơn ở trạng thái cho phép).
+  cancelByUser: (id) =>
+    apiCall(`/orders/${id}/cancel`, {
+      method: 'POST',
     }),
 };
 
@@ -240,4 +258,47 @@ export const measurementsAPI = {
 // Stats API for account sidebar (order counts per status)
 export const statsAPI = {
   getUserStats: (userId) => apiCall(`/users/${userId}/stats`),
+};
+
+// Reviews API
+export const reviewsAPI = {
+  getByProduct: (productId) => apiCall(`/reviews/product/${productId}`),
+  create: (formData) => {
+    const token = localStorage.getItem('token');
+    return fetch(`${API_URL}/reviews`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData, // FormData for multipart/form-data
+    }).then(async (res) => {
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Failed to create review');
+      }
+      return res.json();
+    });
+  },
+  markHelpful: (id) => apiCall(`/reviews/${id}/helpful`, { method: 'POST' }),
+  delete: (id) => apiCall(`/reviews/${id}`, { method: 'DELETE' }),
+};
+
+// Wishlist API
+export const wishlistAPI = {
+  list: () => apiCall('/wishlist'),
+  add: (productId) => apiCall('/wishlist', {
+    method: 'POST',
+    body: JSON.stringify({ product_id: productId }),
+  }),
+  remove: (productId) => apiCall(`/wishlist/${productId}`, {
+    method: 'DELETE',
+  }),
+  check: (productId) => apiCall(`/wishlist/check/${productId}`),
+};
+
+// Payment API (VietQR + Sepay webhook)
+export const paymentAPI = {
+  getBanks: () => apiCall('/payment/banks'),
+  getQR: (orderId, bankId) => apiCall(`/payment/qr?orderId=${orderId}&bankId=${bankId}`),
+  markPaid: (orderId) => apiCall(`/payment/orders/${orderId}/mark-paid`, {
+    method: 'POST',
+  }),
 };

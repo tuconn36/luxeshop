@@ -31,10 +31,15 @@ async function createAdminUser() {
       return;
     }
 
-    // Insert admin user
+    // Insert admin user — has_password=TRUE để login bằng mật khẩu, role='admin' để vào trang admin
     await pool.query(
-      `INSERT INTO users (email, password_hash, name, phone, created_at) 
-       VALUES ($1, $2, $3, $4, NOW())`,
+      `INSERT INTO users (email, password_hash, name, phone, role, has_password, created_at)
+       VALUES ($1, $2, $3, $4, 'admin', TRUE, NOW())
+       ON CONFLICT (email) DO UPDATE SET
+         password_hash = EXCLUDED.password_hash,
+         role = 'admin',
+         has_password = TRUE,
+         name = COALESCE(users.name, EXCLUDED.name)`,
       [email, passwordHash, 'Administrator', '0865577745']
     );
 

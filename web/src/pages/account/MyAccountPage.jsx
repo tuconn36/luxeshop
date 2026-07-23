@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext.jsx';
 import { ordersAPI, statsAPI, addressesAPI, measurementsAPI } from '@/lib/api.js';
+import { getRealEmail } from '@/lib/userDisplay.js';
 import OrderCard from '@/components/shop/OrderCard.jsx';
 import {
   User,
@@ -107,9 +108,9 @@ export default function MyAccountPage() {
             {currentUser?.name || 'Chưa cập nhật tên'}
           </p>
           <div className="flex items-center gap-3 mt-1 text-xs text-gray-500 flex-wrap">
-            {currentUser?.email && (
+            {getRealEmail(currentUser) && (
               <span className="inline-flex items-center gap-1">
-                <Mail className="w-3 h-3" /> {currentUser.email}
+                <Mail className="w-3 h-3" /> {getRealEmail(currentUser)}
               </span>
             )}
             {currentUser?.phone && (

@@ -27,11 +27,25 @@ const upload = multer({
   },
 });
 
+// GET all users (admin) — dùng regex để chỉ match /all, không bị /:id nuốt mất
+// Đặt TRƯỚC route /:id vì Express match theo thứ tự đăng ký.
+router.get(/^\/all$/, authMiddleware, adminMiddleware, async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT id, email, name, phone, address, dob, avatar, has_password, shipping_address, created_at FROM users ORDER BY created_at DESC LIMIT 200'
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
+});
+
 // GET user profile
 router.get('/:id', async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT id, email, name, phone, address, dob, avatar, has_password, created_at FROM users WHERE id = $1',
+      'SELECT id, email, name, phone, address, dob, avatar, has_password, shipping_address, created_at FROM users WHERE id = $1',
       [req.params.id]
     );
 
@@ -46,31 +60,23 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// GET all users (admin) — dùng regex để chỉ match /all, không bị /:id nuốt mất
-router.get(/^\/all$/, authMiddleware, adminMiddleware, async (req, res) => {
-  try {
-    const result = await pool.query(
-      'SELECT id, email, name, phone, address, dob, avatar, has_password, created_at FROM users ORDER BY created_at DESC LIMIT 200'
-    );
-    res.json(result.rows);
-  } catch (error) {
-    console.error('Error fetching users:', error);
-    res.status(500).json({ error: 'Failed to fetch users' });
-  }
-});
-
 // PUT update user profile (owner or admin)
 router.put('/:id', authMiddleware, ownerOrAdminMiddleware, async (req, res) => {
   try {
-    const { name, phone, address, dob, avatar } = req.body;
-    console.log('PUT /users/:id body:', { name, phone, address, dob, avatar, id: req.params.id });
+    const { name, phone, address, dob, avatar, shipping_address } = req.body;
 
     const result = await pool.query(
-      `UPDATE users SET name = $1, phone = $2, address = $3, dob = $4,
+      `UPDATE users SET 
+        name = $1, 
+        phone = $2, 
+        address = $3, 
+        dob = $4,
         avatar = COALESCE($5, avatar),
+        shipping_address = COALESCE($6, shipping_address),
         updated_at = CURRENT_TIMESTAMP
-       WHERE id = $6 RETURNING id, email, name, phone, address, dob, avatar, has_password, created_at`,
-      [name, phone, address, dob || null, avatar || null, req.params.id]
+       WHERE id = $7 
+       RETURNING id, email, name, phone, address, dob, avatar, has_password, shipping_address, created_at`,
+      [name, phone, address, dob || null, avatar || null, shipping_address ? JSON.stringify(shipping_address) : null, req.params.id]
     );
 
     if (result.rows.length === 0) {

@@ -61,7 +61,15 @@ export default function OrderHistoryPage() {
         ) : (
           <div className="space-y-4">
             {orders.map(order => (
-              <OrderCard key={order.id} order={order} />
+              <OrderCard
+                key={order.id}
+                order={order}
+                onCancelled={(updated) => {
+                  setOrders((prev) =>
+                    prev.map((o) => (o.id === updated.id ? { ...o, ...updated } : o))
+                  );
+                }}
+              />
             ))}
           </div>
         )}

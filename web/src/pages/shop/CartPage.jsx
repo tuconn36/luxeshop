@@ -20,7 +20,7 @@ export default function CartPage() {
 
   const handleCheckout = () => {
     if (!currentUser) {
-      navigate('/login?redirect=/checkout');
+      navigate('/signup?redirect=/checkout');
     } else {
       navigate('/checkout');
     }

@@ -65,4 +65,14 @@ export const STATUS_OPTIONS = [
   { value: 'shipping',  label: 'Đang giao' },
   { value: 'completed', label: 'Hoàn thành' },
   { value: 'cancelled', label: 'Đã hủy' },
-]
+]// Resolves a stored image path (e.g. "/uploads/x.jpg") to a full URL
+// pointing at the API host. Uses VITE_API_URL when available so dev/prod
+// always stay in sync.
+export function imgUrl(path) {
+  if (!path) return ''
+  if (typeof path !== 'string') return ''
+  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) return path
+  const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:5001/api').replace(/\/api\/?$/, '')
+  const clean = path.startsWith('/') ? path : `/${path}`
+  return `${apiBase}${clean}`
+}

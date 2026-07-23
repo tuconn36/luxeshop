@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { format } from 'date-fns';
 import { vi } from 'date-fns/locale';
@@ -15,8 +15,12 @@ import {
   Star,
   Wallet,
   Building2,
+  QrCode,
+  Loader2,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import { getPaymentInfo } from '@/lib/paymentInfo.js';
+import { ordersAPI } from '@/lib/api.js';
 
 // Mapping trạng thái → label tiếng Việt + icon + màu
 export const ORDER_STATUSES = {
@@ -83,11 +87,32 @@ function formatVND(n) {
   return Number(n || 0).toLocaleString('vi-VN') + '₫';
 }
 
-export default function OrderCard({ order, expanded = false }) {
+export default function OrderCard({ order, expanded = false, onCancelled }) {
+  const [cancelling, setCancelling] = useState(false);
   const statusInfo = getStatusInfo(order.status);
   const StatusIcon = statusInfo.icon;
   const shippingAddress = parseShippingAddress(order.shippingAddress);
   const items = parseItems(order.items);
+
+  const handleCancel = async () => {
+    if (cancelling) return;
+    const ok = window.confirm(
+      `Bạn có chắc muốn hủy đơn #${String(order.id).slice(-8).toUpperCase()}?\n` +
+      `Hành động này không thể hoàn tác.`
+    );
+    if (!ok) return;
+
+    setCancelling(true);
+    try {
+      const data = await ordersAPI.cancelByUser(order.id);
+      toast.success(data?.message || 'Đã hủy đơn hàng');
+      if (onCancelled) onCancelled(data?.order || { ...order, status: 'cancelled' });
+    } catch (err) {
+      toast.error(err.message || 'Không thể hủy đơn. Vui lòng thử lại.');
+    } finally {
+      setCancelling(false);
+    }
+  };
 
   const totalQty = useMemo(
     () => items.reduce((sum, it) => sum + (Number(it.quantity) || 1), 0),
@@ -245,8 +270,20 @@ export default function OrderCard({ order, expanded = false }) {
               </button>
             )}
             {(statusInfo.color === 'yellow' || statusInfo.color === 'blue' || statusInfo.color === 'indigo') && (
-              <button className="px-3 py-1.5 text-xs font-medium border border-gray-300 text-gray-600 rounded-full hover:bg-gray-50">
-                Hủy đơn
+              <button
+                type="button"
+                onClick={handleCancel}
+                disabled={cancelling}
+                className="px-3 py-1.5 text-xs font-medium border border-red-200 text-red-600 rounded-full hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1"
+              >
+                {cancelling ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    Đang hủy...
+                  </>
+                ) : (
+                  'Hủy đơn'
+                )}
               </button>
             )}
             <Link
@@ -267,7 +304,13 @@ export default function OrderCard({ order, expanded = false }) {
 export function PaymentMethodBadge({ method }) {
   const info = getPaymentInfo(method);
   const isPaid = method && method !== 'cod';
-  const Icon = method === 'momo' ? Wallet : method === 'bank' ? Building2 : CreditCard;
+  const Icon = method === 'momo'
+    ? Wallet
+    : method === 'bank'
+      ? Building2
+      : method === 'vietqr'
+        ? QrCode
+        : CreditCard;
   return (
     <div className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-gray-50 border border-gray-200 text-[10px] font-medium text-gray-600">
       <Icon className="w-3 h-3" />
@@ -316,6 +359,19 @@ function PaymentInfo({ order }) {
           <p className="font-medium text-pink-800">Thanh toán qua MoMo</p>
           <p><span className="text-gray-600">SĐT:</span> <span className="font-mono font-semibold">0865 577 745</span></p>
           <p><span className="text-gray-600">Tên:</span> LUXE JEWELRY</p>
+        </div>
+      )}
+      {order.paymentMethod === 'vietqr' && !isPaid && (
+        <div className="bg-amber-50 border border-amber-200 rounded p-2 text-[11px] space-y-1">
+          <p className="font-medium text-amber-800 inline-flex items-center gap-1">
+            <QrCode className="w-3 h-3" /> Thanh toán bằng mã QR ngân hàng
+          </p>
+          <Link
+            to={`/account/orders/${order.id}`}
+            className="text-primary hover:underline inline-block"
+          >
+            Mở chi tiết đơn để xem QR →
+          </Link>
         </div>
       )}
     </div>

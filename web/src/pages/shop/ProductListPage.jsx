@@ -5,21 +5,19 @@ import { useSearchParams } from 'react-router-dom';
 import Header from '@/components/layout/Header.jsx';
 import Footer from '@/components/layout/Footer.jsx';
 import ProductCard from '@/components/shop/ProductCard.jsx';
-import FilterSidebar from '@/components/shop/FilterSidebar.jsx';
 import { useProducts } from '@/hooks/useProducts.js';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  ChevronLeft, ChevronRight, SlidersHorizontal, Package, 
-  Search, X, Sparkles, TrendingUp 
+  ChevronLeft, ChevronRight, Package, 
+  Search, X, TrendingUp 
 } from 'lucide-react';
 
 export default function ProductListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [page, setPage] = useState(1);
-  const [showFilters, setShowFilters] = useState(false);
   const [searchInput, setSearchInput] = useState('');
   const [filters, setFilters] = useState({
     category: searchParams.get('category') || '',
@@ -219,7 +217,7 @@ export default function ProductListPage() {
                 )}
                 {(filters.minPrice || filters.maxPrice) && (
                   <Badge variant="secondary" className="gap-1 px-3 py-1 bg-primary/10 text-primary border-primary/20">
-                    {filters.minPrice?.toLocaleString('vi-VN')}đ - {filters.maxPrice?.toLocaleString('vi-VN')}đ
+                    {filters.minPrice?.toLocaleString('vi-VN')}₫ - {filters.maxPrice?.toLocaleString('vi-VN')}₫
                     <button onClick={() => {
                       handleFilterChange('minPrice', undefined);
                       handleFilterChange('maxPrice', undefined);
@@ -269,41 +267,27 @@ export default function ProductListPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Filter Bar */}
           <div className="flex items-center justify-between mb-6 pb-4 border-b">
-            {/* Mobile Filter Toggle */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowFilters(!showFilters)}
-              className="lg:hidden gap-2"
-            >
-              <SlidersHorizontal className="w-4 h-4" />
-              Bộ lọc
-            </Button>
-
-            {/* Desktop Filter */}
-            <div className="hidden lg:flex items-center gap-4">
-              {/* Category Pills */}
-              <div className="flex items-center gap-2">
+            {/* Category Pills */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <Button
+                variant={filters.category === '' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => handleFilterChange('category', '')}
+                className={`rounded-full ${filters.category === '' ? 'bg-black hover:bg-gray-800' : ''}`}
+              >
+                Tất cả
+              </Button>
+              {['Nam', 'Nữ', 'Phụ kiện'].map((cat) => (
                 <Button
-                  variant={filters.category === '' ? 'default' : 'outline'}
+                  key={cat}
+                  variant={filters.category === cat ? 'default' : 'outline'}
                   size="sm"
-                  onClick={() => handleFilterChange('category', '')}
-                  className={`rounded-full ${filters.category === '' ? 'bg-black hover:bg-gray-800' : ''}`}
+                  onClick={() => handleFilterChange('category', cat)}
+                  className={`rounded-full ${filters.category === cat ? 'bg-black hover:bg-gray-800' : ''}`}
                 >
-                  Tất cả
+                  {cat}
                 </Button>
-                {['Nam', 'Nữ', 'Phụ kiện'].map((cat) => (
-                  <Button
-                    key={cat}
-                    variant={filters.category === cat ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => handleFilterChange('category', cat)}
-                    className={`rounded-full ${filters.category === cat ? 'bg-black hover:bg-gray-800' : ''}`}
-                  >
-                    {cat}
-                  </Button>
-                ))}
-              </div>
+              ))}
             </div>
 
             {/* Sort */}
@@ -321,36 +305,7 @@ export default function ProductListPage() {
             </Select>
           </div>
 
-          {/* Mobile Filter Sidebar */}
-          {showFilters && (
-            <motion.div 
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
-              exit={{ opacity: 0, height: 0 }}
-              className="lg:hidden mb-6 p-4 bg-muted/30 rounded-2xl"
-            >
-              <FilterSidebar
-                filters={filters}
-                onFilterChange={handleFilterChange}
-                onReset={handleResetFilters}
-              />
-            </motion.div>
-          )}
-
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-            {/* Desktop Sidebar */}
-            <aside className="hidden lg:block">
-              <div className="sticky top-24">
-                <FilterSidebar
-                  filters={filters}
-                  onFilterChange={handleFilterChange}
-                  onReset={handleResetFilters}
-                />
-              </div>
-            </aside>
-
-            {/* Products Grid */}
-            <main className="lg:col-span-3">
+          <main>
               {loading ? (
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
                   {[...Array(9)].map((_, i) => (
@@ -450,8 +405,7 @@ export default function ProductListPage() {
                   )}
                 </>
               )}
-            </main>
-          </div>
+          </main>
         </div>
       </section>
 

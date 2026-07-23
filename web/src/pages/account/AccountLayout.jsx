@@ -5,6 +5,7 @@ import Header from '@/components/layout/Header.jsx';
 import Footer from '@/components/layout/Footer.jsx';
 import { useAuth } from '@/contexts/AuthContext.jsx';
 import { usersAPI, statsAPI } from '@/lib/api.js';
+import { getContactLabel } from '@/lib/userDisplay.js';
 import { Camera, Upload, LogOut, User, MapPin, Ruler, Package, ListOrdered, Clock, Truck, CheckCircle2, XCircle, ChevronRight, ShoppingBag } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -96,7 +97,7 @@ export default function AccountLayout() {
 
   const handleLogout = () => {
     logout();
-    navigate('/');
+    navigate('/', { replace: true });
   };
 
   const isActive = (path) => {
@@ -155,7 +156,7 @@ export default function AccountLayout() {
                   {currentUser?.name || 'Chưa cập nhật'}
                 </p>
                 <p className="text-xs text-gray-500 truncate w-full mt-0.5">
-                  {currentUser?.email || currentUser?.phone || ''}
+                  {getContactLabel(currentUser) || ' '}
                 </p>
                 {!currentUser?.has_password && (
                   <Link

@@ -48,7 +48,7 @@ export default function NewArrivalsPage() {
               {/* Badge */}
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/20 backdrop-blur-sm rounded-full border border-amber-500/30">
                 <Sparkles className="w-4 h-4 text-amber-400" />
-                <span className="text-amber-400 text-sm font-medium tracking-wide">NEW COLLECTION 2026</span>
+                <span className="text-amber-400 text-sm font-medium tracking-wide">BỘ SƯU TẬP MỚI 2026</span>
               </div>
 
               <h1 className="text-5xl lg:text-7xl font-bold text-white leading-tight">
@@ -125,7 +125,7 @@ export default function NewArrivalsPage() {
           {/* Section Header */}
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-10">
             <div>
-              <span className="text-sm font-medium text-amber-600 tracking-wider uppercase">Just Dropped</span>
+              <span className="text-sm font-medium text-amber-600 tracking-wider uppercase">Vừa ra mắt</span>
               <h2 className="text-3xl md:text-4xl font-bold mt-2">Sản phẩm mới về</h2>
             </div>
             

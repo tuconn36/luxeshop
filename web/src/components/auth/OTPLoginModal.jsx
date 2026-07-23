@@ -52,7 +52,8 @@ export default function OTPLoginModal({ isOpen, onClose }) {
   const [tab, setTab] = useState('login'); // 'login' | 'register' | 'forgot'
 
   // Login
-  const [loginEmail, setLoginEmail] = useState('');
+  const [loginMethod, setLoginMethod] = useState('email'); // 'email' | 'phone'
+  const [loginId, setLoginId] = useState('');
   const [loginPw, setLoginPw] = useState('');
   const [showPw, setShowPw] = useState(false);
 
@@ -65,9 +66,11 @@ export default function OTPLoginModal({ isOpen, onClose }) {
   const [regTimer, setRegTimer] = useState(0);
   const [regNewPw, setRegNewPw] = useState('');
   const [regConfirmPw, setRegConfirmPw] = useState('');
+  const [showRegPw, setShowRegPw] = useState(false);
 
   // Forgot
-  const [forgotEmail, setForgotEmail] = useState('');
+  const [forgotMethod, setForgotMethod] = useState('email'); // 'email' | 'phone'
+  const [forgotId, setForgotId] = useState('');
   const [forgotStep, setForgotStep] = useState(1);
   const [forgotOtpId, setForgotOtpId] = useState('');
   const [forgotCode, setForgotCode] = useState('');
@@ -96,24 +99,31 @@ export default function OTPLoginModal({ isOpen, onClose }) {
 
   const resetAll = () => {
     setTab('login');
-    setLoginEmail(''); setLoginPw('');
-    setRegId(''); setRegStep(1); setRegCode(''); setRegNewPw(''); setRegConfirmPw('');
-    setForgotEmail(''); setForgotStep(1); setForgotCode(''); setForgotNewPw(''); setForgotConfirmPw('');
+    setLoginMethod('email'); setLoginId(''); setLoginPw(''); setShowPw(false);
+    setRegId(''); setRegStep(1); setRegCode(''); setRegNewPw(''); setRegConfirmPw(''); setShowRegPw(false);
+    setForgotMethod('email'); setForgotId(''); setForgotStep(1); setForgotCode(''); setForgotNewPw(''); setForgotConfirmPw(''); setShowForgotPw(false);
     setError('');
   };
 
-  const handleClose = () => { if (!loading) { resetAll(); onClose(); } };
+  const handleClose = (open = false) => {
+    if (open) return;
+    resetAll();
+    onClose?.();
+  };
   const switchTab = (t) => { setTab(t); setError(''); };
 
   // ── Đăng nhập ──
   const handleLogin = async (e) => {
     e.preventDefault(); setError('');
+    if (loginMethod === 'phone' && !/^(0|\+84)[0-9]{9,10}$/.test(loginId)) {
+      triggerError('Số điện thoại không hợp lệ'); return;
+    }
     setLoading(true);
     try {
-      await login(loginEmail, loginPw);
+      await login(loginId, loginPw);
       toast.success('Đăng nhập thành công');
       handleClose();
-    } catch { triggerError('Email hoặc mật khẩu không đúng'); }
+    } catch (err) { triggerError(err.message || 'Email/SĐT hoặc mật khẩu không đúng'); }
     finally { setLoading(false); }
   };
 
@@ -134,7 +144,7 @@ export default function OTPLoginModal({ isOpen, onClose }) {
 
   const handleRegVerifyOTP = async (e) => {
     e.preventDefault(); setError('');
-    if (regCode.length !== 8) { triggerError('Mã OTP phải gồm 8 chữ số'); return; }
+    if (regCode.length !== 6) { triggerError('Mã OTP phải gồm 6 chữ số'); return; }
     setLoading(true);
     try {
       const { needsPassword } = await verifyOTP(regOtpId, regCode);
@@ -170,19 +180,24 @@ export default function OTPLoginModal({ isOpen, onClose }) {
   // ── Quên mật khẩu ──
   const handleForgotSendOTP = async (e) => {
     e.preventDefault(); setError('');
-    if (!forgotEmail) { triggerError('Vui lòng nhập email'); return; }
+    if (forgotMethod === 'phone' && !/^(0|\+84)[0-9]{9,10}$/.test(forgotId)) {
+      triggerError('Số điện thoại không hợp lệ'); return;
+    }
+    if (forgotMethod === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(forgotId)) {
+      triggerError('Email không hợp lệ'); return;
+    }
     setLoading(true);
     try {
-      const r = await requestOTP(forgotEmail, 'email');
+      const r = await requestOTP(forgotId, forgotMethod);
       setForgotOtpId(r.otpId); setForgotTimer(60); setForgotStep(2);
-      toast.success('Mã OTP đã gửi đến ' + forgotEmail);
-    } catch { triggerError('Email không tồn tại hoặc không thể gửi OTP'); }
+      toast.success('Mã OTP đã gửi đến ' + forgotId);
+    } catch (err) { triggerError(err.message || 'Không tìm thấy tài khoản hoặc không thể gửi OTP'); }
     finally { setLoading(false); }
   };
 
   const handleForgotVerifyOTP = async (e) => {
     e.preventDefault(); setError('');
-    if (forgotCode.length !== 8) { triggerError('Mã OTP phải gồm 8 chữ số'); return; }
+    if (forgotCode.length !== 6) { triggerError('Mã OTP phải gồm 6 chữ số'); return; }
     setLoading(true);
     try {
       await verifyOTP(forgotOtpId, forgotCode);
@@ -194,7 +209,7 @@ export default function OTPLoginModal({ isOpen, onClose }) {
   const handleForgotResend = async () => {
     setLoading(true);
     try {
-      const r = await requestOTP(forgotEmail, 'email');
+      const r = await requestOTP(forgotId, forgotMethod);
       setForgotOtpId(r.otpId); setForgotCode(''); setForgotTimer(60);
       toast.success('Đã gửi lại mã OTP');
     } catch { toast.error('Không thể gửi lại mã'); }
@@ -241,11 +256,26 @@ export default function OTPLoginModal({ isOpen, onClose }) {
                 <DialogTitle className="text-xl font-bold text-center">Chào mừng trở lại</DialogTitle>
               </DialogHeader>
 
+              <div className="flex gap-2 p-1 bg-muted rounded-lg">
+                {['email', 'phone'].map((m) => (
+                  <button key={m} type="button" onClick={() => { setLoginMethod(m); setLoginId(''); setError(''); }}
+                    className={`flex-1 py-2 rounded-md text-sm font-medium transition-all ${loginMethod === m ? 'bg-white shadow-sm' : 'text-muted-foreground'}`}>
+                    {m === 'email' ? 'Email' : 'Số điện thoại'}
+                  </button>
+                ))}
+              </div>
+
               <div className="space-y-2">
-                <Label>Email</Label>
-                <Input type="email" placeholder="ten@email.com" value={loginEmail}
-                  onChange={(e) => { setLoginEmail(e.target.value); setError(''); }}
-                  disabled={loading} required autoFocus className={shakeClass} />
+                <Label>{loginMethod === 'email' ? 'Email' : 'Số điện thoại'}</Label>
+                <Input
+                  type={loginMethod === 'email' ? 'email' : 'tel'}
+                  placeholder={loginMethod === 'email' ? 'ten@email.com' : '0912345678'}
+                  value={loginId}
+                  onChange={(e) => { setLoginId(loginMethod === 'phone' ? e.target.value.replace(/\D/g, '') : e.target.value); setError(''); }}
+                  disabled={loading} required autoFocus
+                  maxLength={loginMethod === 'phone' ? 11 : undefined}
+                  inputMode={loginMethod === 'phone' ? 'numeric' : undefined}
+                  className={shakeClass} />
               </div>
 
               <div className="space-y-2">
@@ -322,16 +352,16 @@ export default function OTPLoginModal({ isOpen, onClose }) {
                   <DialogHeader className="pb-0">
                     <DialogTitle className="text-xl font-bold text-center">Nhập mã xác thực</DialogTitle>
                   </DialogHeader>
-                  <p className="text-sm text-center text-muted-foreground">Mã 8 chữ số đã gửi đến <strong>{regId}</strong></p>
+                  <p className="text-sm text-center text-muted-foreground">Mã 6 chữ số đã gửi đến <strong>{regId}</strong></p>
                   <div className="space-y-1">
-                    <Input type="text" maxLength={8} placeholder="• • • • • • • •"
+                    <Input type="text" maxLength={6} placeholder="• • • • • •"
                       value={regCode} onChange={(e) => { setRegCode(e.target.value.replace(/\D/g, '')); setError(''); }}
                       disabled={loading} required autoFocus autoComplete="off"
                       className={`text-center text-2xl tracking-[0.5em] font-mono ${shakeClass}`} />
                     <ErrorMsg msg={error} />
                     <p className="text-xs text-center text-muted-foreground">Mã có hiệu lực trong 10 phút</p>
                   </div>
-                  <Button type="submit" className="w-full" disabled={loading || regCode.length !== 8}>
+                  <Button type="submit" className="w-full" disabled={loading || regCode.length !== 6}>
                     {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Đang xác thực...</> : 'Xác thực'}
                   </Button>
                   <div className="flex justify-between text-sm">
@@ -351,16 +381,34 @@ export default function OTPLoginModal({ isOpen, onClose }) {
                   <p className="text-sm text-center text-muted-foreground">Tạo mật khẩu để đăng nhập nhanh hơn</p>
                   <div className="space-y-1">
                     <Label>Mật khẩu</Label>
-                    <Input type="password" placeholder="Ít nhất 6 ký tự" value={regNewPw}
-                      onChange={(e) => setRegNewPw(e.target.value)} disabled={loading} required autoFocus />
+                    <div className="relative">
+                      <Input type={showRegPw ? 'text' : 'password'} placeholder="Ít nhất 6 ký tự" value={regNewPw}
+                        onChange={(e) => setRegNewPw(e.target.value)} disabled={loading} required autoFocus className="pr-10" />
+                      <button type="button" onClick={() => setShowRegPw(!showRegPw)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                        {showRegPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
                   </div>
                   <div className="space-y-1">
                     <Label>Xác nhận mật khẩu</Label>
-                    <Input type="password" placeholder="••••••••" value={regConfirmPw}
-                      onChange={(e) => setRegConfirmPw(e.target.value)} disabled={loading} required />
-                    <ErrorMsg msg={error} />
+                    <div className="relative">
+                      <Input type={showRegPw ? 'text' : 'password'} placeholder="••••••••" value={regConfirmPw}
+                        onChange={(e) => setRegConfirmPw(e.target.value)} disabled={loading} required className="pr-10" />
+                      <button type="button" onClick={() => setShowRegPw(!showRegPw)}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                        {showRegPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                    {regConfirmPw && regConfirmPw !== regNewPw ? (
+                      <p className="text-xs text-red-600 flex items-center gap-1">⚠ Mật khẩu xác nhận chưa khớp</p>
+                    ) : regConfirmPw && regConfirmPw === regNewPw ? (
+                      <p className="text-xs text-green-600 flex items-center gap-1">✓ Mật khẩu trùng khớp</p>
+                    ) : (
+                      <ErrorMsg msg={error} />
+                    )}
                   </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
+                  <Button type="submit" className="w-full" disabled={loading || !regNewPw || regNewPw !== regConfirmPw}>
                     {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Đang lưu...</> : 'Hoàn tất đăng ký'}
                   </Button>
                   <button type="button" onClick={handleClose} className="w-full text-xs text-muted-foreground hover:text-foreground text-center">
@@ -379,12 +427,26 @@ export default function OTPLoginModal({ isOpen, onClose }) {
                   <DialogHeader className="pb-0">
                     <DialogTitle className="text-xl font-bold text-center">Quên mật khẩu</DialogTitle>
                   </DialogHeader>
-                  <p className="text-sm text-center text-muted-foreground">Nhập email để nhận mã xác thực</p>
+                  <p className="text-sm text-center text-muted-foreground">Nhập email hoặc số điện thoại để nhận mã xác thực</p>
+                  <div className="flex gap-2 p-1 bg-muted rounded-lg">
+                    {['email', 'phone'].map((m) => (
+                      <button key={m} type="button" onClick={() => { setForgotMethod(m); setForgotId(''); setError(''); }}
+                        className={`flex-1 py-2 rounded-md text-sm font-medium transition-all ${forgotMethod === m ? 'bg-white shadow-sm' : 'text-muted-foreground'}`}>
+                        {m === 'email' ? 'Email' : 'Số điện thoại'}
+                      </button>
+                    ))}
+                  </div>
                   <div className="space-y-1">
-                    <Label>Email</Label>
-                    <Input type="email" placeholder="ten@email.com" value={forgotEmail}
-                      onChange={(e) => { setForgotEmail(e.target.value); setError(''); }}
-                      disabled={loading} required autoFocus className={shakeClass} />
+                    <Label>{forgotMethod === 'email' ? 'Email' : 'Số điện thoại'}</Label>
+                    <Input
+                      type={forgotMethod === 'email' ? 'email' : 'tel'}
+                      placeholder={forgotMethod === 'email' ? 'ten@email.com' : '0912345678'}
+                      value={forgotId}
+                      onChange={(e) => { setForgotId(forgotMethod === 'phone' ? e.target.value.replace(/\D/g, '') : e.target.value); setError(''); }}
+                      disabled={loading} required autoFocus
+                      maxLength={forgotMethod === 'phone' ? 11 : undefined}
+                      inputMode={forgotMethod === 'phone' ? 'numeric' : undefined}
+                      className={shakeClass} />
                     <ErrorMsg msg={error} />
                   </div>
                   <Button type="submit" className="w-full" disabled={loading}>
@@ -401,16 +463,16 @@ export default function OTPLoginModal({ isOpen, onClose }) {
                   <DialogHeader className="pb-0">
                     <DialogTitle className="text-xl font-bold text-center">Nhập mã xác thực</DialogTitle>
                   </DialogHeader>
-                  <p className="text-sm text-center text-muted-foreground">Mã 8 chữ số đã gửi đến <strong>{forgotEmail}</strong></p>
+                  <p className="text-sm text-center text-muted-foreground">Mã 6 chữ số đã gửi đến <strong>{forgotId}</strong></p>
                   <div className="space-y-1">
-                    <Input type="text" maxLength={8} placeholder="• • • • • • • •"
+                    <Input type="text" maxLength={6} placeholder="• • • • • •"
                       value={forgotCode} onChange={(e) => { setForgotCode(e.target.value.replace(/\D/g, '')); setError(''); }}
                       disabled={loading} required autoFocus autoComplete="off"
                       className={`text-center text-2xl tracking-[0.5em] font-mono ${shakeClass}`} />
                     <ErrorMsg msg={error} />
                     <p className="text-xs text-center text-muted-foreground">Mã có hiệu lực trong 10 phút</p>
                   </div>
-                  <Button type="submit" className="w-full" disabled={loading || forgotCode.length !== 8}>
+                  <Button type="submit" className="w-full" disabled={loading || forgotCode.length !== 6}>
                     {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Đang xác thực...</> : 'Xác thực'}
                   </Button>
                   <div className="flex justify-between text-sm">
@@ -431,7 +493,8 @@ export default function OTPLoginModal({ isOpen, onClose }) {
                     <Label>Mật khẩu mới</Label>
                     <div className="relative">
                       <Input type={showForgotPw ? 'text' : 'password'} placeholder="Ít nhất 6 ký tự"
-                        value={forgotNewPw} onChange={(e) => setForgotNewPw(e.target.value)}
+                        value={forgotNewPw}
+                        onChange={(e) => setForgotNewPw(e.target.value)}
                         disabled={loading} required autoFocus className="pr-10" />
                       <button type="button" onClick={() => setShowForgotPw(!showForgotPw)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
@@ -441,11 +504,19 @@ export default function OTPLoginModal({ isOpen, onClose }) {
                   </div>
                   <div className="space-y-1">
                     <Label>Xác nhận mật khẩu</Label>
-                    <Input type="password" placeholder="••••••••" value={forgotConfirmPw}
-                      onChange={(e) => setForgotConfirmPw(e.target.value)} disabled={loading} required />
-                    <ErrorMsg msg={error} />
+                    <Input type={showForgotPw ? 'text' : 'password'} placeholder="••••••••" value={forgotConfirmPw}
+                      onChange={(e) => setForgotConfirmPw(e.target.value)}
+                      disabled={loading} required
+                      className={forgotConfirmPw && forgotConfirmPw !== forgotNewPw ? 'border-red-500 focus-visible:ring-red-500' : ''} />
+                    {forgotConfirmPw && forgotConfirmPw !== forgotNewPw ? (
+                      <p className="text-xs text-red-600 flex items-center gap-1">⚠ Mật khẩu xác nhận chưa khớp</p>
+                    ) : forgotConfirmPw && forgotConfirmPw === forgotNewPw ? (
+                      <p className="text-xs text-green-600 flex items-center gap-1">✓ Mật khẩu trùng khớp</p>
+                    ) : (
+                      <ErrorMsg msg={error} />
+                    )}
                   </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
+                  <Button type="submit" className="w-full" disabled={loading || !forgotNewPw || forgotNewPw !== forgotConfirmPw}>
                     {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Đang lưu...</> : 'Đặt lại mật khẩu'}
                   </Button>
                 </form>

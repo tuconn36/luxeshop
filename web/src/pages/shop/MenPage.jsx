@@ -61,7 +61,7 @@ export default function MenPage() {
             >
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/20 backdrop-blur-sm rounded-full border border-blue-500/30">
                 <Crown className="w-4 h-4 text-blue-400" />
-                <span className="text-blue-400 text-sm font-medium tracking-wide">MEN'S COLLECTION 2026</span>
+                <span className="text-blue-400 text-sm font-medium tracking-wide">BỘ SƯU TẬP NAM 2026</span>
               </div>
 
               <h1 className="text-5xl lg:text-7xl font-bold text-white leading-tight">

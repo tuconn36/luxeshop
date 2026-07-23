@@ -1,29 +1,41 @@
-const pool = require('../config/database');
+/**
+ * migrate.js — chạy tự động trước khi start server trên Railway.
+ * Idempotent: có thể chạy nhiều lần không lỗi.
+ */
+const { spawnSync } = require('child_process');
+const path = require('path');
 
-async function migrate() {
-  try {
-    // Add missing columns to users table
-    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS dob DATE`);
-    console.log('✅ dob column ready');
+console.log('🚀 Running pre-deploy migrations...');
 
-    await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS has_password BOOLEAN DEFAULT FALSE`);
-    console.log('✅ has_password column ready');
+const migrations = [
+  'initDb.js',
+  // Thêm các migration khác ở đây nếu cần
+  // 'createWishlistTable.js',
+  // 'createUserAddressesTable.js',
+  // 'addShippingAddressColumn.js',
+  // 'upgradeReviews.js',
+  // 'migrateAddRole.js',
+];
 
-    // Update has_password = TRUE for users that have a real password_hash
-    await pool.query(`
-      UPDATE users SET has_password = TRUE 
-      WHERE password_hash IS NOT NULL 
-        AND password_hash != '' 
-        AND has_password IS NOT TRUE
-    `);
-    console.log('✅ has_password values updated');
-
-    console.log('\n✅ Migration complete');
-  } catch (err) {
-    console.error('Migration error:', err.message);
-  } finally {
-    await pool.end();
+let failed = 0;
+for (const file of migrations) {
+  const scriptPath = path.join(__dirname, file);
+  console.log(`\n▶ Running ${file}...`);
+  const res = spawnSync(process.execPath, [scriptPath], {
+    cwd: path.dirname(scriptPath),
+    stdio: 'inherit',
+  });
+  if (res.status !== 0) {
+    console.error(`❌ ${file} failed with code ${res.status}`);
+    failed++;
+  } else {
+    console.log(`✅ ${file} OK`);
   }
 }
 
-migrate();
+if (failed > 0) {
+  console.error(`\n❌ ${failed} migration(s) failed. Aborting start.`);
+  process.exit(1);
+}
+
+console.log('\n✅ All migrations completed. Starting server...\n');

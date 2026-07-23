@@ -45,7 +45,7 @@ export default function AccessoriesPage() {
             >
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-amber-500/20 backdrop-blur-sm rounded-full border border-amber-500/30">
                 <Gem className="w-4 h-4 text-amber-400" />
-                <span className="text-amber-400 text-sm font-medium tracking-wide">ACCESSORIES COLLECTION 2026</span>
+                <span className="text-amber-400 text-sm font-medium tracking-wide">BỘ SƯU TẬP PHỤ KIỆN 2026</span>
               </div>
 
               <h1 className="text-5xl lg:text-7xl font-bold text-white leading-tight">

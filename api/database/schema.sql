@@ -1,7 +1,40 @@
+-- ============================================
+-- MIGRATION: Pending payment status for VietQR
+-- (Chạy nếu database đã có sẵn từ trước)
+-- ============================================
+-- status VARCHAR(50) — KHÔNG cần CHECK constraint, đã cho phép giá trị tùy ý.
+-- Nếu muốn ràng buộc, chạy:
+-- ALTER TABLE orders ADD CONSTRAINT orders_status_check
+--   CHECK (status IN ('pending','pending_payment','processing','ready','shipping','delivered','cancelled','returned'));
+
+-- ============================================
+-- MIGRATION: Update Reviews & Create Wishlists
+-- (Chạy phần này nếu database đã có sẵn)
+-- ============================================
+ALTER TABLE reviews ADD COLUMN IF NOT EXISTS images JSONB;
+ALTER TABLE reviews ADD COLUMN IF NOT EXISTS helpful_count INTEGER DEFAULT 0;
+ALTER TABLE reviews ADD COLUMN IF NOT EXISTS verified_purchase BOOLEAN DEFAULT FALSE;
+
+CREATE TABLE IF NOT EXISTS wishlists (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, product_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_wishlists_user_id ON wishlists(user_id);
+CREATE INDEX IF NOT EXISTS idx_wishlists_product_id ON wishlists(product_id);
+CREATE INDEX IF NOT EXISTS idx_reviews_images ON reviews(images);
+
+-- ============================================
+-- FULL SCHEMA: Tạo mới hoàn toàn (xóa comment phần trên nếu muốn)
+-- ============================================
+
 -- Create users table
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
-    email VARCHAR(255) UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE,
     password_hash VARCHAR(255) NOT NULL,
     name VARCHAR(255),
     phone VARCHAR(50),
@@ -10,8 +43,22 @@ CREATE TABLE IF NOT EXISTS users (
     role VARCHAR(20) DEFAULT 'user',
     has_password BOOLEAN DEFAULT TRUE,
     dob DATE,
+    shipping_address JSONB,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create user addresses table (multiple saved addresses per user)
+CREATE TABLE IF NOT EXISTS user_addresses (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    phone VARCHAR(50) NOT NULL,
+    address TEXT NOT NULL,
+    city VARCHAR(100),
+    district VARCHAR(100),
+    is_default BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Create OTP codes table
@@ -68,8 +115,20 @@ CREATE TABLE IF NOT EXISTS reviews (
     user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
     rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
     comment TEXT,
+    images JSONB,
+    helpful_count INTEGER DEFAULT 0,
+    verified_purchase BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Create wishlists table
+CREATE TABLE IF NOT EXISTS wishlists (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(user_id, product_id)
 );
 
 -- Create indexes
@@ -84,6 +143,10 @@ CREATE INDEX IF NOT EXISTS idx_otp_codes_otp_id ON otp_codes(otp_id);
 CREATE INDEX IF NOT EXISTS idx_otp_codes_identifier ON otp_codes(identifier);
 CREATE INDEX IF NOT EXISTS idx_otp_codes_expires_at ON otp_codes(expires_at);
 CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone);
+
+-- Indexes for user_addresses
+CREATE INDEX IF NOT EXISTS idx_user_addresses_user_id ON user_addresses(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_addresses_is_default ON user_addresses(user_id, is_default);
 
 -- Insert sample data for products
 INSERT INTO products (name, description, price, original_price, category, stock, featured, images, materials, sizes, colors, tags) VALUES

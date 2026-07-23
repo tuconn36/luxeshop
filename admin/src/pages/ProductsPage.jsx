@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { productsAPI } from '../lib/api'
-import { formatVND, formatDateShort, CATEGORIES } from '../lib/utils'
+import { formatVND, formatDateShort, CATEGORIES, imgUrl } from '../lib/utils'
 import { useToast } from '../components/ui/Toast'
 import PageHeader from '../components/ui/PageHeader'
 import SearchInput from '../components/ui/SearchInput'
@@ -173,7 +173,7 @@ export default function ProductsPage() {
                           <div className="w-11 h-11 rounded-lg bg-slate-100 overflow-hidden shrink-0">
                             {p.images?.[0] ? (
                               <img
-                                src={p.images[0].startsWith('http') ? p.images[0] : `http://localhost:5000${p.images[0]}`}
+                                src={p.images[0].startsWith('http') ? p.images[0] : imgUrl(p.images[0])}
                                 alt={p.name}
                                 className="w-full h-full object-cover"
                                 onError={(e) => { e.currentTarget.style.display = 'none' }}
@@ -453,7 +453,7 @@ function ProductFormModal({ product, onClose, onSaved }) {
                 <li key={i} className="flex items-center gap-2 text-sm bg-slate-50 rounded-lg p-2">
                   <div className="w-10 h-10 rounded bg-white overflow-hidden shrink-0">
                     <img
-                      src={img.startsWith('http') ? img : `http://localhost:5000${img}`}
+                      src={img.startsWith('http') ? img : imgUrl(img)}
                       alt=""
                       className="w-full h-full object-cover"
                       onError={(e) => { e.currentTarget.style.display = 'none' }}

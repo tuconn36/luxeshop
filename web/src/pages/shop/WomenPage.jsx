@@ -63,7 +63,7 @@ export default function WomenPage() {
             >
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-pink-500/20 backdrop-blur-sm rounded-full border border-pink-500/30">
                 <Sparkle className="w-4 h-4 text-pink-400" />
-                <span className="text-pink-400 text-sm font-medium tracking-wide">WOMEN'S COLLECTION 2026</span>
+                <span className="text-pink-400 text-sm font-medium tracking-wide">BỘ SƯU TẬP NỮ 2026</span>
               </div>
 
               <h1 className="text-5xl lg:text-7xl font-bold text-white leading-tight">

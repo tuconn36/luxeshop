@@ -13,12 +13,18 @@ const authMiddleware = async (req, res, next) => {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
 
     // Kiểm tra user có tồn tại không
-    const result = await pool.query('SELECT id, email, role FROM users WHERE id = $1', [payload.userId]);
+    // COALESCE(role, 'user') để an toàn khi DB chưa chạy migration thêm cột role.
+    const result = await pool.query(
+      'SELECT id, email, COALESCE(role, $2) AS role FROM users WHERE id = $1',
+      [payload.userId, 'user']
+    );
     if (result.rows.length === 0) {
       return res.status(401).json({ error: 'Unauthorized - User not found' });
     }
 
-    req.user = result.rows[0];
+    const row = result.rows[0];
+    // Gắn cả `id` lẫn `userId` để tương thích code dùng cả 2 kiểu (wishlist.js, ownerOrAdminMiddleware).
+    req.user = { id: row.id, userId: row.id, email: row.email, role: row.role };
     next();
   } catch (error) {
     if (error.name === 'TokenExpiredError') {

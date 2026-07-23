@@ -1,92 +1,255 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Heart, ShoppingBag, Eye, Star, Truck, Shield, RotateCcw } from 'lucide-react';
+import {
+  Heart,
+  ShoppingBag,
+  Eye,
+  Star,
+  Truck,
+  Shield,
+  Plus,
+  Minus,
+  Share2,
+  GitCompareArrows,
+  MessageCircle,
+} from 'lucide-react';
 import { useCart } from '@/hooks/useCart.js';
 import { useAuth } from '@/contexts/AuthContext.jsx';
+import { useWishlist } from '@/contexts/WishlistContext.jsx';
+import { useCompare } from '@/contexts/CompareContext.jsx';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import { resolveAssetUrl } from '@/lib/api';
+
+const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=400&h=400&fit=crop';
+
+const safeImage = (img) => {
+  const url = resolveAssetUrl(img);
+  return url || PLACEHOLDER_IMAGE;
+};
+
+// 3 tiện ích hiển thị khi bấm vào biểu tượng con mắt
+const QUICK_VIEW_FEATURES = [
+  {
+    key: 'wishlist',
+    label: 'Yêu thích',
+    description: 'Lưu vào danh sách',
+    icon: Heart,
+    requiresAuth: true,
+  },
+  {
+    key: 'compare',
+    label: 'So sánh',
+    description: 'Đặt cạnh sản phẩm khác',
+    icon: GitCompareArrows,
+    requiresAuth: false,
+  },
+  {
+    key: 'share',
+    label: 'Chia sẻ',
+    description: 'Sao chép liên kết',
+    icon: Share2,
+    requiresAuth: false,
+  },
+];
 
 // Quick View Modal Component
 function QuickViewModal({ product, isOpen, onClose, onAddToCart }) {
   if (!product) return null;
 
+  const navigate = useNavigate();
+  const { currentUser } = useAuth();
+  const { isInWishlist, toggleWishlist } = useWishlist();
+  const { addToCompare, isInCompare } = useCompare();
+
   const price = Number(product.price) || 0;
   const originalPrice = Number(product.original_price) || null;
-  const images = product.images || [];
+  const images = (product.images && product.images.length > 0)
+    ? product.images
+    : [PLACEHOLDER_IMAGE];
   const [selectedImage, setSelectedImage] = useState(0);
   const [adding, setAdding] = useState(false);
+  const [buying, setBuying] = useState(false);
+  const [quantity, setQuantity] = useState(1);
+  const [selectedColor, setSelectedColor] = useState(0);
+  const [selectedSize, setSelectedSize] = useState(null);
+  const [shareCopied, setShareCopied] = useState(false);
+
+  const inWishlist = isInWishlist(product.id);
+  const inCompare = isInCompare(product.id);
+
+  // Build color options from product data or fallback
+  const colorOptions = (product.colors && product.colors.length > 0)
+    ? product.colors
+    : [
+        { name: 'Đen', value: '#000000' },
+        { name: 'Trắng', value: '#FFFFFF' },
+        { name: 'Nâu', value: '#92400E' },
+        { name: 'Be', value: '#D6BC8A' },
+      ];
+
+  // Build size options from product data or fallback
+  const sizeOptions = (product.sizes && product.sizes.length > 0)
+    ? product.sizes
+    : ['S', 'M', 'L', 'XL'];
 
   const handleAdd = async () => {
     if (!onAddToCart) return;
+    if (sizeOptions.length > 0 && !selectedSize) {
+      toast.error('Vui lòng chọn kích thước');
+      return;
+    }
     try {
       setAdding(true);
-      await onAddToCart(product);
+      await onAddToCart(product, quantity);
     } finally {
       setAdding(false);
     }
   };
 
+  const handleBuyNow = async () => {
+    if (sizeOptions.length > 0 && !selectedSize) {
+      toast.error('Vui lòng chọn kích thước');
+      return;
+    }
+    try {
+      setBuying(true);
+      if (onAddToCart) await onAddToCart(product, quantity);
+      onClose(false);
+      window.location.href = '/checkout';
+    } catch (err) {
+      console.error('Buy now error:', err);
+    } finally {
+      setBuying(false);
+    }
+  };
+
+  const handleShare = async () => {
+    const url = `${window.location.origin}/product/${product.id}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: product.name,
+          text: product.description || product.name,
+          url,
+        });
+        setShareCopied(true);
+        toast.success('Đã chia sẻ sản phẩm');
+        setTimeout(() => setShareCopied(false), 2000);
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      setShareCopied(true);
+      toast.success('Đã sao chép liên kết sản phẩm');
+      setTimeout(() => setShareCopied(false), 2000);
+    } catch (err) {
+      console.error('Share error:', err);
+    }
+  };
+
+  const handleWishlistToggle = async (e) => {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    if (!currentUser) {
+      toast.error('Vui lòng đăng nhập để lưu sản phẩm');
+      onClose(false);
+      navigate('/login');
+      return;
+    }
+    await toggleWishlist(product.id);
+  };
+
+  const handleCompareToggle = (e) => {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+    addToCompare(product);
+  };
+
+  const runFeatureAction = (key) => (e) => {
+    if (key === 'wishlist') return handleWishlistToggle(e);
+    if (key === 'compare') return handleCompareToggle(e);
+    if (key === 'share') return handleShare(e);
+  };
+
+  const decreaseQty = () => {
+    setQuantity((q) => Math.max(1, q - 1));
+  };
+
+  const increaseQty = () => {
+    const max = Number(product.stock) || 99;
+    setQuantity((q) => Math.min(max, q + 1));
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-4xl w-full p-0 overflow-hidden">
+        <DialogTitle className="sr-only">{product.name || 'Xem nhanh sản phẩm'}</DialogTitle>
+        <DialogDescription className="sr-only">Xem nhanh chi tiết sản phẩm</DialogDescription>
         <div className="grid grid-cols-1 md:grid-cols-2">
           {/* Image Gallery */}
-          <div className="relative bg-muted/30 p-4">
-            <div className="aspect-square rounded-2xl overflow-hidden bg-white">
-              <img
-                src={images[selectedImage]?.startsWith('http') 
-                  ? images[selectedImage] 
-                  : `http://localhost:5000${images[selectedImage] || ''}`}
-                alt={product.name}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            
-            {/* Thumbnail gallery */}
+          <div className="relative bg-muted/30 p-4 flex gap-3">
+            {/* Thumbnail column */}
             {images.length > 1 && (
-              <div className="flex gap-2 mt-4 overflow-x-auto pb-2">
+              <div className="flex flex-col gap-2 max-h-[420px] overflow-y-auto pr-1">
                 {images.map((img, idx) => (
                   <button
                     key={idx}
                     onClick={() => setSelectedImage(idx)}
                     className={`w-16 h-16 rounded-lg overflow-hidden border-2 transition-all flex-shrink-0 ${
-                      selectedImage === idx ? 'border-primary' : 'border-transparent hover:border-gray-300'
+                      selectedImage === idx
+                        ? 'border-primary ring-2 ring-primary/30'
+                        : 'border-transparent hover:border-gray-300'
                     }`}
                   >
                     <img
-                      src={img.startsWith('http') ? img : `http://localhost:5000${img}`}
+                      src={safeImage(img)}
                       alt=""
                       className="w-full h-full object-cover"
+                      onError={(e) => { e.currentTarget.src = PLACEHOLDER_IMAGE; }}
                     />
                   </button>
                 ))}
               </div>
             )}
 
-            {/* Badges */}
-            <div className="absolute top-6 left-6 flex flex-col gap-2">
-              {product.is_new && (
-                <Badge className="bg-black text-white">Mới</Badge>
-              )}
-              {originalPrice && originalPrice > price && (
-                <Badge className="bg-red-500 text-white">
-                  -{Math.round((1 - price / originalPrice) * 100)}%
-                </Badge>
-              )}
+            {/* Main image */}
+            <div className="flex-1 relative">
+              <div className="aspect-square rounded-2xl overflow-hidden bg-white">
+                <img
+                  src={safeImage(images[selectedImage])}
+                  alt={product.name}
+                  className="w-full h-full object-cover"
+                  onError={(e) => { e.currentTarget.src = PLACEHOLDER_IMAGE; }}
+                />
+              </div>
+
+              {/* Badges */}
+              <div className="absolute top-3 left-3 flex flex-col gap-2">
+                {product.is_new && (
+                  <Badge className="bg-black text-white">Mới</Badge>
+                )}
+                {originalPrice && originalPrice > price && (
+                  <Badge className="bg-red-500 text-white">
+                    -{Math.round((1 - price / originalPrice) * 100)}%
+                  </Badge>
+                )}
+              </div>
             </div>
           </div>
 
           {/* Product Info */}
-          <div className="p-6 space-y-4">
+          <div className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
             <div>
-              <p className="text-sm text-muted-foreground uppercase tracking-wider">
+              <p className="text-xs text-muted-foreground uppercase tracking-wider">
                 {product.category || 'Thời trang cao cấp'}
               </p>
               <h2 className="text-2xl font-bold mt-1">{product.name}</h2>
@@ -105,65 +268,228 @@ function QuickViewModal({ product, isOpen, onClose, onAddToCart }) {
                 ))}
               </div>
               <span className="text-sm text-muted-foreground">(128 đánh giá)</span>
+              <span className="text-sm text-muted-foreground">•</span>
+              <span className="text-sm text-green-600">Đã bán 1.2k</span>
             </div>
 
-            {/* Price */}
-            <div className="flex items-baseline gap-3">
+              {/* Price */}
+            <div className="flex items-baseline gap-3 flex-wrap bg-primary/5 px-4 py-3 rounded-xl">
               <span className="text-3xl font-bold text-primary">
-                {price.toLocaleString('vi-VN')}đ
+                {price.toLocaleString('vi-VN')}₫
               </span>
               {originalPrice && originalPrice > price && (
-                <span className="text-lg text-muted-foreground line-through">
-                  {originalPrice.toLocaleString('vi-VN')}đ
-                </span>
+                <>
+                  <span className="text-base text-muted-foreground line-through">
+                    {originalPrice.toLocaleString('vi-VN')}₫
+                  </span>
+                  <Badge className="bg-red-500 text-white text-xs">
+                    -{Math.round((1 - price / originalPrice) * 100)}%
+                  </Badge>
+                </>
               )}
             </div>
 
             {/* Description */}
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              {product.description || 'Sản phẩm chất lượng cao, thiết kế tinh tế, phù hợp với mọi phong cách.'}
+            <p className="text-muted-foreground text-sm leading-relaxed line-clamp-3">
+              {product.description || 'Sản phẩm chất liệu cao cấp, thiết kế tinh tế, phù hợp với mọi phong cách thời trang.'}
             </p>
 
-            {/* Stock Status */}
-            <div className="flex items-center gap-2">
-              {product.stock > 0 ? (
-                <span className="text-sm text-green-600 flex items-center gap-1">
-                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                  Còn hàng ({product.stock} sản phẩm)
+            {/* Color */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium">Màu sắc:</span>
+                <span className="text-sm text-muted-foreground">
+                  {colorOptions[selectedColor]?.name}
                 </span>
-              ) : (
-                <span className="text-sm text-red-500">Hết hàng</span>
-              )}
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {colorOptions.map((color, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setSelectedColor(idx)}
+                    title={color.name}
+                    aria-label={color.name}
+                    className={`w-9 h-9 rounded-full border-2 transition-all ${
+                      selectedColor === idx
+                        ? 'border-primary scale-110 ring-2 ring-primary/30'
+                        : 'border-gray-200 hover:scale-105'
+                    }`}
+                    style={{ backgroundColor: color.value }}
+                  />
+                ))}
+              </div>
             </div>
 
-            {/* Actions */}
-            <div className="flex gap-3 pt-4">
+            {/* Size */}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-medium">Kích thước:</span>
+                <button
+                  type="button"
+                  className="text-xs text-primary hover:underline"
+                >
+                  Hướng dẫn chọn size
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {sizeOptions.map((size) => (
+                  <button
+                    key={size}
+                    onClick={() => setSelectedSize(size)}
+                    className={`min-w-[48px] h-10 px-3 rounded-lg border text-sm font-medium transition-all ${
+                      selectedSize === size
+                        ? 'border-primary bg-primary text-black'
+                        : 'border-gray-300 hover:border-primary hover:text-primary'
+                    }`}
+                  >
+                    {size}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Quantity */}
+            <div>
+              <span className="text-sm font-medium block mb-2">Số lượng:</span>
+              <div className="flex items-center gap-3">
+                <div className="flex items-center border rounded-lg overflow-hidden">
+                  <button
+                    type="button"
+                    onClick={decreaseQty}
+                    disabled={quantity <= 1}
+                    className="w-9 h-9 flex items-center justify-center hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    aria-label="Giảm số lượng"
+                  >
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <input
+                    type="text"
+                    value={quantity}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value.replace(/\D/g, ''), 10);
+                      const max = Number(product.stock) || 99;
+                      if (Number.isNaN(val)) return;
+                      setQuantity(Math.min(max, Math.max(1, val)));
+                    }}
+                    className="w-12 h-9 text-center text-sm font-medium border-x outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={increaseQty}
+                    disabled={quantity >= (Number(product.stock) || 99)}
+                    className="w-9 h-9 flex items-center justify-center hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    aria-label="Tăng số lượng"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                </div>
+                <span className="text-sm text-muted-foreground">
+                  {product.stock > 0
+                    ? `Còn ${product.stock} sản phẩm`
+                    : 'Hết hàng'}
+                </span>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-2 pt-2">
               <Button
                 onClick={handleAdd}
                 disabled={product.stock <= 0 || adding}
-                className="flex-1 bg-black hover:bg-gray-800 text-white"
+                variant="outline"
+                className="flex-1 border-black bg-white text-black hover:bg-black hover:text-white"
               >
                 <ShoppingBag className="w-4 h-4 mr-2" />
                 {adding ? 'Đang thêm...' : 'Thêm vào giỏ'}
               </Button>
-              <Button variant="outline" size="icon">
-                <Heart className="w-4 h-4" />
+              <Button
+                onClick={handleBuyNow}
+                disabled={product.stock <= 0 || buying}
+                className="flex-1 bg-primary hover:bg-primary/90 text-black font-semibold"
+              >
+                {buying ? 'Đang xử lý...' : 'Mua ngay'}
               </Button>
+            </div>
+
+            {/* Tiện ích nhanh - hiển thị khi bấm vào con mắt */}
+            <div className="grid grid-cols-3 gap-3 pt-4 border-t border-border/60">
+              {QUICK_VIEW_FEATURES.map((feature) => {
+                const Icon = feature.icon;
+                const isActive =
+                  (feature.key === 'wishlist' && inWishlist) ||
+                  (feature.key === 'compare' && inCompare) ||
+                  (feature.key === 'share' && shareCopied);
+                const stateColor =
+                  feature.key === 'wishlist' && inWishlist
+                    ? 'bg-red-50 text-red-500 border-red-200'
+                    : feature.key === 'compare' && inCompare
+                      ? 'bg-primary/10 text-primary border-primary/30'
+                      : feature.key === 'share' && shareCopied
+                        ? 'bg-green-50 text-green-600 border-green-200'
+                        : 'bg-muted/40 text-foreground/80 border-transparent hover:bg-muted hover:text-primary';
+                const subLabel =
+                  feature.key === 'wishlist' && inWishlist
+                    ? 'Đã lưu'
+                    : feature.key === 'compare' && inCompare
+                      ? 'Đã thêm'
+                      : feature.key === 'share' && shareCopied
+                        ? 'Đã sao chép'
+                        : feature.description;
+
+                return (
+                  <button
+                    key={feature.key}
+                    type="button"
+                    onClick={runFeatureAction(feature.key)}
+                    className={`flex flex-col items-center justify-center gap-1.5 p-3 rounded-xl border transition-all duration-200 ${stateColor}`}
+                    aria-label={feature.label}
+                    aria-pressed={isActive}
+                  >
+                    <Icon
+                      className={`w-5 h-5 ${
+                        feature.key === 'wishlist' && inWishlist ? 'fill-current' : ''
+                      }`}
+                    />
+                    <span className="text-xs font-semibold">{feature.label}</span>
+                    <span className="text-[10px] text-muted-foreground leading-tight text-center">
+                      {subLabel}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Link to full details */}
+            <div className="flex items-center justify-center pt-1">
+              <button
+                type="button"
+                onClick={() => {
+                  onClose(false);
+                  window.location.href = `/product/${product.id}`;
+                }}
+                className="inline-flex items-center gap-1.5 text-sm text-primary font-medium hover:underline"
+              >
+                <Eye className="w-4 h-4" />
+                Xem chi tiết sản phẩm
+              </button>
             </div>
 
             {/* Benefits */}
             <div className="grid grid-cols-3 gap-3 pt-4 border-t">
-              <div className="text-center">
-                <Truck className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
-                <p className="text-xs text-muted-foreground">Miễn phí vận chuyển</p>
+              <div className="text-center p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                <Truck className="w-5 h-5 mx-auto mb-1 text-primary" />
+                <p className="text-xs font-medium">Miễn phí vận chuyển</p>
+                <p className="text-[10px] text-muted-foreground">Đơn từ 500k</p>
               </div>
-              <div className="text-center">
-                <Shield className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
-                <p className="text-xs text-muted-foreground">Bảo hành 12 tháng</p>
+              <div className="text-center p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                <MessageCircle className="w-5 h-5 mx-auto mb-1 text-primary" />
+                <p className="text-xs font-medium">Hỗ trợ 24/7</p>
+                <p className="text-[10px] text-muted-foreground">Tư vấn miễn phí</p>
               </div>
-              <div className="text-center">
-                <RotateCcw className="w-5 h-5 mx-auto mb-1 text-muted-foreground" />
-                <p className="text-xs text-muted-foreground">Đổi trả 30 ngày</p>
+              <div className="text-center p-2 rounded-lg hover:bg-muted/50 transition-colors">
+                <Shield className="w-5 h-5 mx-auto mb-1 text-primary" />
+                <p className="text-xs font-medium">Bảo hành 12 tháng</p>
+                <p className="text-[10px] text-muted-foreground">Đổi trả 30 ngày</p>
               </div>
             </div>
           </div>
@@ -177,47 +503,40 @@ export default function ProductCard({ product, index = 0 }) {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { currentUser } = useAuth();
+  const { isInWishlist, toggleWishlist } = useWishlist();
   const [isHovered, setIsHovered] = useState(false);
-  const [isWishlisted, setIsWishlisted] = useState(false);
   const [showQuickView, setShowQuickView] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [adding, setAdding] = useState(false);
+
+  const inWishlist = isInWishlist(product.id);
 
   const price = Number(product.price) || 0;
   const originalPrice = Number(product.original_price) || null;
 
   const images = product.images || [];
-  let imageUrl = 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=400&h=400&fit=crop';
+  const imageUrl = safeImage(images[0]);
 
-  if (images.length > 0) {
-    const firstImage = images[0];
-    if (firstImage.startsWith('http')) {
-      imageUrl = firstImage;
-    } else if (firstImage.startsWith('/')) {
-      imageUrl = `http://localhost:5000${firstImage}`;
-    }
-  }
-
-  const handleWishlist = (e) => {
+  const handleWishlist = async (e) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsWishlisted(!isWishlisted);
+    await toggleWishlist(product.id);
   };
 
   // Hàm thêm vào giỏ dùng chung cho cả card và Quick View modal
-  const handleAdd = async (prod) => {
+  const handleAdd = async (prod, qty = 1) => {
     if (!prod || prod.stock <= 0) {
       toast.error('Sản phẩm đã hết hàng');
       return;
     }
     if (!currentUser) {
       toast.error('Vui lòng đăng nhập để thêm vào giỏ hàng');
-      navigate('/login');
+      navigate('/signup');
       return;
     }
     try {
       setAdding(true);
-      addToCart(prod, 1);
+      addToCart(prod, qty);
       toast.success(`Đã thêm "${prod.name}" vào giỏ hàng`);
     } catch (err) {
       console.error('Add to cart error:', err);
@@ -272,13 +591,13 @@ export default function ProductCard({ product, index = 0 }) {
                   transition={{ delay: 0.1, duration: 0.2 }}
                   onClick={handleWishlist}
                   className={`w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-md transition-all duration-300 ${
-                    isWishlisted 
+                    inWishlist
                       ? 'bg-red-500 text-white' 
                       : 'bg-white/95 text-gray-600 hover:bg-red-500 hover:text-white shadow-lg'
                   }`}
                   aria-label="Yêu thích"
                 >
-                  <Heart className={`w-5 h-5 ${isWishlisted ? 'fill-current' : ''}`} />
+                  <Heart className={`w-5 h-5 ${inWishlist ? 'fill-current' : ''}`} />
                 </motion.button>
                 
                 <motion.button
@@ -372,15 +691,15 @@ export default function ProductCard({ product, index = 0 }) {
               </h3>
               
               {/* Price & Stock */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-baseline gap-1">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-baseline gap-0.5 flex-wrap">
                   <span className="text-xl font-bold text-primary tracking-tight">
                     {price.toLocaleString('vi-VN')}
                   </span>
-                  <span className="text-sm font-medium text-primary">đ</span>
+                  <span className="text-sm font-medium text-primary">₫</span>
                   {originalPrice && originalPrice > price && (
-                    <span className="text-sm text-muted-foreground line-through ml-1">
-                      {originalPrice.toLocaleString('vi-VN')}đ
+                    <span className="text-sm text-muted-foreground line-through ml-2 whitespace-nowrap">
+                      {originalPrice.toLocaleString('vi-VN')}₫
                     </span>
                   )}
                 </div>

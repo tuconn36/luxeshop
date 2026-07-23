@@ -7,9 +7,15 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 
 export default function FilterSidebar({ filters, onFilterChange, onReset }) {
-  const categories = ['Nam', 'Nữ', 'Trẻ em'];
-  const sizes = ['S', 'M', 'L', 'XL', 'XXL'];
-  const colors = ['Đen', 'Trắng', 'Xám', 'Xanh', 'Đỏ', 'Vàng'];
+  const categories = ['Nam', 'Nữ', 'Phụ kiện'];
+  const sizes = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+  const colors = ['Đen', 'Trắng', 'Xám', 'Xanh navy', 'Xanh dương', 'Đỏ', 'Vàng', 'Hồng', 'Be'];
+  const sortOptions = [
+    { value: '-created_at', label: 'Mới nhất' },
+    { value: 'price', label: 'Giá: Thấp → Cao' },
+    { value: '-price', label: 'Giá: Cao → Thấp' },
+    { value: 'name', label: 'Tên A-Z' },
+  ];
 
   return (
     <Card>
@@ -22,6 +28,19 @@ export default function FilterSidebar({ filters, onFilterChange, onReset }) {
         </div>
       </CardHeader>
       <CardContent className="space-y-6">
+        <div>
+          <Label className="text-base font-semibold mb-3 block">Sắp xếp</Label>
+          <select
+            value={filters.sort || '-created_at'}
+            onChange={(e) => onFilterChange('sort', e.target.value)}
+            className="w-full h-9 px-3 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+          >
+            {sortOptions.map(opt => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+        </div>
+
         <div>
           <Label className="text-base font-semibold mb-3 block">Danh mục</Label>
           <RadioGroup value={filters.category || ''} onValueChange={(value) => onFilterChange('category', value)}>

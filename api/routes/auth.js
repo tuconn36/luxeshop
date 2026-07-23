@@ -43,10 +43,11 @@ router.post('/verify-otp', async (req, res) => {
           [identifier, dummyHash, userName]
         );
       } else {
-        const placeholderEmail = `${identifier.replace(/[^0-9]/g, '')}@phone.luxe.vn`;
+        // Đăng ký bằng SĐT → KHÔNG tạo email giả. email = NULL cho sạch dữ liệu.
+        // Schema đã chạy migration make_email_nullable.sql thì email cho phép NULL.
         result = await pool.query(
-          `INSERT INTO users (email, phone, password_hash, name, has_password, created_at) VALUES ($1, $2, $3, $4, FALSE, NOW()) RETURNING *`,
-          [placeholderEmail, identifier, dummyHash, userName]
+          `INSERT INTO users (email, phone, password_hash, name, has_password, created_at) VALUES (NULL, $1, $2, $3, FALSE, NOW()) RETURNING *`,
+          [identifier, dummyHash, userName]
         );
       }
       user = result.rows[0];
@@ -91,27 +92,38 @@ router.post('/register', async (req, res) => {
   }
 });
 
-// Login with email + password
+// Login with email OR phone + password
 router.post('/login', async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { identifier, email, phone, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Vui lòng nhập email và mật khẩu' });
+    // Hỗ trợ cả 2 kiểu payload: { email, password } cũ và { identifier, password } mới
+    const loginId = (identifier ?? email ?? phone ?? '').toString().trim();
+    if (!loginId || !password) {
+      return res.status(400).json({ error: 'Vui lòng nhập email/số điện thoại và mật khẩu' });
     }
 
-    const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+    // Tự động nhận biết email hay số điện thoại
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(loginId);
+    const isPhone = /^(0|\+84)[0-9]{9,10}$/.test(loginId.replace(/\s/g, ''));
+    if (!isEmail && !isPhone) {
+      return res.status(400).json({ error: 'Email hoặc số điện thoại không hợp lệ' });
+    }
+
+    const field = isEmail ? 'email' : 'phone';
+    const result = await pool.query(`SELECT * FROM users WHERE ${field} = $1`, [loginId]);
     if (result.rows.length === 0) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: 'Tài khoản không tồn tại' });
     }
 
     const user = result.rows[0];
+    if (!user.has_password) {
+      return res.status(401).json({ error: 'Tài khoản chưa đặt mật khẩu. Vui lòng đăng nhập bằng OTP.' });
+    }
 
-    // Trước đây hardcode admin@luxe.vn/admin123 trả về user fake id=1 — bug này đã sửa.
-    // Bây giờ đăng nhập hoàn toàn qua DB + bcrypt. Admin phải được tạo qua createAdmin script.
     const isValid = await bcrypt.compare(password, user.password_hash || '');
     if (!isValid) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: 'Mật khẩu không đúng' });
     }
 
     const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '7d' });

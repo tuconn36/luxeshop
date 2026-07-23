@@ -18,7 +18,11 @@ async function initDatabase() {
       ALTER TABLE users ADD COLUMN IF NOT EXISTS avatar VARCHAR(255);
       ALTER TABLE users ADD COLUMN IF NOT EXISTS address TEXT;
       ALTER TABLE users ADD COLUMN IF NOT EXISTS dob DATE;
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'user';
     `);
+
+    // Backfill role cho user cũ (NULL → 'user')
+    await pool.query(`UPDATE users SET role = 'user' WHERE role IS NULL;`);
 
     // Đảm bảo có bảng otp_codes
     await pool.query(`

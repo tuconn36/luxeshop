@@ -19,7 +19,7 @@ export default function ProtectedRoute({ children }) {
 
   if (!currentUser) {
     // Redirect to login with return URL
-    return <Navigate to={`/login?redirect=${encodeURIComponent(location.pathname)}`} replace />;
+    return <Navigate to={`/signup?redirect=${encodeURIComponent(location.pathname)}`} replace />;
   }
 
   return children;

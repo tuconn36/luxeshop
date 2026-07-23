@@ -12,9 +12,13 @@ import {
   RotateCcw,
   Search,
   ShoppingBag,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+
+const PAGE_SIZE = 1; // số đơn / trang
 
 const FILTERS = [
   { key: null, label: 'Tất cả', icon: Package, color: 'gray' },
@@ -60,6 +64,7 @@ export default function AccountOrdersPage() {
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -100,6 +105,11 @@ export default function AccountOrdersPage() {
     return c;
   }, [orders]);
 
+  // Reset về trang 1 mỗi khi filter hoặc search thay đổi
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeFilter, search]);
+
   const filtered = useMemo(() => {
     let list = orders.filter((o) => matchesFilter(o.status, activeFilter));
     if (search.trim()) {
@@ -113,6 +123,18 @@ export default function AccountOrdersPage() {
     }
     return list;
   }, [orders, activeFilter, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+  const startIdx = (safePage - 1) * PAGE_SIZE;
+  const pagedOrders = filtered.slice(startIdx, startIdx + PAGE_SIZE);
+
+  const goToPage = (p) => {
+    const next = Math.min(totalPages, Math.max(1, p));
+    setCurrentPage(next);
+    // cuộn lên đầu danh sách đơn để UX mượt hơn
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const totalSpent = useMemo(
     () => orders.reduce((s, o) => s + Number(o.totalPrice || 0), 0),
@@ -213,9 +235,16 @@ export default function AccountOrdersPage() {
         />
       ) : (
         <div className="space-y-4">
-          {filtered.map((order) => (
+          {pagedOrders.map((order) => (
             <OrderCard key={order.id} order={order} />
           ))}
+          {totalPages > 1 && (
+            <Pagination
+              currentPage={safePage}
+              totalPages={totalPages}
+              onChange={goToPage}
+            />
+          )}
         </div>
       )}
     </div>
@@ -238,6 +267,81 @@ function StatBox({ label, value, color, small = false }) {
         {value}
       </p>
     </div>
+  );
+}
+
+function Pagination({ currentPage, totalPages, onChange }) {
+  const pageItems = useMemo(() => {
+    const items = [];
+    const push = (v) => items.push(v);
+    // Luôn hiển thị: 1, 2, 3 ... (last) và (first) ... (last-2, last-1, last)
+    if (totalPages <= 5) {
+      for (let i = 1; i <= totalPages; i++) push(i);
+      return items;
+    }
+    // Trang đầu
+    push(1);
+    push(2);
+    push(3);
+    // Ellipsis nếu còn nhiều trang
+    if (totalPages > 4) push('...');
+    // Trang cuối (chỉ thêm nếu nó không trùng 1/2/3)
+    if (totalPages > 3) push(totalPages);
+    return items;
+  }, [totalPages]);
+
+  return (
+    <nav
+      aria-label="Phân trang đơn hàng"
+      className="mt-6 flex items-center justify-center gap-2 select-none"
+    >
+      <button
+        type="button"
+        onClick={() => onChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        className="inline-flex items-center gap-1 px-3 py-2 rounded-full text-sm font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        aria-label="Trang trước"
+      >
+        <ChevronLeft className="w-4 h-4" />
+        Trước
+      </button>
+      {pageItems.map((p, idx) =>
+        p === '...' ? (
+          <span
+            key={`dots-${idx}`}
+            className="min-w-[40px] h-10 inline-flex items-center justify-center text-gray-400 text-sm"
+            aria-hidden="true"
+          >
+            …
+          </span>
+        ) : (
+          <button
+            key={p}
+            type="button"
+            onClick={() => onChange(p)}
+            aria-current={p === currentPage ? 'page' : undefined}
+            aria-label={`Trang ${p}`}
+            className={`min-w-[40px] h-10 px-3 rounded-full text-sm font-semibold border transition-colors ${
+              p === currentPage
+                ? 'bg-black text-white border-black shadow-sm'
+                : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400 hover:text-gray-900'
+            }`}
+          >
+            {p}
+          </button>
+        )
+      )}
+      <button
+        type="button"
+        onClick={() => onChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        className="inline-flex items-center gap-1 px-3 py-2 rounded-full text-sm font-medium border border-gray-200 bg-white text-gray-600 hover:border-gray-400 hover:text-gray-900 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+        aria-label="Trang sau"
+      >
+        Sau
+        <ChevronRight className="w-4 h-4" />
+      </button>
+    </nav>
   );
 }
 

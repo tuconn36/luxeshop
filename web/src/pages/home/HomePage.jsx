@@ -65,56 +65,91 @@ export default function HomePage() {
       </section>
 
       {/* Category Showcase */}
-      <section className="py-20 bg-gradient-to-b from-background to-muted/20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="py-24 bg-gradient-to-b from-background to-muted/20 relative overflow-hidden">
+        {/* Subtle background ornaments */}
+        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="text-center mb-14"
+            className="text-center mb-16"
           >
-            <span className="inline-block text-primary font-medium tracking-[0.3em] uppercase text-sm mb-4">
-              Danh mục
-            </span>
-            <h2 className="text-4xl md:text-5xl font-bold mb-4" style={{ letterSpacing: '-0.02em' }}>
-              Khám phá bộ sưu tập
+            <div className="inline-flex items-center gap-3 mb-5">
+              <span className="w-12 h-px bg-primary/60" />
+              <span className="text-primary font-medium tracking-[0.4em] uppercase text-xs">
+                Bộ sưu tập
+              </span>
+              <span className="w-12 h-px bg-primary/60" />
+            </div>
+            <h2
+              className="text-4xl md:text-6xl font-bold mb-5 font-serif"
+              style={{ letterSpacing: '-0.02em', lineHeight: '1.05' }}
+            >
+              Khám phá <span className="italic font-light text-primary">bộ sưu tập</span>
             </h2>
-            <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-              Tìm kiếm phong cách hoàn hảo cho riêng bạn với những bộ sưu tập đa dạng
+            <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto leading-relaxed">
+              Hành trình thời trang đẳng cấp — nơi phong cách được định hình bởi sự tinh tế trong từng đường nét.
             </p>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
             <Link to="/men" className="group relative">
               <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5 }}
-                whileHover={{ y: -8 }}
-                className="relative overflow-hidden rounded-3xl aspect-[3/4] md:aspect-[3/4]"
+                transition={{ duration: 0.6 }}
+                whileHover={{ y: -6 }}
+                className="relative"
               >
-                <img
-                  src="https://images.unsplash.com/photo-1490114538077-0a7f8cb49891?w=800&h=1000&fit=crop"
-                  alt="Thời trang Nam"
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-                
-                {/* Decorative corner */}
-                <div className="absolute top-4 right-4 w-20 h-20 border-t-2 border-r-2 border-white/20 rounded-tr-3xl" />
-                
-                <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
-                  <span className="inline-block text-xs tracking-[0.3em] uppercase mb-3 text-primary">
-                    Collection
-                  </span>
-                  <h3 className="text-4xl font-bold mb-3 font-serif">Nam</h3>
-                  <p className="text-base mb-5 text-white/70">Lịch lãm & đẳng cấp</p>
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm font-medium">Khám phá</span>
-                    <div className="w-10 h-10 rounded-full border border-white/30 flex items-center justify-center group-hover:border-primary group-hover:bg-primary/20 transition-all duration-300">
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <div className="relative overflow-hidden aspect-square">
+                  <img
+                    src="https://images.unsplash.com/photo-1490114538077-0a7f8cb49891?w=900&h=900&fit=crop&q=80"
+                    alt="Thời trang Nam"
+                    className="w-full h-full object-cover transition-all duration-[1200ms] ease-out group-hover:scale-105"
+                  />
+                  {/* Gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent transition-opacity duration-500 group-hover:from-black/80" />
+
+                  {/* Corner accents */}
+                  <div className="absolute top-0 left-0 w-10 h-10 border-t border-l border-white/40 transition-all duration-500 group-hover:w-14 group-hover:h-14" />
+                  <div className="absolute bottom-0 right-0 w-10 h-10 border-b border-r border-white/40 transition-all duration-500 group-hover:w-14 group-hover:h-14" />
+
+                  {/* Top label */}
+                  <div className="absolute top-5 left-5 right-5 flex items-center justify-between text-white">
+                    <span className="text-[10px] tracking-[0.4em] uppercase font-light">
+                      01 / Collection
+                    </span>
+                    <span className="text-[10px] tracking-[0.2em] uppercase font-light opacity-70">
+                      For Him
+                    </span>
+                  </div>
+
+                  {/* Bottom content */}
+                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                    <h3
+                      className="text-3xl md:text-4xl font-bold mb-2 font-serif"
+                      style={{ letterSpacing: '-0.01em' }}
+                    >
+                      Nam
+                    </h3>
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="w-8 h-px bg-primary" />
+                      <p className="text-xs tracking-[0.2em] uppercase font-light text-white/80">
+                        Lịch lãm & đẳng cấp
+                      </p>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs tracking-[0.3em] uppercase font-medium">
+                        Khám phá
+                      </span>
+                      <div className="w-9 h-9 rounded-full border border-white/50 flex items-center justify-center group-hover:border-primary group-hover:bg-primary group-hover:text-black transition-all duration-300">
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -123,33 +158,53 @@ export default function HomePage() {
 
             <Link to="/women" className="group relative">
               <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.1 }}
-                whileHover={{ y: -8 }}
-                className="relative overflow-hidden rounded-3xl aspect-[3/4] md:aspect-[3/4]"
+                transition={{ duration: 0.6, delay: 0.15 }}
+                whileHover={{ y: -6 }}
+                className="relative"
               >
-                <img
-                  src="https://images.unsplash.com/photo-1617127365659-c47fa864d8bc?w=800&h=1000&fit=crop"
-                  alt="Thời trang Nữ"
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-                
-                {/* Decorative corner */}
-                <div className="absolute top-4 right-4 w-20 h-20 border-t-2 border-r-2 border-white/20 rounded-tr-3xl" />
-                
-                <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
-                  <span className="inline-block text-xs tracking-[0.3em] uppercase mb-3 text-primary">
-                    Collection
-                  </span>
-                  <h3 className="text-4xl font-bold mb-3 font-serif">Nữ</h3>
-                  <p className="text-base mb-5 text-white/70">Thanh lịch & quyến rũ</p>
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm font-medium">Khám phá</span>
-                    <div className="w-10 h-10 rounded-full border border-white/30 flex items-center justify-center group-hover:border-primary group-hover:bg-primary/20 transition-all duration-300">
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <div className="relative overflow-hidden aspect-square">
+                  <img
+                    src="https://images.unsplash.com/photo-1617127365659-c47fa864d8bc?w=900&h=900&fit=crop&q=80"
+                    alt="Thời trang Nữ"
+                    className="w-full h-full object-cover transition-all duration-[1200ms] ease-out group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent transition-opacity duration-500 group-hover:from-black/80" />
+
+                  <div className="absolute top-0 left-0 w-10 h-10 border-t border-l border-white/40 transition-all duration-500 group-hover:w-14 group-hover:h-14" />
+                  <div className="absolute bottom-0 right-0 w-10 h-10 border-b border-r border-white/40 transition-all duration-500 group-hover:w-14 group-hover:h-14" />
+
+                  <div className="absolute top-5 left-5 right-5 flex items-center justify-between text-white">
+                    <span className="text-[10px] tracking-[0.4em] uppercase font-light">
+                      02 / Collection
+                    </span>
+                    <span className="text-[10px] tracking-[0.2em] uppercase font-light opacity-70">
+                      For Her
+                    </span>
+                  </div>
+
+                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                    <h3
+                      className="text-3xl md:text-4xl font-bold mb-2 font-serif"
+                      style={{ letterSpacing: '-0.01em' }}
+                    >
+                      Nữ
+                    </h3>
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="w-8 h-px bg-primary" />
+                      <p className="text-xs tracking-[0.2em] uppercase font-light text-white/80">
+                        Thanh lịch & quyến rũ
+                      </p>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs tracking-[0.3em] uppercase font-medium">
+                        Khám phá
+                      </span>
+                      <div className="w-9 h-9 rounded-full border border-white/50 flex items-center justify-center group-hover:border-primary group-hover:bg-primary group-hover:text-black transition-all duration-300">
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -158,33 +213,53 @@ export default function HomePage() {
 
             <Link to="/accessories" className="group relative">
               <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.2 }}
-                whileHover={{ y: -8 }}
-                className="relative overflow-hidden rounded-3xl aspect-[3/4] md:aspect-[3/4]"
+                transition={{ duration: 0.6, delay: 0.3 }}
+                whileHover={{ y: -6 }}
+                className="relative"
               >
-                <img
-                  src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=800&h=1000&fit=crop"
-                  alt="Phụ kiện"
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-                
-                {/* Decorative corner */}
-                <div className="absolute top-4 right-4 w-20 h-20 border-t-2 border-r-2 border-white/20 rounded-tr-3xl" />
-                
-                <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
-                  <span className="inline-block text-xs tracking-[0.3em] uppercase mb-3 text-primary">
-                    Collection
-                  </span>
-                  <h3 className="text-4xl font-bold mb-3 font-serif">Phụ kiện</h3>
-                  <p className="text-base mb-5 text-white/70">Hoàn thiện phong cách</p>
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm font-medium">Khám phá</span>
-                    <div className="w-10 h-10 rounded-full border border-white/30 flex items-center justify-center group-hover:border-primary group-hover:bg-primary/20 transition-all duration-300">
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                <div className="relative overflow-hidden aspect-square">
+                  <img
+                    src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=900&h=900&fit=crop&q=80"
+                    alt="Phụ kiện"
+                    className="w-full h-full object-cover transition-all duration-[1200ms] ease-out group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent transition-opacity duration-500 group-hover:from-black/80" />
+
+                  <div className="absolute top-0 left-0 w-10 h-10 border-t border-l border-white/40 transition-all duration-500 group-hover:w-14 group-hover:h-14" />
+                  <div className="absolute bottom-0 right-0 w-10 h-10 border-b border-r border-white/40 transition-all duration-500 group-hover:w-14 group-hover:h-14" />
+
+                  <div className="absolute top-5 left-5 right-5 flex items-center justify-between text-white">
+                    <span className="text-[10px] tracking-[0.4em] uppercase font-light">
+                      03 / Collection
+                    </span>
+                    <span className="text-[10px] tracking-[0.2em] uppercase font-light opacity-70">
+                      Essentials
+                    </span>
+                  </div>
+
+                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                    <h3
+                      className="text-3xl md:text-4xl font-bold mb-2 font-serif"
+                      style={{ letterSpacing: '-0.01em' }}
+                    >
+                      Phụ kiện
+                    </h3>
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="w-8 h-px bg-primary" />
+                      <p className="text-xs tracking-[0.2em] uppercase font-light text-white/80">
+                        Hoàn thiện phong cách
+                      </p>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs tracking-[0.3em] uppercase font-medium">
+                        Khám phá
+                      </span>
+                      <div className="w-9 h-9 rounded-full border border-white/50 flex items-center justify-center group-hover:border-primary group-hover:bg-primary group-hover:text-black transition-all duration-300">
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -243,7 +318,7 @@ export default function HomePage() {
                 <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
                   <TrendingUp className="w-4 h-4 text-primary" />
                 </div>
-                <span className="text-primary font-medium tracking-wider uppercase text-sm">Just Dropped</span>
+                <span className="text-primary font-medium tracking-wider uppercase text-sm">Vừa ra mắt</span>
               </div>
               <h2 className="text-4xl md:text-5xl font-bold" style={{ letterSpacing: '-0.02em' }}>
                 Hàng mới về
