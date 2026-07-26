@@ -2,10 +2,10 @@
   "$schema": "https://railway.com/railway.schema.json",
   "build": {
     "builder": "NIXPACKS",
-    "watchPatterns": ["api/**"]
+    "buildCommand": "npm install --prefix api"
   },
   "deploy": {
-    "startCommand": "cd api && npm install && node index.js",
+    "startCommand": "npm start --prefix api",
     "restartPolicyType": "ON_FAILURE"
   }
 }
