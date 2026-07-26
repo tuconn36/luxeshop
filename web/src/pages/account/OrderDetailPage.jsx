@@ -25,11 +25,18 @@ import {
   Phone,
   User as UserIcon,
   FileText,
+  Box,
+  Warehouse,
+  Home,
+  ExternalLink,
+  Navigation,
+  MessageSquare,
 } from 'lucide-react';
 import { ordersAPI, paymentAPI } from '@/lib/api.js';
 import { getPaymentInfo } from '@/lib/paymentInfo.js';
 import { Button } from '@/components/ui/button';
 import VietQRModal from '@/components/shop/VietQRModal.jsx';
+import OrderTimeline from '@/components/order/OrderTimeline.jsx';
 
 const ORDER_STATUSES = {
   pending: { label: 'Chờ xác nhận', icon: Clock, color: 'yellow', step: 0 },
@@ -165,6 +172,250 @@ function StatusTimeline({ step }) {
           Đơn hàng này đã bị hủy.
         </div>
       )}
+    </div>
+  );
+}
+
+const JOURNEY_STEPS = [
+  {
+    key: 'picked',
+    label: 'Đã lấy hàng',
+    desc: 'Shipper đã lấy hàng thành công',
+    location: 'Kho hàng LUXE — Quận Bình Thạnh, TP.HCM',
+    note: 'Đã đóng gói cẩn thận, có dán seal bảo đảm',
+    icon: Box,
+  },
+  {
+    key: 'leaved',
+    label: 'Rời kho trung tâm',
+    desc: 'Đơn rời kho phân loại đến bưu cục gần bạn',
+    location: 'Hub phân loại — Trung tâm TP.HCM',
+    note: 'Đơn đã được phân loại theo khu vực giao hàng',
+    icon: Warehouse,
+  },
+  {
+    key: 'in_transit',
+    label: 'Đang trên đường',
+    desc: 'Đang vận chuyển tới bạn',
+    location: 'Trên đường đến chi nhánh giao hàng',
+    note: 'Xe vận chuyển đang chạy tuyến trung chuyển',
+    icon: Package,
+  },
+  {
+    key: 'out_for_delivery',
+    label: 'Đang giao đến bạn',
+    desc: 'Shipper đang giao tới địa chỉ',
+    location: 'Bưu cục phát — Quận/Huyện của bạn',
+    note: 'Shipper sẽ liên hệ bạn trước khi giao',
+    icon: Truck,
+  },
+  {
+    key: 'delivered',
+    label: 'Đã giao thành công',
+    desc: 'Đã đến tay người nhận',
+    location: 'Địa chỉ nhận hàng của bạn',
+    note: 'Đã ký nhận thành công • Cảm ơn bạn đã mua sắm!',
+    icon: Home,
+  },
+];
+
+function buildJourney(order) {
+  const status = (order.status || '').toLowerCase();
+  const isDelivered = status === 'delivered' || status === 'đã giao';
+  const isShipping = status === 'shipping' || status === 'đang giao' || status === 'ready' || isDelivered;
+
+  if (!isShipping) return { steps: [], eta: null, currentIndex: -1 };
+
+  const baseTs = order.updatedAt ? new Date(order.updatedAt).getTime() : Date.now();
+
+  const offsets = isDelivered
+    ? { picked: -48, leaved: -36, in_transit: -24, out_for_delivery: -6, delivered: 0 }
+    : { picked: -18, leaved: -10, in_transit: -3, out_for_delivery: 0, delivered: null };
+
+  const steps = JOURNEY_STEPS.map((s) => ({
+    ...s,
+    reached: offsets[s.key] !== null && (isDelivered ? true : offsets[s.key] <= 0),
+    isCurrent: !isDelivered && offsets[s.key] === 0,
+    time: offsets[s.key] !== null
+      ? format(new Date(baseTs + offsets[s.key] * 3600 * 1000), 'HH:mm • dd/MM/yyyy', { locale: vi })
+      : null,
+  }));
+
+  const currentIndex = steps.findIndex((s) => s.isCurrent);
+
+  let eta = null;
+  if (isDelivered) {
+    eta = { text: 'Đã giao thành công', warm: false };
+  } else if (status === 'shipping' || status === 'đang giao') {
+    eta = {
+      text: 'Dự kiến giao: hôm nay 14:00 – 18:00',
+      warm: true,
+    };
+  } else if (status === 'ready') {
+    eta = {
+      text: 'Dự kiến giao: 1–2 ngày tới',
+      warm: true,
+    };
+  }
+
+  return { steps, eta, currentIndex };
+}
+
+function ShippingJourney({ order }) {
+  const { steps, eta, currentIndex } = buildJourney(order);
+  if (steps.length === 0) return null;
+
+  const progressPct = currentIndex < 0
+    ? 100
+    : Math.round((currentIndex / (steps.length - 1)) * 100);
+
+  const carrierGuess =
+    /^VN\d+/i.test(order.trackingNumber || '') ? 'Vietnam Post' :
+    /^VNP/i.test(order.trackingNumber || '') ? 'Viettel Post' :
+    /^GHTK/i.test(order.trackingNumber || '') ? 'Giao Hàng Tiết Kiệm' :
+    /^GHN/i.test(order.trackingNumber || '') ? 'Giao Hàng Nhanh' :
+    'Đơn vị vận chuyển';
+
+  return (
+    <div className="bg-gradient-to-br from-sky-50 to-blue-50/40 border border-sky-200 rounded-2xl px-6 py-5 mb-5">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-3 flex-wrap mb-4">
+        <div>
+          <h3 className="font-semibold text-sm uppercase tracking-wider text-sky-900 inline-flex items-center gap-2">
+            <Truck className="w-4 h-4" /> Hành trình đơn hàng
+          </h3>
+          <p className="text-xs text-sky-800 mt-1">
+            Shipper đã liên hệ người nhận • Mọi cập nhật sẽ hiển thị tại đây
+          </p>
+        </div>
+        {order.trackingNumber && (
+          <span className="text-xs font-mono text-sky-800 bg-white px-2.5 py-1 rounded-full border border-sky-200">
+            VC: {order.trackingNumber}
+          </span>
+        )}
+      </div>
+
+      {/* Carrier info card */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-4">
+        <div className="bg-white/80 backdrop-blur border border-sky-100 rounded-xl px-3 py-2.5">
+          <p className="text-[10px] uppercase tracking-wider text-sky-600 font-bold">Đơn vị vận chuyển</p>
+          <p className="text-sm font-semibold text-gray-900 mt-0.5 truncate" title={carrierGuess}>
+            {carrierGuess}
+          </p>
+        </div>
+        <div className="bg-white/80 backdrop-blur border border-sky-100 rounded-xl px-3 py-2.5">
+          <p className="text-[10px] uppercase tracking-wider text-sky-600 font-bold">Trạng thái</p>
+          <p className="text-sm font-semibold text-gray-900 mt-0.5">
+            {steps.find((s) => s.isCurrent)?.label || steps.find((s) => s.reached)?.label || '—'}
+          </p>
+        </div>
+        <div className="bg-white/80 backdrop-blur border border-sky-100 rounded-xl px-3 py-2.5">
+          <p className="text-[10px] uppercase tracking-wider text-sky-600 font-bold">Tiến độ</p>
+          <div className="flex items-center gap-2 mt-1">
+            <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-sky-400 to-blue-500 transition-all"
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
+            <span className="text-xs font-bold text-sky-700">{progressPct}%</span>
+          </div>
+        </div>
+      </div>
+
+      {/* ETA banner */}
+      {eta && (
+        <div
+          className={`mb-4 px-3 py-2 rounded-xl border text-xs flex items-center gap-2 ${
+            eta.warm
+              ? 'bg-amber-50 border-amber-200 text-amber-800'
+              : 'bg-green-50 border-green-200 text-green-800'
+          }`}
+        >
+          <Navigation className="w-4 h-4 shrink-0" />
+          <span className="font-medium">{eta.text}</span>
+        </div>
+      )}
+
+      {/* Timeline */}
+      <div className="relative">
+        <div className="absolute left-[14px] top-2 bottom-2 w-0.5 bg-sky-200" aria-hidden />
+        <ul className="space-y-3.5">
+          {steps.map((step) => {
+            const Icon = step.icon;
+            return (
+              <li key={step.key} className="relative pl-10">
+                <div
+                  className={`absolute left-0 top-0.5 w-7 h-7 rounded-full flex items-center justify-center ring-4 ${
+                    step.isCurrent
+                      ? 'bg-sky-500 text-white ring-sky-100 animate-pulse'
+                      : step.reached
+                      ? 'bg-sky-600 text-white ring-sky-50'
+                      : 'bg-gray-200 text-gray-400 ring-gray-50'
+                  }`}
+                >
+                  {step.reached && !step.isCurrent ? (
+                    <CheckCircle2 className="w-4 h-4" />
+                  ) : (
+                    <Icon className="w-3.5 h-3.5" />
+                  )}
+                </div>
+
+                <div className={`${step.reached ? '' : 'opacity-60'} flex items-start justify-between gap-3 flex-wrap`}>
+                  <div className="min-w-0 flex-1">
+                    <p
+                      className={`text-sm font-semibold leading-tight inline-flex items-center gap-2 ${
+                        step.isCurrent ? 'text-sky-700' : step.reached ? 'text-gray-900' : 'text-gray-500'
+                      }`}
+                    >
+                      {step.label}
+                      {step.isCurrent && (
+                        <span className="text-[10px] font-bold uppercase tracking-wider bg-sky-100 text-sky-700 px-1.5 py-0.5 rounded">
+                          Hiện tại
+                        </span>
+                      )}
+                    </p>
+                    <p className="text-xs text-gray-600 mt-0.5">{step.desc}</p>
+
+                    {/* Location + note */}
+                    {(step.reached || step.isCurrent) && (
+                      <div className="mt-1.5 space-y-0.5">
+                        <p className="text-[11px] text-gray-700 inline-flex items-center gap-1">
+                          <MapPin className="w-3 h-3 text-sky-500" />
+                          <span className="font-medium">{step.location}</span>
+                        </p>
+                        <p className="text-[11px] text-gray-500 inline-flex items-start gap-1">
+                          <MessageSquare className="w-3 h-3 text-gray-400 mt-0.5 shrink-0" />
+                          <span className="italic">{step.note}</span>
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-gray-400 font-medium shrink-0 mt-0.5">
+                    {step.time || '—'}
+                  </p>
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+
+      {/* Footer contact */}
+      <div className="mt-4 pt-4 border-t border-sky-200/60 flex items-center justify-between gap-3 flex-wrap text-xs">
+        <p className="text-gray-600 inline-flex items-center gap-1.5">
+          <Phone className="w-3.5 h-3.5 text-sky-600" />
+          Cần hỗ trợ? Hotline: <span className="font-semibold text-gray-900">1900 6868</span>
+        </p>
+        <a
+          href={`https://www.google.com/search?q=${encodeURIComponent((order.trackingNumber || '') + ' ' + carrierGuess)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 text-sky-700 hover:text-sky-900 font-semibold"
+        >
+          Tra cứu chi tiết bên ngoài <ExternalLink className="w-3 h-3" />
+        </a>
+      </div>
     </div>
   );
 }
@@ -323,9 +574,15 @@ export default function OrderDetailPage() {
         </span>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-2xl px-6 py-5 mb-5">
-        <StatusTimeline step={statusInfo.step} />
+      <div className="mb-5">
+        <OrderTimeline
+          order={order}
+          onCancel={statusInfo?.color === 'amber' ? handleCancel : undefined}
+          pollInterval={order?.status === 'shipping' || order?.status === 'processing' ? 30000 : 0}
+        />
       </div>
+
+      <ShippingJourney order={order} />
 
       {/* QR payment banner */}
       {order.paymentMethod === 'vietqr' && order.paymentStatus !== 'paid' && order.status !== 'cancelled' && (

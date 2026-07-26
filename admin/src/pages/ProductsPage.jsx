@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, useRef } from 'react'
 import { productsAPI } from '../lib/api'
 import { formatVND, formatDateShort, CATEGORIES, imgUrl } from '../lib/utils'
 import { useToast } from '../components/ui/Toast'
@@ -27,7 +27,6 @@ const blankForm = {
   colors: [],
   tags: [],
 }
-
 export default function ProductsPage() {
   const [items, setItems] = useState([])
   const [total, setTotal] = useState(0)
@@ -41,9 +40,7 @@ export default function ProductsPage() {
   const [confirm, setConfirm] = useState(null)
   const toast = useToast()
   const limit = 10
-
   useEffect(() => { load() }, [page, category])
-
   const load = async () => {
     setLoading(true)
     try {
@@ -91,7 +88,7 @@ export default function ProductsPage() {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       <PageHeader
         title="Quản lý sản phẩm"
         description={`${total} sản phẩm trong hệ thống`}
@@ -102,32 +99,33 @@ export default function ProductsPage() {
         }
       />
 
-      <div className="card p-4">
-        <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3">
-          <div className="flex-1">
+      <div className="card p-5">
+        <form onSubmit={handleSearch} className="flex flex-col sm:flex-row sm:items-center gap-3">
+          <div className="flex-1 min-w-0">
             <SearchInput
               value={search}
               onChange={setSearch}
               placeholder="Tìm theo tên hoặc mô tả..."
             />
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 shrink-0">
             <select
               value={category}
               onChange={(e) => { setCategory(e.target.value); setPage(1) }}
-              className="input min-w-[140px]"
+              className="input min-w-[150px] h-10"
             >
               <option value="">Tất cả danh mục</option>
               {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
             </select>
-            <button type="submit" className="btn-primary">
+            <button type="submit" className="btn-primary h-10">
               <Filter className="w-4 h-4" /> Lọc
             </button>
             {(search || category) && (
               <button
                 type="button"
                 onClick={() => { setSearch(''); setCategory(''); setPage(1); setTimeout(load, 0) }}
-                className="btn-ghost"
+                className="btn-ghost h-10 px-3"
+                title="Xóa bộ lọc"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -167,10 +165,10 @@ export default function ProductsPage() {
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {items.map((p) => (
-                    <tr key={p.id} className="hover:bg-slate-50">
-                      <td className="table-cell">
-                        <div className="flex items-center gap-3 min-w-[200px]">
-                          <div className="w-11 h-11 rounded-lg bg-slate-100 overflow-hidden shrink-0">
+                    <tr key={p.id} className="hover:bg-slate-50/70 transition-colors">
+                      <td className="table-cell py-3.5">
+                        <div className="flex items-center gap-3 min-w-[220px]">
+                          <div className="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden shrink-0 ring-1 ring-slate-200">
                             {p.images?.[0] ? (
                               <img
                                 src={p.images[0].startsWith('http') ? p.images[0] : imgUrl(p.images[0])}
@@ -180,7 +178,7 @@ export default function ProductsPage() {
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">
-                                <Package className="w-4 h-4 text-slate-400" />
+                                <Package className="w-5 h-5 text-slate-400" />
                               </div>
                             )}
                           </div>
@@ -190,23 +188,23 @@ export default function ProductsPage() {
                           </div>
                         </div>
                       </td>
-                      <td className="table-cell">
+                      <td className="table-cell py-3.5">
                         <span className="badge bg-slate-100 text-slate-700 ring-slate-200">
                           {p.category}
                         </span>
                       </td>
-                      <td className="table-cell text-right font-medium">
+                      <td className="table-cell text-right font-medium py-3.5">
                         {formatVND(p.price)}
                         {p.original_price && Number(p.original_price) > Number(p.price) && (
-                          <div className="text-xs text-slate-400 line-through">
+                          <div className="text-xs text-slate-400 line-through mt-0.5">
                             {formatVND(p.original_price)}
                           </div>
                         )}
                       </td>
-                      <td className="table-cell text-right">
+                      <td className="table-cell text-right py-3.5">
                         <StockBadge stock={p.stock} />
                       </td>
-                      <td className="table-cell">
+                      <td className="table-cell py-3.5">
                         {p.featured ? (
                           <span className="badge bg-amber-100 text-amber-700 ring-amber-200 inline-flex items-center gap-1">
                             <Star className="w-3 h-3 fill-current" /> Nổi bật
@@ -215,19 +213,19 @@ export default function ProductsPage() {
                           <span className="text-xs text-slate-400">—</span>
                         )}
                       </td>
-                      <td className="table-cell text-slate-500">{formatDateShort(p.created_at)}</td>
-                      <td className="table-cell text-right">
+                      <td className="table-cell text-slate-500 py-3.5">{formatDateShort(p.created_at)}</td>
+                      <td className="table-cell text-right py-3.5">
                         <div className="flex items-center justify-end gap-1">
                           <button
                             onClick={() => onEdit(p)}
-                            className="p-2 rounded-lg text-slate-500 hover:bg-brand-50 hover:text-brand-700"
+                            className="p-2 rounded-lg text-slate-500 hover:bg-brand-50 hover:text-brand-700 transition-colors"
                             title="Chỉnh sửa"
                           >
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => setConfirm(p)}
-                            className="p-2 rounded-lg text-slate-500 hover:bg-rose-50 hover:text-rose-600"
+                            className="p-2 rounded-lg text-slate-500 hover:bg-rose-50 hover:text-rose-600 transition-colors"
                             title="Xóa"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -275,18 +273,18 @@ function StockBadge({ stock }) {
 function Pagination({ page, totalPages, onChange }) {
   if (totalPages <= 1) return null
   return (
-    <div className="flex items-center justify-between px-4 py-3 border-t border-slate-100 bg-slate-50">
-      <p className="text-xs text-slate-500">Trang {page} / {totalPages}</p>
-      <div className="flex gap-1">
+    <div className="flex items-center justify-between px-5 py-4 border-t border-slate-100 bg-slate-50/60">
+      <p className="text-sm text-slate-500">Trang <span className="font-semibold text-slate-700">{page}</span> / {totalPages}</p>
+      <div className="flex gap-2">
         <button
           disabled={page === 1}
           onClick={() => onChange(page - 1)}
-          className="btn-secondary px-3 py-1.5 text-xs"
+          className="btn-secondary px-4 py-1.5 text-xs"
         >Trước</button>
         <button
           disabled={page === totalPages}
           onClick={() => onChange(page + 1)}
-          className="btn-secondary px-3 py-1.5 text-xs"
+          className="btn-secondary px-4 py-1.5 text-xs"
         >Sau</button>
       </div>
     </div>
@@ -302,8 +300,45 @@ function ProductFormModal({ product, onClose, onSaved }) {
   )
   const [saving, setSaving] = useState(false)
   const [imageInput, setImageInput] = useState('')
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef(null)
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }))
+
+  const handleFileChange = async (e) => {
+    const files = Array.from(e.target.files || [])
+    if (files.length === 0) return
+
+    setUploading(true)
+    try {
+      for (const file of files) {
+        const formData = new FormData()
+        formData.append('image', file)
+
+        const response = await fetch('/api/upload/image', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+          },
+          body: formData
+        })
+
+        if (!response.ok) {
+          const error = await response.json()
+          throw new Error(error.error || 'Upload thất bại')
+        }
+
+        const data = await response.json()
+        set('images', [...(form.images || []), data.url])
+      }
+      toast.success('Đã upload ảnh thành công')
+    } catch (err) {
+      toast.error(err.message || 'Upload ảnh thất bại')
+    } finally {
+      setUploading(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
 
   const addImage = () => {
     const v = imageInput.trim()
@@ -366,7 +401,7 @@ function ProductFormModal({ product, onClose, onSaved }) {
         </>
       }
     >
-      <form id="product-form" onSubmit={handleSubmit} className="space-y-4">
+      <form id="product-form" onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label className="label">Tên sản phẩm *</label>
           <input className="input" value={form.name} onChange={(e) => set('name', e.target.value)} required />
@@ -375,7 +410,7 @@ function ProductFormModal({ product, onClose, onSaved }) {
         <div>
           <label className="label">Mô tả</label>
           <textarea
-            className="input min-h-[90px] resize-y"
+            className="input min-h-[96px] resize-y leading-relaxed"
             value={form.description}
             onChange={(e) => set('description', e.target.value)}
             rows={3}
@@ -423,7 +458,7 @@ function ProductFormModal({ product, onClose, onSaved }) {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5 pt-1">
           <input
             id="featured" type="checkbox"
             checked={!!form.featured}
@@ -436,22 +471,42 @@ function ProductFormModal({ product, onClose, onSaved }) {
         </div>
 
         <div>
-          <label className="label">Hình ảnh (URL)</label>
-          <div className="flex gap-2">
+          <label className="label">Hình ảnh sản phẩm</label>
+          <div className="flex flex-col sm:flex-row gap-2">
             <input
-              className="input"
-              value={imageInput}
-              onChange={(e) => setImageInput(e.target.value)}
-              placeholder="/uploads/products/abc.jpg hoặc URL đầy đủ"
-              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addImage() } }}
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              multiple
+              onChange={handleFileChange}
+              disabled={uploading}
+              className="hidden"
             />
-            <button type="button" onClick={addImage} className="btn-secondary shrink-0">Thêm</button>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploading}
+              className="btn-secondary whitespace-nowrap"
+            >
+              {uploading ? 'Đang upload...' : '📁 Chọn ảnh từ máy'}
+            </button>
+            <div className="relative flex-1">
+              <input
+                className="input w-full"
+                value={imageInput}
+                onChange={(e) => setImageInput(e.target.value)}
+                placeholder="Hoặc dán URL ảnh..."
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addImage() } }}
+              />
+            </div>
+            <button type="button" onClick={addImage} className="btn-secondary shrink-0">Thêm URL</button>
           </div>
+          <p className="text-xs text-slate-500 mt-1.5">Hỗ trợ: JPG, PNG, GIF, WebP (tối đa 5MB/ảnh)</p>
           {form.images?.length > 0 && (
             <ul className="mt-3 space-y-2">
               {form.images.map((img, i) => (
-                <li key={i} className="flex items-center gap-2 text-sm bg-slate-50 rounded-lg p-2">
-                  <div className="w-10 h-10 rounded bg-white overflow-hidden shrink-0">
+                <li key={i} className="flex items-center gap-2 text-sm bg-slate-50 rounded-lg p-2.5">
+                  <div className="w-11 h-11 rounded bg-white overflow-hidden shrink-0 ring-1 ring-slate-200">
                     <img
                       src={img.startsWith('http') ? img : imgUrl(img)}
                       alt=""
@@ -460,7 +515,7 @@ function ProductFormModal({ product, onClose, onSaved }) {
                     />
                   </div>
                   <span className="flex-1 truncate text-slate-600">{img}</span>
-                  <button type="button" onClick={() => removeImage(i)} className="p-1 text-slate-400 hover:text-rose-600">
+                  <button type="button" onClick={() => removeImage(i)} className="p-1.5 text-slate-400 hover:text-rose-600 rounded transition-colors">
                     <X className="w-4 h-4" />
                   </button>
                 </li>
@@ -469,7 +524,7 @@ function ProductFormModal({ product, onClose, onSaved }) {
           )}
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="border-t border-slate-100 pt-5 grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label className="label">Chất liệu (phân cách dấu phẩy)</label>
             <input

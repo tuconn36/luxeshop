@@ -3,6 +3,7 @@ import { Route, Routes, BrowserRouter as Router } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext.jsx';
 import { WishlistProvider } from './contexts/WishlistContext.jsx';
 import { CompareProvider } from './contexts/CompareContext.jsx';
+import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import { Toaster } from '@/components/ui/sonner';
 import ScrollToTop from './components/layout/ScrollToTop.jsx';
 import ProtectedRoute from './components/common/ProtectedRoute.jsx';
@@ -24,6 +25,7 @@ import OrderDetailPage from './pages/account/OrderDetailPage.jsx';
 import MyAccountPage from './pages/account/MyAccountPage.jsx';
 import ChangePasswordPage from './pages/account/ChangePasswordPage.jsx';
 import WishlistPage from './pages/account/WishlistPage.jsx';
+import VipPage from './pages/account/VipPage.jsx';
 import AuthModalPage from './pages/auth/AuthModalPage.jsx';
 import NewArrivalsPage from './pages/shop/NewArrivalsPage.jsx';
 import SalePage from './pages/shop/SalePage.jsx';
@@ -39,12 +41,13 @@ import PolicyPage from './pages/policy/PolicyPage.jsx';
 
 function App() {
   return (
-    <AuthProvider>
-      <WishlistProvider>
-        <CompareProvider>
-          <Router>
-            <ScrollToTop />
-            <Routes>
+    <ThemeProvider>
+      <AuthProvider>
+        <WishlistProvider>
+          <CompareProvider>
+            <Router>
+              <ScrollToTop />
+              <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/new-arrivals" element={<NewArrivalsPage />} />
             <Route path="/sale" element={<SalePage />} />
@@ -101,6 +104,7 @@ function App() {
             <Route path="orders" element={<AccountOrdersPage />} />
             <Route path="orders/:id" element={<OrderDetailPage />} />
             <Route path="wishlist" element={<WishlistPage />} />
+            <Route path="vip" element={<VipPage />} />
           </Route>
         </Routes>
         <Toaster
@@ -117,6 +121,7 @@ function App() {
         </CompareProvider>
       </WishlistProvider>
     </AuthProvider>
+    </ThemeProvider>
   );
 }
 

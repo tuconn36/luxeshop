@@ -11,23 +11,7 @@ export const PAYMENT_INFO = {
       'Áp dụng toàn quốc'
     ]
   },
-  bank: {
-    label: 'Chuyển khoản ngân hàng (thủ công)',
-    shortLabel: 'Chuyển khoản',
-    icon: 'Building2',
-    description: 'Quý khách chuyển khoản qua ngân hàng. Đơn hàng sẽ được xử lý sau khi nhận được thanh toán.',
-    bankName: 'Ngân hàng TMCP Ngoại thương Việt Nam (Vietcombank)',
-    accountName: 'CONG TY TNHH LUXE JEWELRY',
-    accountNumber: '1234 5678 9012',
-    branch: 'Chi nhánh Hà Nội',
-    swift: 'BFTVVNVX',
-    transferNote: 'Vui lòng ghi rõ MÃ ĐƠN HÀNG trong nội dung chuyển khoản để được xử lý nhanh nhất.',
-    details: [
-      'Đơn hàng được xử lý trong 1-24h sau khi nhận được chuyển khoản',
-      'Vui lòng giữ lại biên lai chuyển khoản để đối chiếu',
-      'Hỗ trợ xác nhận nhanh qua Zalo/Hotline: 1900 6868'
-    ]
-  },
+
   momo: {
     label: 'Ví MoMo',
     shortLabel: 'MoMo',

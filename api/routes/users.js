@@ -325,9 +325,44 @@ router.get('/:id/stats', async (req, res) => {
       [req.params.id]
     ).catch(() => ({ rows: [{ count: 0 }] }));
 
+    // Tính tổng chi tiêu (chỉ tính đơn thành công: delivered/processing/shipping/pending)
+    const totalSpentResult = await pool.query(
+      `SELECT COALESCE(SUM(total_amount), 0)::bigint AS total
+       FROM orders
+       WHERE user_id = $1
+         AND LOWER(status) IN ('delivered','shipping','shipped','processing','pending','chờ xác nhận','đang xử lý','đang giao','đã giao')`,
+      [req.params.id]
+    ).catch(() => ({ rows: [{ total: 0 }] }));
+
+    const totalSpent = Number(totalSpentResult.rows[0]?.total || 0);
+
+    // Tier rule (mirror với web/src/lib/vip.js)
+    const tiers = [
+      { id: 0, key: 'member', min: 0 },
+      { id: 1, key: 'vip1', min: 1_000_000 },
+      { id: 2, key: 'vip2', min: 3_000_000 },
+      { id: 3, key: 'vip3', min: 7_000_000 },
+      { id: 4, key: 'vip4', min: 15_000_000 },
+      { id: 5, key: 'vip5', min: 30_000_000 },
+      { id: 6, key: 'vip6', min: 60_000_000 },
+      { id: 7, key: 'vip7', min: 120_000_000 },
+      { id: 8, key: 'vip8', min: 250_000_000 },
+      { id: 9, key: 'vip9', min: 500_000_000 },
+      { id: 10, key: 'vip10', min: 1_000_000_000 },
+    ];
+    let tier = tiers[0];
+    let nextTier = null;
+    for (const t of tiers) {
+      if (totalSpent >= t.min) tier = t;
+    }
+    nextTier = tiers[tier.id + 1] || null;
+
     res.json({
       orders: counts,
       addresses: addressesResult.rows[0]?.count || 0,
+      totalSpent,
+      tier: { id: tier.id, key: tier.key, minSpent: tier.min },
+      nextTier: nextTier ? { id: nextTier.id, key: nextTier.key, minSpent: nextTier.min } : null,
     });
   } catch (error) {
     console.error('Error fetching user stats:', error);
@@ -335,6 +370,9 @@ router.get('/:id/stats', async (req, res) => {
     res.json({
       orders: { all: 0, pending: 0, processing: 0, shipping: 0, delivered: 0, cancelled: 0 },
       addresses: 0,
+      totalSpent: 0,
+      tier: { id: 0, key: 'member', minSpent: 0 },
+      nextTier: { id: 1, key: 'vip1', minSpent: 1_000_000 },
     });
   }
 });

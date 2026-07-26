@@ -64,7 +64,40 @@ const allProducts = [
   { name: 'Áo Tank Top Nữ Sale', description: 'Áo tank top nữ mát mẻ, giá sale cực sốc chỉ 99k. Chất liệu cotton spandex co giãn. Form ôm dáng. Nhiều màu sắc trẻ trung.', price: 99000, category: 'Nữ', stock: 75, featured: false, image: 'ao-tank-top-nu-sale.jpg', brand: 'Xita' },
   { name: 'Combo 5 Đôi Tất/Vớ', description: 'Combo 5 đôi tất/vớ cotton cao cấp, giá ưu đãi. Chất cotton thoáng khí thấm mồ hôi. Co giãn tốt, bền màu. Mix nhiều màu.', price: 99000, category: 'Phụ kiện', stock: 120, featured: false, image: 'tat-combo-5-doi.jpg', brand: 'Canifa' },
   { name: 'Quần Short Jean Nam Sale', description: 'Quần short jean nam giá sale 199k. Chất denim co giãn thoải mái. Túi năm túi cơ bản. Hàng sale cuối mùa.', price: 199000, category: 'Nam', stock: 60, featured: false, image: 'quan-short-jean-sale.jpg', brand: 'Yody' },
-  { name: 'Áo Sơ Mi Nữ Sale 199k', description: 'Áo sơ mi nữ giá sale 199k. Chất vải mềm mại thoáng mát. Thiết kế basic dễ phối đồ. Giảm giá từ 399k.', price: 199000, category: 'Nữ', stock: 55, featured: false, image: 'ao-som-mi-nu-sale.jpg', brand: 'IVY moda' }
+  { name: 'Áo Sơ Mi Nữ Sale 199k', description: 'Áo sơ mi nữ giá sale 199k. Chất vải mềm mại thoáng mát. Thiết kế basic dễ phối đồ. Giảm giá từ 399k.', price: 199000, category: 'Nữ', stock: 55, featured: false, image: 'ao-som-mi-nu-sale.jpg', brand: 'IVY moda' },
+
+  // ===== Luxury - Dior (4 sản phẩm) =====
+  { name: 'Dior Sauvage Eau de Parfum 100ml', description: 'Nước hoa nam Dior Sauvage EDP 100ml. Hương gỗ cay nồng đặc trưng với cam Bergamot, gỗ đàn hương và Ambroxan. Lưu hương lâu 8-12 giờ.', price: 3850000, original_price: 4200000, category: 'Phụ kiện', stock: 25, featured: true, image: 'dior-sauvage-edp-100ml.jpg', brand: 'Dior' },
+  { name: 'Dior B30 Sneaker Trắng', description: 'Giày sneaker Dior B30 trắng da bê cao cấp, đế cao su bền chắc. Thiết kế sport-luxe, logo CD khắc nổi. Hàng chính hãng, full box.', price: 27500000, original_price: 32000000, category: 'Nam', stock: 8, featured: true, image: 'dior-b30-sneaker-trang.jpg', brand: 'Dior' },
+  { name: 'Dior Saddle Bag Đen', description: 'Túi Saddle huyền thoại của Dior với thiết kế cong cách mạng. Da bê cao cấp màu đen, khóa CD mạ vàng, dây xích tháo rời.', price: 89000000, original_price: 98000000, category: 'Phụ kiện', stock: 5, featured: true, image: 'dior-saddle-bag-den.jpg', brand: 'Dior' },
+  { name: 'Dior Oblique Shirt Nam', description: 'Áo sơ mi nam Dior họa tiết Oblique kinh điển. Vải cotton lụa cao cấp, form slim fit, cài cúc ngọc trai.', price: 18500000, original_price: 21000000, category: 'Nam', stock: 12, featured: true, image: 'dior-oblique-shirt-nam.jpg', brand: 'Dior' },
+
+  // ===== Luxury - Chanel (4 sản phẩm) =====
+  { name: 'Chanel N°5 Eau de Parfum 100ml', description: 'Chanel N°5 - biểu tượng nước hoa vĩnh cửu từ 1921. Hương hoa aldehyde cổ điển với hoa hồng, jasmine, lily và gỗ đàn hương.', price: 4250000, original_price: 4800000, category: 'Phụ kiện', stock: 20, featured: true, image: 'chanel-no5-edp-100ml.jpg', brand: 'Chanel' },
+  { name: 'Chanel Classic Flap Bag Medium Đen', description: 'Túi Chanel Classic Flap size Medium da cừu đen, họa tiết quilted huyền thoại. Khóa CC mạ vàng, dây xích vàng đan da.', price: 145000000, original_price: 165000000, category: 'Phụ kiện', stock: 3, featured: true, image: 'chanel-classic-flap-medium-den.jpg', brand: 'Chanel' },
+  { name: 'Chanel Ballerina Slingback Beige', description: 'Giày búp bê Chanel Slingback hai màu đen-beige kinh điển. Da cừu non mềm mại, mũi nhọn, gót thấp 5cm thoải mái.', price: 22500000, original_price: 25000000, category: 'Nữ', stock: 10, featured: true, image: 'chanel-ballerina-slingback-beige.jpg', brand: 'Chanel' },
+  { name: 'Chanel Coco Mademoiselle 100ml', description: 'Chanel Coco Mademoiselle - hương thơm hiện đại, gợi cảm, tự do. Hương hoa cam, ylang-ylang, hoa nhài, patchouli trắng và xạ hương.', price: 4450000, original_price: 4950000, category: 'Phụ kiện', stock: 22, featured: false, image: 'chanel-coco-mademoiselle-100ml.jpg', brand: 'Chanel' },
+
+  // ===== Luxury - Hermès (3 sản phẩm) =====
+  { name: 'Hermès Birkin 25 Togo Orange', description: 'Túi Hermès Birkin 25cm da Togo màu cam. Khóa palladium, chỉ khâu saddle stitch thủ công. Danh sách chờ 2-5 năm.', price: 380000000, original_price: 420000000, category: 'Phụ kiện', stock: 2, featured: true, image: 'hermes-birkin-25-togo-orange.jpg', brand: 'Hermès' },
+  { name: 'Hermès Twilly d\'Hermès Eau de Parfum 85ml', description: 'Hermès Twilly - hương thơm trẻ trung với gừng, tuberose, gỗ đàn hương. Lấy cảm hứng từ chiếc khăn lụa Twilly huyền thoại.', price: 3850000, original_price: 4200000, category: 'Phụ kiện', stock: 18, featured: false, image: 'hermes-twilly-edp-85ml.jpg', brand: 'Hermès' },
+  { name: 'Hermès Kelly Loafer Đen', description: 'Giày Hermès Kelly Loafer da bê đen mềm mại. Thiết kế penny loafer với khóa Kelly mini mạ vàng đặc trưng.', price: 28500000, original_price: 32000000, category: 'Nữ', stock: 8, featured: true, image: 'hermes-kelly-loafer-den.jpg', brand: 'Hermès' },
+
+  // ===== Luxury - Gucci (2 sản phẩm) =====
+  { name: 'Gucci Marmont Matelassé Shoulder Bag', description: 'Túi Gucci GG Marmont đen da cừu quilted matelassé. Khóa GG mạ vàng antique, dây xích vàng đan da.', price: 32500000, original_price: 36500000, category: 'Phụ kiện', stock: 6, featured: true, image: 'gucci-marmont-shoulder-bag.jpg', brand: 'Gucci' },
+  { name: 'Gucci Ace Sneaker Trắng', description: 'Giày Gucci Ace sneaker trắng da bê cao cấp. Họa tiết web stripe xanh-đỏ-xanh, logo GG kim loại phía sau.', price: 14500000, original_price: 16500000, category: 'Nam', stock: 15, featured: false, image: 'gucci-ace-sneaker-trang.jpg', brand: 'Gucci' },
+
+  // ===== Luxury - Louis Vuitton (2 sản phẩm) =====
+  { name: 'Louis Vuitton Neverfull MM Monogram', description: 'Túi LV Neverfull MM họa tiết Monogram Canvas. Tay cầm da nâu tự nhiên, lớp lót đỏ, túi nhỏ tháo rời.', price: 32500000, original_price: 36500000, category: 'Phụ kiện', stock: 7, featured: true, image: 'lv-neverfull-mm-monogram.jpg', brand: 'Louis Vuitton' },
+  { name: 'Louis Vuitton Speedy 25 Damier Ebene', description: 'Túi LV Speedy 25 họa tiết Damier Ebene nâu-đen. Tay cầm da bò, khóa kéo vàng, form tròn cổ điển.', price: 28500000, original_price: 32000000, category: 'Phụ kiện', stock: 9, featured: true, image: 'lv-speedy-25-damier-ebene.jpg', brand: 'Louis Vuitton' },
+
+  // ===== Luxury - Prada (2 sản phẩm) =====
+  { name: 'Prada Re-Edition 2005 Nylon Bag', description: 'Túi Prada Re-Edition 2005 nylon tái phát hành từ thiết kế gốc. Chất liệu Re-Nylon tái chế, khóa tam giác Prada Saffiano logo.', price: 24500000, original_price: 28000000, category: 'Phụ kiện', stock: 10, featured: false, image: 'prada-re-edition-2005-nylon.jpg', brand: 'Prada' },
+  { name: 'Prada Linea Rossa Sunglasses', description: 'Kính mát Prada Linea Rossa thể thao sang trọng. Gọng đen mờ, tròng polarized UV400, logo Prada in laser tinh tế.', price: 12500000, original_price: 14500000, category: 'Phụ kiện', stock: 14, featured: false, image: 'prada-linea-rossa-sunglasses.jpg', brand: 'Prada' },
+
+  // ===== Luxury - Cartier (2 sản phẩm) =====
+  { name: 'Cartier Panthère de Cartier Watch', description: 'Đồng hồ Cartier Panthère thép không gỉ. Mặt vuông 27mm, viền kim cương, dây thép đan mắt xích, movement quartz Thụy Sĩ.', price: 385000000, original_price: 425000000, category: 'Phụ kiện', stock: 3, featured: true, image: 'cartier-panthere-watch.jpg', brand: 'Cartier' },
+  { name: 'Cartier Love Bracelet Vàng Hồng', description: 'Vòng tay Cartier Love bằng vàng hồng 18K. Thiết kế bắt vít huyền thoại 1970, cần tua vít đặc biệt để tháo.', price: 165000000, original_price: 185000000, category: 'Phụ kiện', stock: 4, featured: true, image: 'cartier-love-bracelet-vang-hong.jpg', brand: 'Cartier' }
 ];
 
 async function seedFullProducts() {
@@ -83,12 +116,13 @@ async function seedFullProducts() {
     let count = 0;
     for (const product of allProducts) {
       await client.query(
-        `INSERT INTO products (name, description, price, category, stock, featured, images, tags, created_at) 
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())`,
+        `INSERT INTO products (name, description, price, original_price, category, stock, featured, images, tags, created_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NOW())`,
         [
           product.name,
           product.description,
           product.price,
+          product.original_price || null,
           product.category,
           product.stock,
           product.featured,

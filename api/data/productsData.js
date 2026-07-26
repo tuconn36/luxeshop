@@ -393,10 +393,199 @@ const saleProducts = [
   },
 ];
 
+// Luxury Brands - Dior, Chanel & các thương hiệu cao cấp
+const luxuryProducts = [
+  // ===== Dior (Nam) =====
+  {
+    name: 'Dior Sauvage Eau de Parfum 100ml',
+    brand: 'Dior',
+    price: 3850000,
+    original_price: 4200000,
+    category: 'Phụ kiện',
+    image: 'dior-sauvage-edp-100ml.jpg',
+    description: 'Nước hoa nam Dior Sauvage Eau de Parfum phiên bản 100ml. Hương gỗ cay nồng đặc trưng với cam Bergamot, gỗ đàn hương và Ambroxan. Lưu hương lâu 8-12 giờ, phù hợp mọi dịp.'
+  },
+  {
+    name: 'Dior B30 Sneaker Trắng',
+    brand: 'Dior',
+    price: 27500000,
+    original_price: 32000000,
+    category: 'Nam',
+    image: 'dior-b30-sneaker-trang.jpg',
+    description: 'Giày sneaker Dior B30 trắng da bê cao cấp, đế cao su bền chắc. Thiết kế hiện đại pha sport-luxe, logo CD khắc nổi. Hàng chính hãng, full box.'
+  },
+  {
+    name: 'Dior Saddle Bag Đen',
+    brand: 'Dior',
+    price: 89000000,
+    original_price: 98000000,
+    category: 'Phụ kiện',
+    image: 'dior-saddle-bag-den.jpg',
+    description: 'Túi Saddle huyền thoại của Dior với thiết kế cong cách mạng. Da bê cao cấp màu đen, khóa CD mạ vàng, dây xích có thể tháo rời. Biểu tượng thời trang thập niên 2000 trở lại mạnh mẽ.'
+  },
+  {
+    name: 'Dior Oblique Shirt Nam',
+    brand: 'Dior',
+    price: 18500000,
+    original_price: 21000000,
+    category: 'Nam',
+    image: 'dior-oblique-shirt-nam.jpg',
+    description: 'Áo sơ mi nam Dior họa tiết Oblique kinh điển. Vải cotton lụa cao cấp, form slim fit. Họa tiết Dior xám-trắng đặc trưng, cài cúc ngọc trai.'
+  },
+
+  // ===== Chanel (Nữ) =====
+  {
+    name: 'Chanel N°5 Eau de Parfum 100ml',
+    brand: 'Chanel',
+    price: 4250000,
+    original_price: 4800000,
+    category: 'Phụ kiện',
+    image: 'chanel-no5-edp-100ml.jpg',
+    description: 'Chanel N°5 - biểu tượng nước hoa vĩnh cửu ra mắt 1921. Hương hoa aldehyde cổ điển với hoa hồng, jasmine, lily và gỗ đàn hương. Chai vuông tối giản sang trọng.'
+  },
+  {
+    name: 'Chanel Classic Flap Bag Medium Đen',
+    brand: 'Chanel',
+    price: 145000000,
+    original_price: 165000000,
+    category: 'Phụ kiện',
+    image: 'chanel-classic-flap-medium-den.jpg',
+    description: 'Túi Chanel Classic Flap size Medium da cừu màu đen, họa tiết quilted huyền thoại. Khóa CC mạ vàng, dây xích vàng đan da. Được Marilyn Monroe và mọi biểu tượng thời trang yêu thích.'
+  },
+  {
+    name: 'Chanel Ballerina Slingback Beige',
+    brand: 'Chanel',
+    price: 22500000,
+    original_price: 25000000,
+    category: 'Nữ',
+    image: 'chanel-ballerina-slingback-beige.jpg',
+    description: 'Giày búp bê Chanel Slingback hai màu đen-beige kinh điển. Da cừu non mềm mại, mũi giày mũi nhọn, gót thấp 5cm thoải mái. Thiết kế Coco Chanel 1957.'
+  },
+  {
+    name: 'Chanel Coco Mademoiselle 100ml',
+    brand: 'Chanel',
+    price: 4450000,
+    original_price: 4950000,
+    category: 'Phụ kiện',
+    image: 'chanel-coco-mademoiselle-100ml.jpg',
+    description: 'Chanel Coco Mademoiselle - hương thơm hiện đại, gợi cảm và tự do. Hương hoa cam, ylang-ylang, hoa nhài kết hợp patchouli trắng và xạ hương. Dành cho người phụ nữ độc lập.'
+  },
+
+  // ===== Hermes (Luxury) =====
+  {
+    name: 'Hermès Birkin 25 Togo Orange',
+    brand: 'Hermès',
+    price: 380000000,
+    original_price: 420000000,
+    category: 'Phụ kiện',
+    image: 'hermes-birkin-25-togo-orange.jpg',
+    description: 'Túi Hermès Birkin 25cm da Togo màu cam đặc trưng. Khóa palladium, chỉ khâu saddle stitch thủ công. Biểu tượng đỉnh cao của túi xách luxury, danh sách chờ 2-5 năm.'
+  },
+  {
+    name: 'Hermès Twilly d\'Hermès Eau de Parfum 85ml',
+    brand: 'Hermès',
+    price: 3850000,
+    original_price: 4200000,
+    category: 'Phụ kiện',
+    image: 'hermes-twilly-edp-85ml.jpg',
+    description: 'Hermès Twilly - hương thơm trẻ trung, nghịch ngợm dành cho giới trẻ. Hương gừng, tuberose, gỗ đàn hương. Lấy cảm hứng từ chiếc khăn lụa Twilly huyền thoại.'
+  },
+  {
+    name: 'Hermès Kelly Loafer Đen',
+    brand: 'Hermès',
+    price: 28500000,
+    original_price: 32000000,
+    category: 'Nữ',
+    image: 'hermes-kelly-loafer-den.jpg',
+    description: 'Giày Hermès Kelly Loafer da bê đen mềm mại. Thiết kế penny loafer với khóa Kelly mini mạ vàng đặc trưng. Đế bệt thanh lịch, phù hợp công sở và dạo phố.'
+  },
+
+  // ===== Gucci (Luxury) =====
+  {
+    name: 'Gucci Marmont Matelassé Shoulder Bag',
+    brand: 'Gucci',
+    price: 32500000,
+    original_price: 36500000,
+    category: 'Phụ kiện',
+    image: 'gucci-marmont-shoulder-bag.jpg',
+    description: 'Túi Gucci GG Marmont đen da cừu quilted matelassé. Khóa GG mạ vàng antique, dây xích vàng đan da. Thiết kế iconic thập niên 70 được tái sinh.'
+  },
+  {
+    name: 'Gucci Ace Sneaker Trắng',
+    brand: 'Gucci',
+    price: 14500000,
+    original_price: 16500000,
+    category: 'Nam',
+    image: 'gucci-ace-sneaker-trang.jpg',
+    description: 'Giày Gucci Ace sneaker trắng da bê cao cấp. Họa tiết sọc xanh-đỏ-green đặc trưng web stripe, logo GG kim loại phía sau. Đế cao su trắng classic.'
+  },
+
+  // ===== LV (Luxury) =====
+  {
+    name: 'Louis Vuitton Neverfull MM Monogram',
+    brand: 'Louis Vuitton',
+    price: 32500000,
+    original_price: 36500000,
+    category: 'Phụ kiện',
+    image: 'lv-neverfull-mm-monogram.jpg',
+    description: 'Túi Louis Vuitton Neverfull size MM họa tiết Monogram Canvas. Tay cầm da màu nâu tự nhiên, lớp lót đỏ. Túi nhỏ có thể tháo rời. Biểu tượng everyday luxury.'
+  },
+  {
+    name: 'Louis Vuitton Speedy 25 Damier Ebene',
+    brand: 'Louis Vuitton',
+    price: 28500000,
+    original_price: 32000000,
+    category: 'Phụ kiện',
+    image: 'lv-speedy-25-damier-ebene.jpg',
+    description: 'Túi LV Speedy 25 họa tiết Damier Ebene nâu-đen. Tay cầm da bò tự nhiên, khóa kéo vàng. Form tròn cổ điển, phù hợp mọi dịp.'
+  },
+
+  // ===== Prada (Luxury) =====
+  {
+    name: 'Prada Re-Edition 2005 Nylon Bag',
+    brand: 'Prada',
+    price: 24500000,
+    original_price: 28000000,
+    category: 'Phụ kiện',
+    image: 'prada-re-edition-2005-nylon.jpg',
+    description: 'Túi Prada Re-Edition 2005 nylon tái phát hành từ thiết kế gốc. Chất liệu Re-Nylon tái chế bền vững, khóa tam giác Prada Saffiano logo. Dây xích có thể tháo rời.'
+  },
+  {
+    name: 'Prada Linea Rossa Sunglasses',
+    brand: 'Prada',
+    price: 12500000,
+    original_price: 14500000,
+    category: 'Phụ kiện',
+    image: 'prada-linea-rossa-sunglasses.jpg',
+    description: 'Kính mát Prada Linea Rossa thể thao sang trọng. Gọng đen mờ, tròng polarized chống UV400. Logo Prada in laser tinh tế.'
+  },
+
+  // ===== Cartier (Luxury) =====
+  {
+    name: 'Cartier Panthère de Cartier Watch',
+    brand: 'Cartier',
+    price: 385000000,
+    original_price: 425000000,
+    category: 'Phụ kiện',
+    image: 'cartier-panthere-watch.jpg',
+    description: 'Đồng hồ Cartier Panthère bằng thép không gỉ. Mặt vuông 27mm, viền đính kim cương, dây đeo thép đan mắt xích. Movement quartz Thụy Sĩ, sapphire crystal.'
+  },
+  {
+    name: 'Cartier Love Bracelet Vàng Hồng',
+    brand: 'Cartier',
+    price: 165000000,
+    original_price: 185000000,
+    category: 'Phụ kiện',
+    image: 'cartier-love-bracelet-vang-hong.jpg',
+    description: 'Vòng tay Cartier Love bằng vàng hồng 18K. Thiết kế bắt vít huyền thoại 1970, cần tua vít đặc biệt để tháo. Biểu tượng tình yêu vĩnh cửu.'
+  },
+];
+
 module.exports = {
   menProducts,
   womenProducts,
   accessories,
   saleProducts,
-  allProducts: [...menProducts, ...womenProducts, ...accessories, ...saleProducts]
+  luxuryProducts,
+  allProducts: [...menProducts, ...womenProducts, ...accessories, ...saleProducts, ...luxuryProducts]
 };

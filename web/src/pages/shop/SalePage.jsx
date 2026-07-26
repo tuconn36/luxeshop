@@ -7,6 +7,8 @@ import ProductCard from '@/components/shop/ProductCard.jsx';
 import { useProducts } from '@/hooks/useProducts.js';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { ProductCardSkeleton } from '@/components/ui/product-skeleton.jsx';
+import CountdownTimer from '@/components/shop/CountdownTimer.jsx';
 import { motion } from 'framer-motion';
 import { Tag, Clock, Flame, Percent, Gift, Truck, Shield, ArrowRight } from 'lucide-react';
 
@@ -207,16 +209,22 @@ export default function SalePage() {
       {/* Products Section */}
       <section className="bg-gray-50 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Flash Sale Countdown */}
+          <div className="mb-6">
+            <CountdownTimer
+              targetTime={(() => {
+                // Tự tạo thời điểm kết thúc: cuối ngày hôm nay
+                const end = new Date();
+                end.setHours(23, 59, 59, 999);
+                return end.toISOString();
+              })()}
+              title="Flash Sale kết thúc trong"
+              variant="banner"
+            />
+          </div>
+
           {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-              {[...Array(12)].map((_, i) => (
-                <div key={i} className="animate-pulse">
-                  <div className="aspect-square bg-gradient-to-br from-red-100 to-orange-100 rounded-2xl mb-4"></div>
-                  <div className="h-4 bg-gray-200 rounded-lg mb-2"></div>
-                  <div className="h-5 bg-gray-200 rounded-lg w-2/3"></div>
-                </div>
-              ))}
-            </div>
+            <ProductCardSkeleton variant="wide" />
           ) : products.length > 0 ? (
             <>
               {/* Sale Banner */}

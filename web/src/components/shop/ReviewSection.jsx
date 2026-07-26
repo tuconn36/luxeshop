@@ -199,7 +199,36 @@ export default function ReviewSection({ productId, onStatsUpdate }) {
 
   return (
     <div className="mt-16 border-t pt-12">
-      <h2 className="text-2xl font-bold mb-8">Đánh giá sản phẩm</h2>
+      <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
+        <h2 className="text-2xl font-bold">Đánh giá sản phẩm</h2>
+
+        {/* Write review button — always visible */}
+        {!showForm && (
+          currentUser ? (
+            <Button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                setShowForm(true);
+              }}
+              variant="default"
+              className="bg-amber-600 hover:bg-amber-700 text-white shadow-sm"
+            >
+              ✍️ Viết đánh giá của bạn
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              variant="outline"
+              className="border-amber-600 text-amber-700 hover:bg-amber-50"
+              onClick={() => toast.error('Vui lòng đăng nhập để viết đánh giá')}
+            >
+              🔒 Đăng nhập để viết đánh giá
+            </Button>
+          )
+        )}
+      </div>
 
       {/* Summary */}
       <div className="grid md:grid-cols-2 gap-8 mb-10 p-6 bg-muted/30 rounded-2xl">
@@ -230,14 +259,7 @@ export default function ReviewSection({ productId, onStatsUpdate }) {
         </div>
       </div>
 
-      {/* Write review */}
-      {currentUser && !showForm && (
-        <div className="mb-8">
-          <Button onClick={() => setShowForm(true)} variant="outline">
-            ✍️ Viết đánh giá của bạn
-          </Button>
-        </div>
-      )}
+      {/* Write review form shown below when toggled */}
 
       {showForm && (
         <form onSubmit={handleSubmit} className="mb-10 border rounded-2xl p-6 bg-muted/10 space-y-4">

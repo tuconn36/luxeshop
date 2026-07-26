@@ -1,13 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Search, ShoppingCart, User, Menu, X, Phone, Globe, Tag, Moon, Sun, ChevronDown } from 'lucide-react';
+import { AnimatePresence } from 'framer-motion';
+import { Search, ShoppingCart, User, Menu, X, Phone, Globe, Tag, Moon, Sun, ChevronDown, ArrowUp, Crown } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext.jsx';
+import { useTheme } from '@/contexts/ThemeContext.jsx';
 import { useCart } from '@/hooks/useCart.js';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { getContactLabel } from '@/lib/userDisplay.js';
+import { statsAPI } from '@/lib/api.js';
+import { getVipTier } from '@/lib/vip.js';
+import { toast } from 'sonner';
 import OTPLoginModal from '@/components/auth/OTPLoginModal.jsx';
+import SearchSuggestions from '@/components/search/SearchSuggestions.jsx';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import MegaMenu from '@/components/layout/MegaMenu.jsx';
 
 
 export default function Header() {
@@ -16,6 +23,7 @@ export default function Header() {
   const navigate = useNavigate();
   const location = useLocation();
   const isHome = location.pathname === '/';
+  const [vipTier, setVipTier] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
@@ -39,6 +47,27 @@ export default function Header() {
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Fetch VIP tier for badge near cart
+  useEffect(() => {
+    if (!currentUser?.id) {
+      setVipTier(null);
+      return;
+    }
+    let cancelled = false;
+    const fetchVip = async () => {
+      try {
+        const stats = await statsAPI.getUserStats(currentUser.id);
+        if (cancelled) return;
+        const totalSpent = stats?.totalSpent ?? 0;
+        setVipTier(getVipTier(totalSpent).current);
+      } catch {
+        if (!cancelled) setVipTier(null);
+      }
+    };
+    fetchVip();
+    return () => { cancelled = true; };
+  }, [currentUser?.id]);
 
   const handleMouseEnterMen = () => {
     if (menuTimeoutRef.current) {
@@ -85,111 +114,15 @@ export default function Header() {
     }, 200); // Increase timeout to 200ms
   };
 
-  const menCategories = {
-    col1: [
-      'Áo Thun',
-      'Áo Polo',
-      'Áo Sơ mi',
-      'Áo Khoác',
-      'Áo Nỉ Và Len',
-      'Hoodie',
-      'Tank Top - Áo Ba Lỗ',
-      'Set đồ'
-    ],
-    col2: [
-      'Quần Jean',
-      'Quần Short',
-      'Quần Kaki & Chino',
-      'Quần Jogger - Quần Dài',
-      'Quần Tây',
-      'Quần Boxer',
-      'Set Đồ'
-    ],
-    col3: [
-      'Giày & Dép',
-      'Balo, Túi & Ví',
-      'Nón',
-      'Thắt Lưng',
-      'Vớ',
-      'Mắt Kính'
-    ]
-  };
-
-  const womenCategories = {
-    col1: [
-      'Áo Thun',
-      'Áo Kiểu',
-      'Áo Sơ mi',
-      'Áo Khoác',
-      'Áo Len & Cardigan',
-      'Áo Hai Dây',
-      'Áo Croptop',
-      'Set đồ'
-    ],
-    col2: [
-      'Váy',
-      'Quần Jean',
-      'Quần Short',
-      'Quần Dài',
-      'Quần Legging',
-      'Đầm',
-      'Jumpsuit & Yếm'
-    ],
-    col3: [
-      'Giày & Dép',
-      'Túi Xách',
-      'Balo & Ví',
-      'Nón',
-      'Thắt Lưng',
-      'Trang Sức',
-      'Mắt Kính'
-    ]
-  };
-
-  const accessoriesCategories = {
-    col1: [
-      'Nón & Mũ',
-      'Mũ Lưỡi Trai',
-      'Mũ Bucket',
-      'Khăn Choàng',
-      'Khẩu Trang'
-    ],
-    col2: [
-      'Túi Xách',
-      'Balo',
-      'Ví',
-      'Thắt Lưng',
-      'Cà Vạt'
-    ],
-    col3: [
-      'Giày Sneaker',
-      'Dép',
-      'Tất/Vớ',
-      'Mắt Kính',
-      'Trang Sức',
-      'Đồng Hồ'
-    ]
-  };
-
   const [lang, setLang] = useState(() => localStorage.getItem('lang') || 'vi');
-  const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
 
-  const toggleDark = () => {
-    const html = document.documentElement;
-    html.classList.toggle('dark');
-    const dark = html.classList.contains('dark');
-    setIsDark(dark);
-    localStorage.setItem('theme', dark ? 'dark' : 'light');
-  };
-
-  // Khởi tạo theme từ localStorage
-  React.useEffect(() => {
-    const saved = localStorage.getItem('theme');
-    if (saved === 'dark') {
-      document.documentElement.classList.add('dark');
-      setIsDark(true);
-    }
-  }, []);
+  // Theme — dùng ThemeContext toàn cục (đồng bộ với mọi nơi)
+  // eslint-disable-next-line no-unused-vars
+  const { isDark, toggleTheme } = useTheme();
+  // Backward-compat alias
+  const setIsDark = () => {};
+  // local handler gọi qua context
+  const toggleDark = toggleTheme;
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -224,7 +157,9 @@ export default function Header() {
 
   const handleLogout = () => {
     logout();
-    navigate('/', { replace: true });
+    toast.success('Đã đăng xuất');
+    // navigate về home SAU state đã clear để tránh Header render lại với currentUser cũ
+    setTimeout(() => navigate('/', { replace: true }), 0);
   };
 
   // Shop pages also use overlay style
@@ -549,6 +484,12 @@ export default function Header() {
                           }`}>
                             {currentUser.name || getContactLabel(currentUser)}
                           </span>
+                          {vipTier && vipTier.id > 0 && (
+                            <span className={`hidden xl:inline-flex items-center gap-0.5 px-1.5 h-5 rounded-full bg-gradient-to-r ${vipTier.gradient} text-white text-[10px] font-black tracking-wider leading-none border border-white/30`}>
+                              <Crown className="w-2.5 h-2.5" />
+                              {vipTier.id === 10 ? 'MAX' : `VIP${vipTier.id}`}
+                            </span>
+                          )}
                         </Button>
                       </Link>
                     ) : (
@@ -665,245 +606,125 @@ export default function Header() {
       </header>
 
 
-      {/* Nam Menu */}
-      {showMenMegaMenu && (
-        <div
-          className="fixed left-0 right-0 z-40"
-          style={{ top: megaMenuTop }}
-          onMouseEnter={handleMouseEnterMen}
-          onMouseLeave={handleMouseLeaveMen}
-        >
-          <div className="bg-background/95 backdrop-blur-xl border-b border-border/60 shadow-2xl">
-            <div className="max-w-7xl mx-auto px-8 py-8">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="font-serif text-xl font-bold tracking-wide">Thời trang Nam</h3>
-                <Link
-                  to="/men"
-                  className="text-xs font-medium tracking-widest uppercase text-primary hover:underline"
-                  onClick={() => setShowMenMegaMenu(false)}
-                >
-                  Xem tất cả →
-                </Link>
-              </div>
+      {/* Nam Mega Menu */}
+      <MegaMenu
+        isOpen={showMenMegaMenu}
+        onMouseEnter={handleMouseEnterMen}
+        onMouseLeave={handleMouseLeaveMen}
+        top={megaMenuTop}
+        eyebrow="BST 01 / For Him"
+        title="Thời trang Nam"
+        viewAllLink="/men"
+        categories={[
+          {
+            title: 'Áo Nam',
+            items: ['Áo Thun', 'Áo Polo', 'Áo Sơ mi', 'Áo Khoác', 'Áo Nỉ & Len', 'Hoodie', 'Tank Top', 'Set đồ'],
+          },
+          {
+            title: 'Quần Nam',
+            items: ['Quần Jean', 'Quần Short', 'Quần Kaki & Chino', 'Quần Jogger', 'Quần Tây', 'Quần Boxer'],
+          },
+          {
+            title: 'Phụ kiện Nam',
+            items: ['Giày & Dép', 'Balo, Túi & Ví', 'Nón', 'Thắt Lưng', 'Vớ', 'Mắt Kính'],
+          },
+        ]}
+        brands={['Routine', 'Coolmate', 'Owen', 'Canifa', 'Yody', 'Ninomaxx', 'Dirty Coins', 'Local Brand', 'The Blues', 'Lados']}
+        brandLinkPrefix="/men?brand="
+        categoryLinkPrefix="/men?category="
+        featured={{
+          image: 'https://images.unsplash.com/photo-1617137968427-85924c800a22?w=600&h=800&fit=crop&q=85',
+          title: 'BST Thu Đông 2026',
+          subtitle: 'For Him',
+          badge: 'Mới',
+          link: '/men?collection=aw-2026',
+        }}
+        secondary={{
+          title: 'Ưu đãi đến 50% quần nam',
+          subtitle: 'Flash Sale',
+          link: '/men?sale=true',
+        }}
+      />
 
-              <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-4 gap-y-2 mb-8">
-                {['Routine', 'Coolmate', 'Owen', 'Canifa', 'Yody', 'Ninomaxx', 'Dirty Coins', 'Local Brand', 'The Blues', 'Lados'].map((brand) => (
-                  <Link
-                    key={brand}
-                    to={`/men?brand=${brand}`}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors py-1"
-                    onClick={() => setShowMenMegaMenu(false)}
-                  >
-                    {brand}
-                  </Link>
-                ))}
-              </div>
+      {/* Nữ Mega Menu */}
+      <MegaMenu
+        isOpen={showWomenMegaMenu}
+        onMouseEnter={handleMouseEnterWomen}
+        onMouseLeave={handleMouseLeaveWomen}
+        top={megaMenuTop}
+        eyebrow="BST 02 / For Her"
+        title="Thời trang Nữ"
+        viewAllLink="/women"
+        categories={[
+          {
+            title: 'Áo Nữ',
+            items: ['Áo Thun', 'Áo Kiểu', 'Áo Sơ mi', 'Áo Khoác', 'Áo Len & Cardigan', 'Áo Hai Dây', 'Áo Croptop', 'Set đồ'],
+          },
+          {
+            title: 'Quần & Váy',
+            items: ['Váy', 'Quần Jean', 'Quần Short', 'Quần Dài', 'Quần Legging', 'Đầm', 'Jumpsuit'],
+          },
+          {
+            title: 'Phụ kiện Nữ',
+            items: ['Giày & Dép', 'Túi Xách', 'Balo & Ví', 'Nón', 'Thắt Lưng', 'Trang Sức', 'Mắt Kính'],
+          },
+        ]}
+        brands={['Elise', 'Juno', 'Biluxury', 'IVY moda', 'Kiza', 'NEM', 'Xita', 'VietCharm', 'Lime Orange', 'May 10']}
+        brandLinkPrefix="/women?brand="
+        categoryLinkPrefix="/women?category="
+        featured={{
+          image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&h=800&fit=crop&q=85',
+          title: 'BST Đầm Tiệc Tối',
+          subtitle: 'For Her',
+          badge: 'Hot',
+          link: '/women?collection=evening',
+        }}
+        secondary={{
+          title: 'Giảm 30% BST mới',
+          subtitle: 'New In',
+          link: '/women?new=true',
+        }}
+      />
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-6 border-t border-border/60">
-                <div>
-                  <h4 className="text-xs font-semibold tracking-[0.15em] uppercase text-primary mb-4">Áo</h4>
-                  {menCategories.col1.map((category) => (
-                    <Link
-                      key={category}
-                      to={`/men?category=${encodeURIComponent(category)}`}
-                      className="block py-1.5 text-sm text-muted-foreground hover:text-foreground hover:translate-x-1 transition-all"
-                      onClick={() => setShowMenMegaMenu(false)}
-                    >
-                      {category}
-                    </Link>
-                  ))}
-                </div>
-                <div>
-                  <h4 className="text-xs font-semibold tracking-[0.15em] uppercase text-primary mb-4">Quần</h4>
-                  {menCategories.col2.map((category) => (
-                    <Link
-                      key={category}
-                      to={`/men?category=${encodeURIComponent(category)}`}
-                      className="block py-1.5 text-sm text-muted-foreground hover:text-foreground hover:translate-x-1 transition-all"
-                      onClick={() => setShowMenMegaMenu(false)}
-                    >
-                      {category}
-                    </Link>
-                  ))}
-                </div>
-                <div>
-                  <h4 className="text-xs font-semibold tracking-[0.15em] uppercase text-primary mb-4">Giày & Phụ kiện</h4>
-                  {menCategories.col3.map((category) => (
-                    <Link
-                      key={category}
-                      to={`/men?category=${encodeURIComponent(category)}`}
-                      className="block py-1.5 text-sm text-muted-foreground hover:text-foreground hover:translate-x-1 transition-all"
-                      onClick={() => setShowMenMegaMenu(false)}
-                    >
-                      {category}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Nữ Menu */}
-      {showWomenMegaMenu && (
-        <div
-          className="fixed left-0 right-0 z-40"
-          style={{ top: megaMenuTop }}
-          onMouseEnter={handleMouseEnterWomen}
-          onMouseLeave={handleMouseLeaveWomen}
-        >
-          <div className="bg-background/95 backdrop-blur-xl border-b border-border/60 shadow-2xl">
-            <div className="max-w-7xl mx-auto px-8 py-8">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="font-serif text-xl font-bold tracking-wide">Thời trang Nữ</h3>
-                <Link
-                  to="/women"
-                  className="text-xs font-medium tracking-widest uppercase text-primary hover:underline"
-                  onClick={() => setShowWomenMegaMenu(false)}
-                >
-                  Xem tất cả →
-                </Link>
-              </div>
-
-              <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-4 gap-y-2 mb-8">
-                {['Elise', 'Juno', 'Biluxury', 'IVY moda', 'Kiza', 'NEM', 'Xita', 'VietCharm', 'Lime Orange', 'May 10'].map((brand) => (
-                  <Link
-                    key={brand}
-                    to={`/women?brand=${brand}`}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors py-1"
-                    onClick={() => setShowWomenMegaMenu(false)}
-                  >
-                    {brand}
-                  </Link>
-                ))}
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-6 border-t border-border/60">
-                <div>
-                  <h4 className="text-xs font-semibold tracking-[0.15em] uppercase text-primary mb-4">Áo</h4>
-                  {womenCategories.col1.map((category) => (
-                    <Link
-                      key={category}
-                      to={`/women?category=${encodeURIComponent(category)}`}
-                      className="block py-1.5 text-sm text-muted-foreground hover:text-foreground hover:translate-x-1 transition-all"
-                      onClick={() => setShowWomenMegaMenu(false)}
-                    >
-                      {category}
-                    </Link>
-                  ))}
-                </div>
-                <div>
-                  <h4 className="text-xs font-semibold tracking-[0.15em] uppercase text-primary mb-4">Quần & Váy</h4>
-                  {womenCategories.col2.map((category) => (
-                    <Link
-                      key={category}
-                      to={`/women?category=${encodeURIComponent(category)}`}
-                      className="block py-1.5 text-sm text-muted-foreground hover:text-foreground hover:translate-x-1 transition-all"
-                      onClick={() => setShowWomenMegaMenu(false)}
-                    >
-                      {category}
-                    </Link>
-                  ))}
-                </div>
-                <div>
-                  <h4 className="text-xs font-semibold tracking-[0.15em] uppercase text-primary mb-4">Giày & Phụ kiện</h4>
-                  {womenCategories.col3.map((category) => (
-                    <Link
-                      key={category}
-                      to={`/women?category=${encodeURIComponent(category)}`}
-                      className="block py-1.5 text-sm text-muted-foreground hover:text-foreground hover:translate-x-1 transition-all"
-                      onClick={() => setShowWomenMegaMenu(false)}
-                    >
-                      {category}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Phụ kiện Menu */}
-      {showAccessoriesMegaMenu && (
-        <div
-          className="fixed left-0 right-0 z-40"
-          style={{ top: megaMenuTop }}
-          onMouseEnter={handleMouseEnterAccessories}
-          onMouseLeave={handleMouseLeaveAccessories}
-        >
-          <div className="bg-background/95 backdrop-blur-xl border-b border-border/60 shadow-2xl">
-            <div className="max-w-7xl mx-auto px-8 py-8">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="font-serif text-xl font-bold tracking-wide">Phụ kiện thời trang</h3>
-                <Link
-                  to="/accessories"
-                  className="text-xs font-medium tracking-widest uppercase text-primary hover:underline"
-                  onClick={() => setShowAccessoriesMegaMenu(false)}
-                >
-                  Xem tất cả →
-                </Link>
-              </div>
-
-              <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-4 gap-y-2 mb-8">
-                {['MLB', 'Adidas', 'Nike', 'Puma', 'Gucci', 'LV', 'Chanel', 'Hermès', 'Coach', 'Michael Kors', 'Fossil', 'Daniel Wellington'].map((brand) => (
-                  <Link
-                    key={brand}
-                    to={`/accessories?brand=${brand}`}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors py-1"
-                    onClick={() => setShowAccessoriesMegaMenu(false)}
-                  >
-                    {brand}
-                  </Link>
-                ))}
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-6 border-t border-border/60">
-                <div>
-                  <h4 className="text-xs font-semibold tracking-[0.15em] uppercase text-primary mb-4">Mũ & Khăn</h4>
-                  {accessoriesCategories.col1.map((category) => (
-                    <Link
-                      key={category}
-                      to={`/accessories?category=${encodeURIComponent(category)}`}
-                      className="block py-1.5 text-sm text-muted-foreground hover:text-foreground hover:translate-x-1 transition-all"
-                      onClick={() => setShowAccessoriesMegaMenu(false)}
-                    >
-                      {category}
-                    </Link>
-                  ))}
-                </div>
-                <div>
-                  <h4 className="text-xs font-semibold tracking-[0.15em] uppercase text-primary mb-4">Túi & Ví</h4>
-                  {accessoriesCategories.col2.map((category) => (
-                    <Link
-                      key={category}
-                      to={`/accessories?category=${encodeURIComponent(category)}`}
-                      className="block py-1.5 text-sm text-muted-foreground hover:text-foreground hover:translate-x-1 transition-all"
-                      onClick={() => setShowAccessoriesMegaMenu(false)}
-                    >
-                      {category}
-                    </Link>
-                  ))}
-                </div>
-                <div>
-                  <h4 className="text-xs font-semibold tracking-[0.15em] uppercase text-primary mb-4">Giày & Khác</h4>
-                  {accessoriesCategories.col3.map((category) => (
-                    <Link
-                      key={category}
-                      to={`/accessories?category=${encodeURIComponent(category)}`}
-                      className="block py-1.5 text-sm text-muted-foreground hover:text-foreground hover:translate-x-1 transition-all"
-                      onClick={() => setShowAccessoriesMegaMenu(false)}
-                    >
-                      {category}
-                    </Link>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Phụ kiện Mega Menu */}
+      <MegaMenu
+        isOpen={showAccessoriesMegaMenu}
+        onMouseEnter={handleMouseEnterAccessories}
+        onMouseLeave={handleMouseLeaveAccessories}
+        top={megaMenuTop}
+        eyebrow="BST 03 / Essentials"
+        title="Phụ kiện thời trang"
+        viewAllLink="/accessories"
+        categories={[
+          {
+            title: 'Mũ & Khăn',
+            items: ['Nón & Mũ', 'Mũ Lưỡi Trai', 'Mũ Bucket', 'Khăn Choàng', 'Khẩu Trang'],
+          },
+          {
+            title: 'Túi & Ví',
+            items: ['Túi Xách', 'Balo', 'Ví', 'Thắt Lưng', 'Cà Vạt'],
+          },
+          {
+            title: 'Giày & Khác',
+            items: ['Giày Sneaker', 'Dép', 'Tất/Vớ', 'Mắt Kính', 'Trang Sức', 'Đồng Hồ'],
+          },
+        ]}
+        brands={['MLB', 'Adidas', 'Nike', 'Puma', 'Gucci', 'LV', 'Chanel', 'Hermès', 'Coach', 'Michael Kors', 'Fossil', 'Daniel Wellington']}
+        brandLinkPrefix="/accessories?brand="
+        categoryLinkPrefix="/accessories?category="
+        featured={{
+          image: 'https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=600&h=800&fit=crop&q=85',
+          title: 'BST Túi Da Cao Cấp',
+          subtitle: 'Luxury',
+          badge: 'Hot',
+          link: '/accessories?collection=luxury-bags',
+        }}
+        secondary={{
+          title: 'Xem BST trang sức mới',
+          subtitle: 'New In',
+          link: '/accessories?category=Trang%20Sức',
+        }}
+      />
 
       {/* Search Overlay */}
       <div
@@ -940,6 +761,20 @@ export default function Header() {
                 Tìm
               </Button>
             </form>
+
+            {/* Autocomplete suggestions */}
+            <AnimatePresence>
+              {isSearchOpen && (
+                <div className="mt-3">
+                  <SearchSuggestions
+                    query={searchQuery}
+                    onClose={() => setIsSearchOpen(false)}
+                    onPick={(q) => setSearchQuery(q)}
+                  />
+                </div>
+              )}
+            </AnimatePresence>
+
             <div className="mt-5 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
               <span className="mr-1">Gợi ý:</span>
               {['Áo thun', 'Quần jean', 'Giày sneaker', 'Túi xách', 'Áo khoác'].map((kw) => (
@@ -965,10 +800,25 @@ export default function Header() {
         }`}
       />
 
-      <OTPLoginModal 
-        isOpen={isLoginModalOpen} 
-        onClose={() => setIsLoginModalOpen(false)} 
+      <OTPLoginModal
+        isOpen={isLoginModalOpen}
+        onClose={() => setIsLoginModalOpen(false)}
       />
+
+      {/* Scroll to Top Button - vertical "scrollbar-like" pill */}
+      <button
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        aria-label="Cuộn lên đầu trang"
+        title="Lên đầu trang"
+        className={`fixed right-2 top-1/2 -translate-y-1/2 z-[60] group flex flex-col items-center justify-center gap-1 w-7 py-4 rounded-full bg-neutral-900/80 hover:bg-neutral-950 text-white shadow-2xl backdrop-blur-md border border-white/10 transition-all duration-300 hover:scale-110 active:scale-95 ${
+          isScrolled ? 'opacity-100 translate-y-[-50%] pointer-events-auto' : 'opacity-0 translate-y-[-30%] pointer-events-none'
+        }`}
+      >
+        <ArrowUp className="w-4 h-4 group-hover:animate-bounce" strokeWidth={2.5} />
+        <span className="text-[9px] font-semibold tracking-[0.2em] uppercase [writing-mode:vertical-rl]">
+          Top
+        </span>
+      </button>
     </>
   );
 }

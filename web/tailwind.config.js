@@ -90,11 +90,31 @@ module.exports = {
           "0%,70%,100%": { opacity: "1" },
           "20%,50%": { opacity: "0" },
         },
+        shimmer: {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(100%)" },
+        },
+        "gradient-shift": {
+          "0%, 100%": { "background-position": "0% 50%" },
+          "50%": { "background-position": "100% 50%" },
+        },
+        "vip-float": {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-3px)" },
+        },
+        "vip-glow": {
+          "0%, 100%": { "box-shadow": "0 0 8px 2px rgba(251,191,36,0.3)" },
+          "50%": { "box-shadow": "0 0 16px 4px rgba(251,191,36,0.6)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "caret-blink": "caret-blink 1.25s ease-out infinite",
+        shimmer: "shimmer 2.5s linear infinite",
+        "gradient-shift": "gradient-shift 4s ease infinite",
+        "vip-float": "vip-float 3s ease-in-out infinite",
+        "vip-glow": "vip-glow 2s ease-in-out infinite",
       },
     },
   },

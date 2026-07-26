@@ -8,6 +8,7 @@ import ProductCard from '@/components/shop/ProductCard.jsx';
 import { useProducts } from '@/hooks/useProducts.js';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { ProductCardSkeleton } from '@/components/ui/product-skeleton.jsx';
 import { motion } from 'framer-motion';
 import { ArrowRight, Shirt, Crown, Zap } from 'lucide-react';
 
@@ -173,15 +174,7 @@ export default function MenPage() {
       <section className="bg-background py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {loading ? (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
-              {[...Array(12)].map((_, i) => (
-                <div key={i} className="animate-pulse">
-                  <div className="aspect-square bg-gradient-to-br from-blue-100 to-slate-100 rounded-2xl mb-4"></div>
-                  <div className="h-4 bg-gray-200 rounded-lg mb-2"></div>
-                  <div className="h-5 bg-gray-200 rounded-lg w-2/3"></div>
-                </div>
-              ))}
-            </div>
+            <ProductCardSkeleton variant="wide" />
           ) : products.length > 0 ? (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
               {products.map((product, index) => (

@@ -2,11 +2,14 @@ import React from 'react';
 import { Helmet } from 'react-helmet';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ArrowRight, Sparkles, Shield, Truck, Heart, Star, TrendingUp, Percent, Gift } from 'lucide-react';
+import { ArrowRight, Sparkles, Shield, Truck, Heart, Star, Percent, Gift } from 'lucide-react';
 import Header from '@/components/layout/Header.jsx';
 import Footer from '@/components/layout/Footer.jsx';
 import ProductCard from '@/components/shop/ProductCard.jsx';
 import HeroCarousel from '@/components/shop/HeroCarousel.jsx';
+import FlashSale from '@/components/shop/FlashSale.jsx';
+import SectionHeader from '@/components/shop/SectionHeader.jsx';
+import RecentlyViewedCarousel from '@/components/shop/RecentlyViewedCarousel.jsx';
 import { useProducts } from '@/hooks/useProducts.js';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -64,203 +67,168 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Category Showcase */}
-      <section className="py-24 bg-gradient-to-b from-background to-muted/20 relative overflow-hidden">
-        {/* Subtle background ornaments */}
-        <div className="absolute top-20 left-10 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
+      {/* Category Showcase - Asymmetric Editorial Layout */}
+      <section className="py-20 md:py-28 bg-gradient-to-b from-background via-amber-50/30 to-background relative overflow-hidden">
+        {/* Decorative ornaments */}
+        <div className="absolute top-32 -left-32 w-96 h-96 bg-amber-300/10 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-20 -right-32 w-[28rem] h-[28rem] bg-rose-300/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-16"
+            transition={{ duration: 0.7 }}
+            className="flex flex-col md:flex-row items-start md:items-end justify-between mb-12 gap-6"
           >
-            <div className="inline-flex items-center gap-3 mb-5">
-              <span className="w-12 h-px bg-primary/60" />
-              <span className="text-primary font-medium tracking-[0.4em] uppercase text-xs">
-                Bộ sưu tập
-              </span>
-              <span className="w-12 h-px bg-primary/60" />
+            <div className="max-w-2xl">
+              <div className="inline-flex items-center gap-3 mb-5">
+                <span className="w-12 h-px bg-amber-500" />
+                <span className="text-amber-600 font-semibold tracking-[0.4em] uppercase text-xs">
+                  Bộ sưu tập
+                </span>
+              </div>
+              <h2
+                className="text-5xl md:text-7xl font-bold mb-4 font-serif"
+                style={{ letterSpacing: '-0.03em', lineHeight: '0.95' }}
+              >
+                Khám phá <span className="italic font-light text-amber-600">bộ sưu tập</span>
+              </h2>
+              <p className="text-muted-foreground text-base md:text-lg leading-relaxed">
+                Hành trình thời trang đẳng cấp — nơi phong cách được định hình bởi sự tinh tế trong từng đường nét.
+              </p>
             </div>
-            <h2
-              className="text-4xl md:text-6xl font-bold mb-5 font-serif"
-              style={{ letterSpacing: '-0.02em', lineHeight: '1.05' }}
+            <Link
+              to="/products"
+              className="group inline-flex items-center gap-2 text-sm font-medium tracking-wider uppercase text-foreground hover:text-amber-600 transition-colors"
             >
-              Khám phá <span className="italic font-light text-primary">bộ sưu tập</span>
-            </h2>
-            <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto leading-relaxed">
-              Hành trình thời trang đẳng cấp — nơi phong cách được định hình bởi sự tinh tế trong từng đường nét.
-            </p>
+              Xem tất cả
+              <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            </Link>
           </motion.div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
+          {/* Asymmetric Grid: 1 large + 2 small stacked */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 lg:gap-6">
+            {/* Large Hero Card - Women (occupies 2 rows) */}
+            <Link to="/women" className="group relative lg:row-span-2">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.7 }}
+                className="relative h-full min-h-[520px] lg:min-h-[640px]"
+              >
+                <div className="absolute inset-0 rounded-3xl overflow-hidden">
+                  <img
+                    src="https://images.unsplash.com/photo-1617127365659-c47fa864d8bc?w=1200&h=1400&fit=crop&q=85"
+                    alt="Thời trang Nữ"
+                    className="w-full h-full object-cover transition-all duration-[1500ms] ease-out group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10 transition-opacity duration-500 group-hover:from-black/90" />
+                </div>
+
+                {/* Decorative frame corners */}
+                <div className="absolute top-6 left-6 w-12 h-12 border-t-2 border-l-2 border-white/60 transition-all duration-500 group-hover:w-16 group-hover:h-16" />
+                <div className="absolute bottom-6 right-6 w-12 h-12 border-b-2 border-r-2 border-white/60 transition-all duration-500 group-hover:w-16 group-hover:h-16" />
+
+                {/* Top label */}
+                <div className="absolute top-8 left-1/2 -translate-x-1/2 text-white text-center">
+                  <span className="text-[10px] tracking-[0.5em] uppercase font-light block mb-1">
+                    Featured Collection
+                  </span>
+                  <span className="text-[10px] tracking-[0.3em] uppercase font-medium text-amber-400">
+                    01 / AW 2026
+                  </span>
+                </div>
+
+                {/* Bottom content */}
+                <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
+                  <p className="text-[11px] tracking-[0.3em] uppercase font-medium text-amber-400 mb-3">
+                    For Her
+                  </p>
+                  <h3 className="text-5xl md:text-6xl font-bold mb-3 font-serif" style={{ letterSpacing: '-0.02em' }}>
+                    Nữ
+                  </h3>
+                  <p className="text-sm text-white/80 mb-6 max-w-xs leading-relaxed">
+                    Thanh lịch, quyến rũ — những thiết kế dành cho phái đẹp hiện đại.
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs tracking-[0.3em] uppercase font-medium border-b border-white pb-1">
+                      Khám phá ngay
+                    </span>
+                    <div className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center transition-all duration-300 group-hover:bg-amber-400 group-hover:rotate-[-45deg]">
+                      <ArrowRight className="w-4 h-4" />
+                    </div>
+                  </div>
+                </div>
+              </motion.div>
+            </Link>
+
+            {/* Small Card - Men (top-right) */}
             <Link to="/men" className="group relative">
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
-                whileHover={{ y: -6 }}
-                className="relative"
+                transition={{ duration: 0.7, delay: 0.15 }}
+                className="relative h-[300px] lg:h-[310px]"
               >
-                <div className="relative overflow-hidden aspect-square">
+                <div className="absolute inset-0 rounded-3xl overflow-hidden">
                   <img
-                    src="https://images.unsplash.com/photo-1490114538077-0a7f8cb49891?w=900&h=900&fit=crop&q=80"
+                    src="https://images.unsplash.com/photo-1490114538077-0a7f8cb49891?w=900&h=600&fit=crop&q=85"
                     alt="Thời trang Nam"
-                    className="w-full h-full object-cover transition-all duration-[1200ms] ease-out group-hover:scale-105"
+                    className="w-full h-full object-cover transition-all duration-[1500ms] ease-out group-hover:scale-105"
                   />
-                  {/* Gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent transition-opacity duration-500 group-hover:from-black/80" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent transition-opacity duration-500" />
+                </div>
 
-                  {/* Corner accents */}
-                  <div className="absolute top-0 left-0 w-10 h-10 border-t border-l border-white/40 transition-all duration-500 group-hover:w-14 group-hover:h-14" />
-                  <div className="absolute bottom-0 right-0 w-10 h-10 border-b border-r border-white/40 transition-all duration-500 group-hover:w-14 group-hover:h-14" />
+                <div className="absolute top-4 left-4 text-[10px] tracking-[0.4em] uppercase font-light text-white">
+                  02 / Men
+                </div>
 
-                  {/* Top label */}
-                  <div className="absolute top-5 left-5 right-5 flex items-center justify-between text-white">
-                    <span className="text-[10px] tracking-[0.4em] uppercase font-light">
-                      01 / Collection
-                    </span>
-                    <span className="text-[10px] tracking-[0.2em] uppercase font-light opacity-70">
-                      For Him
-                    </span>
-                  </div>
-
-                  {/* Bottom content */}
-                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                    <h3
-                      className="text-3xl md:text-4xl font-bold mb-2 font-serif"
-                      style={{ letterSpacing: '-0.01em' }}
-                    >
-                      Nam
-                    </h3>
-                    <div className="flex items-center gap-2 mb-4">
-                      <span className="w-8 h-px bg-primary" />
-                      <p className="text-xs tracking-[0.2em] uppercase font-light text-white/80">
-                        Lịch lãm & đẳng cấp
-                      </p>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs tracking-[0.3em] uppercase font-medium">
-                        Khám phá
-                      </span>
-                      <div className="w-9 h-9 rounded-full border border-white/50 flex items-center justify-center group-hover:border-primary group-hover:bg-primary group-hover:text-black transition-all duration-300">
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                      </div>
-                    </div>
+                <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                  <p className="text-[11px] tracking-[0.3em] uppercase font-medium text-amber-400 mb-2">
+                    For Him
+                  </p>
+                  <h3 className="text-3xl font-bold mb-3 font-serif">Nam</h3>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs tracking-[0.3em] uppercase font-medium">Khám phá</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
               </motion.div>
             </Link>
 
-            <Link to="/women" className="group relative">
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.15 }}
-                whileHover={{ y: -6 }}
-                className="relative"
-              >
-                <div className="relative overflow-hidden aspect-square">
-                  <img
-                    src="https://images.unsplash.com/photo-1617127365659-c47fa864d8bc?w=900&h=900&fit=crop&q=80"
-                    alt="Thời trang Nữ"
-                    className="w-full h-full object-cover transition-all duration-[1200ms] ease-out group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent transition-opacity duration-500 group-hover:from-black/80" />
-
-                  <div className="absolute top-0 left-0 w-10 h-10 border-t border-l border-white/40 transition-all duration-500 group-hover:w-14 group-hover:h-14" />
-                  <div className="absolute bottom-0 right-0 w-10 h-10 border-b border-r border-white/40 transition-all duration-500 group-hover:w-14 group-hover:h-14" />
-
-                  <div className="absolute top-5 left-5 right-5 flex items-center justify-between text-white">
-                    <span className="text-[10px] tracking-[0.4em] uppercase font-light">
-                      02 / Collection
-                    </span>
-                    <span className="text-[10px] tracking-[0.2em] uppercase font-light opacity-70">
-                      For Her
-                    </span>
-                  </div>
-
-                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                    <h3
-                      className="text-3xl md:text-4xl font-bold mb-2 font-serif"
-                      style={{ letterSpacing: '-0.01em' }}
-                    >
-                      Nữ
-                    </h3>
-                    <div className="flex items-center gap-2 mb-4">
-                      <span className="w-8 h-px bg-primary" />
-                      <p className="text-xs tracking-[0.2em] uppercase font-light text-white/80">
-                        Thanh lịch & quyến rũ
-                      </p>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs tracking-[0.3em] uppercase font-medium">
-                        Khám phá
-                      </span>
-                      <div className="w-9 h-9 rounded-full border border-white/50 flex items-center justify-center group-hover:border-primary group-hover:bg-primary group-hover:text-black transition-all duration-300">
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            </Link>
-
+            {/* Small Card - Accessories (bottom-right) */}
             <Link to="/accessories" className="group relative">
               <motion.div
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.3 }}
-                whileHover={{ y: -6 }}
-                className="relative"
+                transition={{ duration: 0.7, delay: 0.3 }}
+                className="relative h-[300px] lg:h-[310px]"
               >
-                <div className="relative overflow-hidden aspect-square">
+                <div className="absolute inset-0 rounded-3xl overflow-hidden">
                   <img
-                    src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=900&h=900&fit=crop&q=80"
+                    src="https://images.unsplash.com/photo-1529139574466-a303027c1d8b?w=900&h=600&fit=crop&q=85"
                     alt="Phụ kiện"
-                    className="w-full h-full object-cover transition-all duration-[1200ms] ease-out group-hover:scale-105"
+                    className="w-full h-full object-cover transition-all duration-[1500ms] ease-out group-hover:scale-105"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent transition-opacity duration-500 group-hover:from-black/80" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                </div>
 
-                  <div className="absolute top-0 left-0 w-10 h-10 border-t border-l border-white/40 transition-all duration-500 group-hover:w-14 group-hover:h-14" />
-                  <div className="absolute bottom-0 right-0 w-10 h-10 border-b border-r border-white/40 transition-all duration-500 group-hover:w-14 group-hover:h-14" />
+                <div className="absolute top-4 left-4 text-[10px] tracking-[0.4em] uppercase font-light text-white">
+                  03 / Accessories
+                </div>
 
-                  <div className="absolute top-5 left-5 right-5 flex items-center justify-between text-white">
-                    <span className="text-[10px] tracking-[0.4em] uppercase font-light">
-                      03 / Collection
-                    </span>
-                    <span className="text-[10px] tracking-[0.2em] uppercase font-light opacity-70">
-                      Essentials
-                    </span>
-                  </div>
-
-                  <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-                    <h3
-                      className="text-3xl md:text-4xl font-bold mb-2 font-serif"
-                      style={{ letterSpacing: '-0.01em' }}
-                    >
-                      Phụ kiện
-                    </h3>
-                    <div className="flex items-center gap-2 mb-4">
-                      <span className="w-8 h-px bg-primary" />
-                      <p className="text-xs tracking-[0.2em] uppercase font-light text-white/80">
-                        Hoàn thiện phong cách
-                      </p>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs tracking-[0.3em] uppercase font-medium">
-                        Khám phá
-                      </span>
-                      <div className="w-9 h-9 rounded-full border border-white/50 flex items-center justify-center group-hover:border-primary group-hover:bg-primary group-hover:text-black transition-all duration-300">
-                        <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                      </div>
-                    </div>
+                <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                  <p className="text-[11px] tracking-[0.3em] uppercase font-medium text-amber-400 mb-2">
+                    Essentials
+                  </p>
+                  <h3 className="text-3xl font-bold mb-3 font-serif">Phụ kiện</h3>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs tracking-[0.3em] uppercase font-medium">Khám phá</span>
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
               </motion.div>
@@ -269,71 +237,70 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Benefits Section - Modern Cards */}
-      <section className="py-20 bg-black">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Flash Sale Band + Benefits Row */}
+      <section className="relative py-20 overflow-hidden">
+        {/* Background: gradient & animated blobs */}
+        <div className="absolute inset-0 bg-gradient-to-br from-stone-950 via-stone-900 to-black" />
+        <div className="absolute -top-32 -left-32 w-96 h-96 bg-amber-500/20 rounded-full blur-3xl animate-pulse" />
+        <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-rose-500/10 rounded-full blur-3xl" />
+
+        <FlashSale />
+
+        {/* Divider */}
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-16">
+          <div className="flex items-center gap-4 mb-12">
+            <span className="w-12 h-px bg-white/30" />
+            <span className="text-xs tracking-[0.4em] uppercase text-white/50">
+              Tại sao chọn LUXE
+            </span>
+            <span className="flex-1 h-px bg-white/30" />
+          </div>
+
           <motion.div
             variants={containerVariants}
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true }}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
           >
             {[
-              { icon: Sparkles, title: 'Chất lượng cao cấp', desc: 'Sản phẩm được tuyển chọn kỹ lưỡng từ các thương hiệu hàng đầu' },
-              { icon: Truck, title: 'Giao hàng nhanh', desc: 'Miễn phí giao hàng cho đơn từ 500K, giao trong 24h' },
-              { icon: Shield, title: 'Đổi trả 30 ngày', desc: 'Chính sách đổi trả linh hoạt, không phí ẩn' },
-              { icon: Heart, title: 'Tư vấn nhiệt tình', desc: 'Đội ngũ tư vấn chuyên nghiệp, hỗ trợ 24/7' }
+              { icon: Sparkles, title: 'Chất lượng cao cấp', desc: 'Tuyển chọn từ thương hiệu hàng đầu thế giới' },
+              { icon: Truck, title: 'Giao hàng 24h', desc: 'Miễn phí ship cho đơn từ 500K' },
+              { icon: Shield, title: 'Đổi trả 30 ngày', desc: 'Chính sách linh hoạt, không phí ẩn' },
+              { icon: Heart, title: 'Tư vấn 24/7', desc: 'Đội ngũ chuyên nghiệp, tận tâm' }
             ].map((benefit, index) => (
               <motion.div
                 key={index}
                 variants={itemVariants}
-                className="group relative bg-gradient-to-br from-white/5 to-white/10 rounded-2xl p-6 border border-white/10 hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/5"
+                className="group relative p-6 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:border-amber-400/40 hover:bg-white/10 transition-all duration-300"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-primary/0 to-primary/0 group-hover:from-primary/5 group-hover:to-transparent rounded-2xl transition-all duration-500" />
-                <div className="relative">
-                  <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mb-5 group-hover:bg-primary/20 transition-colors duration-300">
-                    <benefit.icon className="w-7 h-7 text-primary" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">{benefit.title}</h3>
-                  <p className="text-sm text-white/50 leading-relaxed">{benefit.desc}</p>
+                <div className="w-12 h-12 rounded-xl bg-amber-400/10 flex items-center justify-center mb-4 group-hover:bg-amber-400/20 group-hover:scale-110 transition-all duration-300">
+                  <benefit.icon className="w-6 h-6 text-amber-400" strokeWidth={1.5} />
                 </div>
+                <h3 className="text-base font-semibold text-white mb-1.5">{benefit.title}</h3>
+                <p className="text-sm text-white/60 leading-relaxed">{benefit.desc}</p>
               </motion.div>
             ))}
           </motion.div>
         </div>
       </section>
 
-      {/* New Arrivals Section */}
-      <section className="py-20 bg-gradient-to-b from-muted/20 to-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-12 gap-4"
-          >
-            <div>
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center">
-                  <TrendingUp className="w-4 h-4 text-primary" />
-                </div>
-                <span className="text-primary font-medium tracking-wider uppercase text-sm">Vừa ra mắt</span>
-              </div>
-              <h2 className="text-4xl md:text-5xl font-bold" style={{ letterSpacing: '-0.02em' }}>
-                Hàng mới về
-              </h2>
-            </div>
-            <Link to="/products">
-              <Button variant="outline" size="lg" className="group">
-                Xem tất cả 
-                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </Link>
-          </motion.div>
+      {/* New Arrivals Section - Bento Style */}
+      <section className="py-20 md:py-28 bg-gradient-to-b from-background via-amber-50/20 to-background relative overflow-hidden">
+        {/* Background ornaments */}
+        <div className="absolute top-20 right-0 w-80 h-80 bg-amber-300/10 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+          <SectionHeader
+            eyebrow="Vừa ra mắt"
+            title="Hàng mới về"
+            subtitle="Những thiết kế mới nhất được tuyển chọn — định hình xu hướng thời trang trong mùa."
+            link="/products"
+            linkText="Xem tất cả"
+          />
 
           {newLoading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6">
               {[...Array(8)].map((_, i) => (
                 <Card key={i} className="overflow-hidden">
                   <div className="aspect-square bg-muted animate-pulse" />
@@ -350,7 +317,7 @@ export default function HomePage() {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
-              className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+              className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6"
             >
               {newProducts.map((product, index) => (
                 <motion.div key={`new-${product.id}`} variants={itemVariants}>
@@ -362,225 +329,306 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Promo Banner */}
-      <section className="py-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-primary/5 to-transparent" />
-        <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-primary/5 to-transparent" />
-        
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <motion.div
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="grid lg:grid-cols-2 gap-12 items-center"
-          >
-            <div>
-              <span className="inline-flex items-center gap-2 text-primary font-medium tracking-wider uppercase text-sm mb-4">
-                <Percent className="w-4 h-4" /> Khuyến mãi đặc biệt
+      {/* Promo Banner - Full Width Editorial */}
+      <section className="relative py-24 md:py-32 overflow-hidden">
+        {/* Background image with overlay */}
+        <div className="absolute inset-0">
+          <img
+            src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1800&h=900&fit=crop&q=85"
+            alt="Fashion background"
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-black/90 via-black/70 to-black/30" />
+        </div>
+
+        {/* Decorative lines */}
+        <div className="absolute top-12 left-12 hidden md:block">
+          <div className="w-20 h-px bg-amber-400 mb-2" />
+          <div className="w-10 h-px bg-amber-400/60" />
+        </div>
+        <div className="absolute bottom-12 right-12 hidden md:block">
+          <div className="w-20 h-px bg-amber-400 mb-2 ml-auto" />
+          <div className="w-10 h-px bg-amber-400/60 ml-auto" />
+        </div>
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-2xl">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.8 }}
+            >
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-400/20 border border-amber-400/40 text-amber-300 text-xs tracking-[0.3em] uppercase font-bold mb-6">
+                <Percent className="w-3.5 h-3.5" />
+                Khuyến mãi đặc biệt
               </span>
-              <h2 className="text-4xl md:text-5xl font-bold mb-6" style={{ letterSpacing: '-0.02em' }}>
-                Giảm giá <span className="text-primary">15%</span> cho đơn hàng đầu tiên
+
+              <h2
+                className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 font-serif"
+                style={{ letterSpacing: '-0.03em', lineHeight: '0.95' }}
+              >
+                Giảm giá <br />
+                <span className="italic text-amber-400">15%</span>{' '}
+                <span className="text-3xl md:text-5xl">cho</span>
+                <br />
+                đơn đầu tiên
               </h2>
-              <p className="text-muted-foreground text-lg mb-8 leading-relaxed">
-                Đăng ký ngay hôm nay và nhận ưu đãi giảm giá 15% cho lần mua hàng đầu tiên. 
-                Áp dụng cho tất cả sản phẩm trong bộ sưu tập mới.
+
+              <p className="text-white/70 text-lg md:text-xl mb-10 leading-relaxed max-w-lg">
+                Đăng ký thành viên ngay hôm nay để nhận ngay ưu đãi giảm giá độc quyền
+                15% cho lần mua hàng đầu tiên — áp dụng cho tất cả sản phẩm.
               </p>
-              <div className="flex flex-wrap gap-4">
+
+              <div className="flex flex-wrap gap-4 items-center">
                 <Link to="/signup">
-                  <Button size="lg" className="rounded-full px-8">
-                    Đăng ký ngay
-                    <ArrowRight className="ml-2 w-4 h-4" />
-                  </Button>
+                  <button className="group relative inline-flex items-center gap-2 px-9 py-4 bg-amber-400 text-black rounded-full font-semibold text-sm tracking-wider uppercase overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-amber-400/40">
+                    <span className="relative z-10">Đăng ký ngay</span>
+                    <ArrowRight className="relative z-10 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    <div className="absolute inset-0 bg-amber-300 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                  </button>
                 </Link>
                 <Link to="/products">
-                  <Button variant="outline" size="lg" className="rounded-full px-8">
+                  <span className="inline-flex items-center gap-2 text-white/80 hover:text-amber-400 transition-colors text-sm tracking-wider uppercase font-medium border-b border-white/30 hover:border-amber-400 pb-1">
                     Xem sản phẩm
-                  </Button>
+                    <ArrowRight className="w-4 h-4" />
+                  </span>
                 </Link>
               </div>
-            </div>
-            
-            <div className="relative">
-              <div className="grid grid-cols-2 gap-4">
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.2 }}
-                  className="space-y-4"
-                >
-                  <img
-                    src="https://images.unsplash.com/photo-1558171813-4c088753af8f?w=400&h=500&fit=crop"
-                    alt="Fashion"
-                    className="w-full h-64 object-cover rounded-2xl"
-                  />
-                  <img
-                    src="https://images.unsplash.com/photo-1509631179647-0177331693ae?w=400&h=300&fit=crop"
-                    alt="Fashion"
-                    className="w-full h-48 object-cover rounded-2xl"
-                  />
-                </motion.div>
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  whileInView={{ opacity: 1, scale: 1 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: 0.3 }}
-                  className="space-y-4 pt-8"
-                >
-                  <img
-                    src="https://images.unsplash.com/photo-1445205170230-053b83016050?w=400&h=300&fit=crop"
-                    alt="Fashion"
-                    className="w-full h-48 object-cover rounded-2xl"
-                  />
-                  <img
-                    src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=500&fit=crop"
-                    alt="Fashion"
-                    className="w-full h-64 object-cover rounded-2xl"
-                  />
-                </motion.div>
+
+              {/* Small info row */}
+              <div className="mt-12 flex items-center gap-6 text-white/50 text-xs tracking-wider uppercase">
+                <span className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-amber-400 rounded-full" />
+                  Miễn phí vận chuyển
+                </span>
+                <span className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-amber-400 rounded-full" />
+                  Đổi trả 30 ngày
+                </span>
+                <span className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 bg-amber-400 rounded-full" />
+                  Thanh toán an toàn
+                </span>
               </div>
-              
-              {/* Floating discount badge */}
-              <motion.div
-                animate={{ y: [0, -10, 0] }}
-                transition={{ duration: 3, repeat: Infinity }}
-                className="absolute -bottom-6 -left-6 w-28 h-28 bg-primary rounded-full flex items-center justify-center shadow-xl shadow-primary/30"
-              >
-                <div className="text-center">
-                  <p className="text-3xl font-bold text-black">15%</p>
-                  <p className="text-[10px] font-medium text-black/70 uppercase tracking-wider">Giảm</p>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* Men's Collection - Split with side banner */}
+      <section className="py-20 bg-background relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <SectionHeader
+            eyebrow="Bộ sưu tập"
+            title="Thời trang"
+            highlight="Nam"
+            subtitle="Phong cách lịch lãm cho quý ông hiện đại — từ công sở đến dạo phố."
+            link="/men"
+            linkText="Khám phá tất cả"
+          />
+
+          <div className="grid lg:grid-cols-[280px_1fr] gap-6">
+            {/* Vertical banner */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7 }}
+              className="hidden lg:block relative rounded-3xl overflow-hidden min-h-[520px]"
+            >
+              <img
+                src="https://images.unsplash.com/photo-1617137968427-85924c800a22?w=600&h=900&fit=crop&q=85"
+                alt="Men's fashion"
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+              <div className="absolute bottom-0 p-6 text-white">
+                <p className="text-[10px] tracking-[0.3em] uppercase text-amber-400 mb-2">
+                  AW 2026
+                </p>
+                <h3 className="text-2xl font-bold mb-2 font-serif">Phong cách quý ông</h3>
+                <p className="text-xs text-white/70 mb-4">Khám phá bộ sưu tập mới nhất</p>
+                <Link to="/men" className="inline-flex items-center gap-2 text-xs tracking-wider uppercase font-medium border-b border-amber-400 pb-1 text-amber-400">
+                  Xem ngay
+                  <ArrowRight className="w-3 h-3" />
+                </Link>
+              </div>
+            </motion.div>
+
+            {/* Products grid */}
+            <div>
+              {menLoading ? (
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {[...Array(4)].map((_, i) => (
+                    <Card key={i} className="overflow-hidden">
+                      <div className="aspect-square bg-muted animate-pulse" />
+                      <CardContent className="p-4">
+                        <div className="h-4 bg-muted rounded animate-pulse mb-2" />
+                        <div className="h-4 bg-muted rounded animate-pulse w-2/3" />
+                      </CardContent>
+                    </Card>
+                  ))}
                 </div>
-              </motion.div>
-            </div>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Men's Collection */}
-      <section className="py-20 bg-muted/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-12 gap-4"
-          >
-            <div>
-              <span className="inline-flex items-center gap-2 text-primary font-medium tracking-wider uppercase text-sm mb-3">
-                Bộ sưu tập
-              </span>
-              <h2 className="text-4xl md:text-5xl font-bold mb-2" style={{ letterSpacing: '-0.02em' }}>
-                Thời trang Nam
-              </h2>
-              <p className="text-muted-foreground text-lg">
-                Phong cách lịch lãm cho quý ông hiện đại
-              </p>
-            </div>
-            <Link to="/men">
-              <Button variant="outline" size="lg" className="group">
-                Xem tất cả 
-                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </Link>
-          </motion.div>
-
-          {menLoading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[...Array(4)].map((_, i) => (
-                <Card key={i} className="overflow-hidden">
-                  <div className="aspect-square bg-muted animate-pulse" />
-                  <CardContent className="p-4">
-                    <div className="h-4 bg-muted rounded animate-pulse mb-2" />
-                    <div className="h-4 bg-muted rounded animate-pulse w-2/3" />
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6"
-            >
-              {menProducts.map((product, index) => (
-                <motion.div key={product.id} variants={itemVariants}>
-                  <ProductCard product={product} index={index} />
+              ) : (
+                <motion.div
+                  variants={containerVariants}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true }}
+                  className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+                >
+                  {menProducts.slice(0, 4).map((product, index) => (
+                    <motion.div key={product.id} variants={itemVariants}>
+                      <ProductCard product={product} index={index} />
+                    </motion.div>
+                  ))}
                 </motion.div>
-              ))}
-            </motion.div>
-          )}
+              )}
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Women's Collection */}
-      <section className="py-20">
+      {/* Women's Collection - Mirrored split */}
+      <section className="py-20 bg-amber-50/30 relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-background to-transparent pointer-events-none" />
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-12 gap-4"
-          >
+          <SectionHeader
+            eyebrow="Bộ sưu tập"
+            title="Thời trang"
+            highlight="Nữ"
+            subtitle="Tinh tế, thanh lịch — những thiết kế tôn vinh vẻ đẹp phái đẹp."
+            link="/women"
+            linkText="Khám phá tất cả"
+          />
+
+          <div className="grid lg:grid-cols-[1fr_280px] gap-6">
+            {/* Products grid */}
             <div>
-              <span className="inline-flex items-center gap-2 text-primary font-medium tracking-wider uppercase text-sm mb-3">
-                Bộ sưu tập
-              </span>
-              <h2 className="text-4xl md:text-5xl font-bold mb-2" style={{ letterSpacing: '-0.02em' }}>
-                Thời trang Nữ
-              </h2>
-              <p className="text-muted-foreground text-lg">
-                Thanh lịch & nữ tính
-              </p>
-            </div>
-            <Link to="/women">
-              <Button variant="outline" size="lg" className="group">
-                Xem tất cả 
-                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </Link>
-          </motion.div>
-
-          {womenLoading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[...Array(4)].map((_, i) => (
-                <Card key={i} className="overflow-hidden">
-                  <div className="aspect-square bg-muted animate-pulse" />
-                  <CardContent className="p-4">
-                    <div className="h-4 bg-muted rounded animate-pulse mb-2" />
-                    <div className="h-4 bg-muted rounded animate-pulse w-2/3" />
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6"
-            >
-              {womenProducts.map((product, index) => (
-                <motion.div key={product.id} variants={itemVariants}>
-                  <ProductCard product={product} index={index} />
+              {womenLoading ? (
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {[...Array(4)].map((_, i) => (
+                    <Card key={i} className="overflow-hidden">
+                      <div className="aspect-square bg-muted animate-pulse" />
+                      <CardContent className="p-4">
+                        <div className="h-4 bg-muted rounded animate-pulse mb-2" />
+                        <div className="h-4 bg-muted rounded animate-pulse w-2/3" />
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : (
+                <motion.div
+                  variants={containerVariants}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true }}
+                  className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+                >
+                  {womenProducts.slice(0, 4).map((product, index) => (
+                    <motion.div key={product.id} variants={itemVariants}>
+                      <ProductCard product={product} index={index} />
+                    </motion.div>
+                  ))}
                 </motion.div>
-              ))}
+              )}
+            </div>
+
+            {/* Vertical banner - right */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.7 }}
+              className="hidden lg:block relative rounded-3xl overflow-hidden min-h-[520px]"
+            >
+              <img
+                src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=600&h=900&fit=crop&q=85"
+                alt="Women's fashion"
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+              <div className="absolute bottom-0 p-6 text-white">
+                <p className="text-[10px] tracking-[0.3em] uppercase text-amber-400 mb-2">
+                  AW 2026
+                </p>
+                <h3 className="text-2xl font-bold mb-2 font-serif">Bản sắc nữ tính</h3>
+                <p className="text-xs text-white/70 mb-4">Khám phá bộ sưu tập mới nhất</p>
+                <Link to="/women" className="inline-flex items-center gap-2 text-xs tracking-wider uppercase font-medium border-b border-amber-400 pb-1 text-amber-400">
+                  Xem ngay
+                  <ArrowRight className="w-3 h-3" />
+                </Link>
+              </div>
             </motion.div>
-          )}
+          </div>
         </div>
       </section>
 
-      {/* Testimonials / Trust Banner */}
-      <section className="py-16 bg-black">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap justify-center gap-12 lg:gap-20">
+      {/* Editorial Lookbook Strip + Stats */}
+      <section className="py-0 bg-stone-950 relative overflow-hidden">
+        {/* Top: side-by-side lookbook */}
+        <div className="grid grid-cols-1 md:grid-cols-2">
+          <Link to="/men" className="group relative h-[420px] md:h-[560px] overflow-hidden">
+            <img
+              src="https://images.unsplash.com/photo-1617137968427-85924c800a22?w=1200&h=900&fit=crop&q=85"
+              alt="Men lookbook"
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1500ms] group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
+            <div className="absolute inset-0 p-10 flex flex-col justify-end text-white">
+              <p className="text-[11px] tracking-[0.4em] uppercase text-amber-400 font-medium mb-3">
+                Lookbook / 01
+              </p>
+              <h3 className="text-4xl md:text-5xl font-bold mb-3 font-serif leading-tight">
+                Phong cách <br />
+                <span className="italic text-amber-400">Quý ông</span>
+              </h3>
+              <p className="text-white/70 text-sm mb-5 max-w-sm">
+                Khám phá bộ sưu tập thời trang nam với thiết kế tối giản, đường nét tinh tế.
+              </p>
+              <span className="inline-flex items-center gap-2 text-sm tracking-[0.3em] uppercase font-medium w-fit">
+                Khám phá
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </span>
+            </div>
+          </Link>
+
+          <Link to="/women" className="group relative h-[420px] md:h-[560px] overflow-hidden">
+            <img
+              src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200&h=900&fit=crop&q=85"
+              alt="Women lookbook"
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1500ms] group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-black/10" />
+            <div className="absolute inset-0 p-10 flex flex-col justify-end text-white">
+              <p className="text-[11px] tracking-[0.4em] uppercase text-amber-400 font-medium mb-3">
+                Lookbook / 02
+              </p>
+              <h3 className="text-4xl md:text-5xl font-bold mb-3 font-serif leading-tight">
+                Bản sắc <br />
+                <span className="italic text-amber-400">Phái đẹp</span>
+              </h3>
+              <p className="text-white/70 text-sm mb-5 max-w-sm">
+                Những thiết kế nữ tính, thanh lịch — nơi vẻ đẹp được tôn vinh trọn vẹn.
+              </p>
+              <span className="inline-flex items-center gap-2 text-sm tracking-[0.3em] uppercase font-medium w-fit">
+                Khám phá
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </span>
+            </div>
+          </Link>
+        </div>
+
+        {/* Bottom: stats with amber dividers */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-20">
+          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-0 md:divide-x md:divide-white/10">
             {[
-              { rating: 4.9, label: 'Đánh giá trung bình' },
-              { count: '10,000+', label: 'Khách hàng tin tưởng' },
-              { products: '500+', label: 'Sản phẩm chất lượng' },
-              { brands: '50+', label: 'Thương hiệu hàng đầu' }
+              { value: '4.9', icon: Star, label: 'Đánh giá trung bình', isIcon: true },
+              { value: '10,000+', label: 'Khách hàng tin tưởng' },
+              { value: '500+', label: 'Sản phẩm chất lượng' },
+              { value: '50+', label: 'Thương hiệu hàng đầu' }
             ].map((stat, index) => (
               <motion.div
                 key={index}
@@ -588,56 +636,35 @@ export default function HomePage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="text-center"
+                className="text-center flex-1 min-w-[180px] px-6 py-2"
               >
-                <div className="flex items-center justify-center gap-1 mb-2">
-                  {stat.rating && (
-                    <>
-                      <Star className="w-5 h-5 text-primary fill-primary" />
-                      <span className="text-3xl font-bold text-white">{stat.rating}</span>
-                    </>
-                  )}
-                  {stat.count && <span className="text-3xl font-bold text-white">{stat.count}</span>}
-                  {stat.products && <span className="text-3xl font-bold text-white">{stat.products}</span>}
-                  {stat.brands && <span className="text-3xl font-bold text-white">{stat.brands}</span>}
+                <div className="flex items-center justify-center gap-1.5 mb-2">
+                  {stat.isIcon && <Star className="w-6 h-6 text-amber-400 fill-amber-400" />}
+                  <span className="text-4xl md:text-5xl font-bold text-white font-serif">
+                    {stat.value}
+                  </span>
                 </div>
-                <p className="text-sm text-white/50">{stat.label}</p>
+                <p className="text-sm text-white/50 tracking-wider uppercase">{stat.label}</p>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Accessories Collection */}
-      <section className="py-20 bg-muted/10">
+      {/* Accessories Collection - 4 columns with section header */}
+      <section className="py-20 bg-background relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-12 gap-4"
-          >
-            <div>
-              <span className="inline-flex items-center gap-2 text-primary font-medium tracking-wider uppercase text-sm mb-3">
-                Bộ sưu tập
-              </span>
-              <h2 className="text-4xl md:text-5xl font-bold mb-2" style={{ letterSpacing: '-0.02em' }}>
-                Phụ kiện
-              </h2>
-              <p className="text-muted-foreground text-lg">
-                Hoàn thiện phong cách của bạn
-              </p>
-            </div>
-            <Link to="/accessories">
-              <Button variant="outline" size="lg" className="group">
-                Xem tất cả 
-                <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </Button>
-            </Link>
-          </motion.div>
+          <SectionHeader
+            eyebrow="Hoàn thiện phong cách"
+            title="Phụ kiện"
+            highlight="đẳng cấp"
+            subtitle="Những phụ kiện tinh tế giúp hoàn thiện phong cách của bạn mỗi ngày."
+            link="/accessories"
+            linkText="Xem tất cả"
+          />
 
           {accessoriesLoading ? (
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {[...Array(4)].map((_, i) => (
                 <Card key={i} className="overflow-hidden">
                   <div className="aspect-square bg-muted animate-pulse" />
@@ -654,9 +681,9 @@ export default function HomePage() {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
-              className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+              className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-5"
             >
-              {accessoriesProducts.map((product, index) => (
+              {accessoriesProducts.slice(0, 4).map((product, index) => (
                 <motion.div key={product.id} variants={itemVariants}>
                   <ProductCard product={product} index={index} />
                 </motion.div>
@@ -666,39 +693,59 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Newsletter */}
-      <section className="py-20 bg-gradient-to-b from-background to-muted/30">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      {/* Newsletter - Editorial Style */}
+      <section className="py-24 md:py-32 relative overflow-hidden">
+        {/* Background */}
+        <div className="absolute inset-0 bg-gradient-to-br from-stone-950 via-stone-900 to-amber-950" />
+        <div className="absolute inset-0 opacity-30">
+          <div className="absolute top-0 left-1/4 w-px h-full bg-gradient-to-b from-transparent via-amber-400/40 to-transparent" />
+          <div className="absolute top-0 right-1/4 w-px h-full bg-gradient-to-b from-transparent via-amber-400/40 to-transparent" />
+        </div>
+
+        <div className="relative max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
           >
-            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-              <Gift className="w-8 h-8 text-primary" />
+            {/* Frame */}
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-400/10 border border-amber-400/30 mb-8">
+              <Gift className="w-7 h-7 text-amber-400" strokeWidth={1.5} />
             </div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4" style={{ letterSpacing: '-0.02em' }}>
-              Nhận ưu đãi độc quyền
+
+            <span className="block text-amber-400 text-xs tracking-[0.4em] uppercase font-medium mb-5">
+              Cập nhật mới nhất
+            </span>
+
+            <h2
+              className="text-4xl md:text-6xl font-bold text-white mb-5 font-serif"
+              style={{ letterSpacing: '-0.02em', lineHeight: '1' }}
+            >
+              Trở thành <span className="italic text-amber-400">thành viên</span> LUXE
             </h2>
-            <p className="text-muted-foreground text-lg mb-8">
-              Đăng ký nhận bản tin để cập nhật những sản phẩm mới và ưu đãi hấp dẫn
+            <p className="text-white/60 text-base md:text-lg mb-10 max-w-xl mx-auto">
+              Đăng ký ngay để nhận những bộ sưu tập giới hạn, ưu đãi độc quyền và câu chuyện thời trang mỗi tuần.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
               <input
                 type="email"
-                placeholder="Nhập email của bạn"
-                className="flex-1 px-5 py-3 rounded-full border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all"
+                placeholder="Email của bạn..."
+                className="flex-1 px-6 py-4 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:ring-2 focus:ring-amber-400/50 focus:border-amber-400/50 transition-all"
               />
-              <Button size="lg" className="rounded-full px-8">
+              <button className="group px-8 py-4 rounded-full bg-amber-400 text-black font-semibold tracking-wider uppercase text-sm transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-amber-400/40">
                 Đăng ký
-              </Button>
+                <ArrowRight className="inline-block ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+              </button>
             </div>
-            <p className="text-xs text-muted-foreground mt-4">
-              Bằng việc đăng ký, bạn đồng ý với chính sách bảo mật của chúng tôi
+            <p className="text-xs text-white/40 mt-6 tracking-wider">
+              Bằng việc đăng ký, bạn đồng ý với chính sách bảo mật của LUXE.
             </p>
           </motion.div>
         </div>
       </section>
+
+      <RecentlyViewedCarousel />
 
       <Footer />
     </>

@@ -66,8 +66,26 @@ export function AuthProvider({ children }) {
   };
 
   const logout = () => {
+    // Xóa auth
     localStorage.removeItem('token');
     localStorage.removeItem('user');
+    // Xóa toàn bộ data theo user (tránh leak cart/coupon/address qua account khác)
+    const userScopedKeys = [
+      'cart',
+      'luxe_cart',
+      'luxe_applied_coupon',
+      'saved_addresses',
+      'wishlist',
+      'luxe_wishlist',
+      'luxe_compare',
+      'recentlyViewed',
+      'luxe_recently_viewed',
+    ];
+    userScopedKeys.forEach((k) => {
+      try { localStorage.removeItem(k); } catch { /* ignore */ }
+    });
+    // Dispatch event để các context khác (cart, wishlist) reset state
+    try { window.dispatchEvent(new CustomEvent('luxe:user-logged-out')); } catch { /* ignore */ }
     setCurrentUser(null);
   };
 

@@ -18,7 +18,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
-const PAGE_SIZE = 1; // số đơn / trang
+const PAGE_SIZE = 3; // số đơn / trang
 
 const FILTERS = [
   { key: null, label: 'Tất cả', icon: Package, color: 'gray' },
@@ -142,15 +142,20 @@ export default function AccountOrdersPage() {
   );
 
   return (
-    <div>
+    <div className="max-w-5xl mx-auto">
       {/* Header */}
-      <h1 className="text-2xl font-bold text-center uppercase tracking-widest mb-8">
-        Đơn hàng của tôi
-      </h1>
+      <div className="mb-8">
+        <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
+          Đơn hàng của tôi
+        </h1>
+        <p className="text-sm text-gray-500 mt-1.5">
+          Theo dõi trạng thái và lịch sử các đơn hàng của bạn.
+        </p>
+      </div>
 
       {/* Stats summary */}
       {!loading && orders.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <StatBox
             label="Tổng đơn"
             value={stats?.orders?.all ?? orders.length}
@@ -176,8 +181,8 @@ export default function AccountOrdersPage() {
       )}
 
       {/* Filter tabs */}
-      <div className="mb-4 -mx-1 px-1 overflow-x-auto scrollbar-thin">
-        <div className="flex gap-2 min-w-max pb-2">
+      <div className="mb-5">
+        <div className="flex gap-2 overflow-x-auto scrollbar-thin pb-2 -mx-1 px-1">
           {FILTERS.map((f) => {
             const Icon = f.icon;
             const isActive = activeFilter === f.key;
@@ -186,7 +191,7 @@ export default function AccountOrdersPage() {
               <button
                 key={f.key || 'all'}
                 onClick={() => handleFilterChange(f.key)}
-                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border whitespace-nowrap transition-all ${
+                className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium border whitespace-nowrap transition-all shrink-0 ${
                   isActive
                     ? 'bg-black text-white border-black shadow-sm'
                     : 'bg-white text-gray-600 border-gray-200 hover:border-gray-400 hover:text-gray-900'
@@ -195,7 +200,7 @@ export default function AccountOrdersPage() {
                 <Icon className="w-4 h-4" />
                 {f.label}
                 <span
-                  className={`text-[10px] font-bold rounded-full px-1.5 py-0.5 min-w-[18px] text-center ${
+                  className={`text-[10px] font-bold rounded-full px-1.5 py-0.5 min-w-[20px] text-center ${
                     isActive ? 'bg-white/20 text-white' : 'bg-gray-100 text-gray-500'
                   }`}
                 >
@@ -210,12 +215,12 @@ export default function AccountOrdersPage() {
       {/* Search bar */}
       {!loading && orders.length > 0 && (
         <div className="mb-6 relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <Input
             placeholder="Tìm theo mã đơn hoặc tên sản phẩm..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
+            className="pl-10 h-11"
           />
         </div>
       )}
@@ -234,7 +239,7 @@ export default function AccountOrdersPage() {
           onClearFilter={() => handleFilterChange(null)}
         />
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-5">
           {pagedOrders.map((order) => (
             <OrderCard key={order.id} order={order} />
           ))}
@@ -261,9 +266,9 @@ function StatBox({ label, value, color, small = false }) {
   }[color] || 'text-gray-900';
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl px-4 py-3">
-      <p className="text-xs text-gray-500">{label}</p>
-      <p className={`font-bold tracking-tight ${accent} ${small ? 'text-base' : 'text-xl'} mt-0.5 truncate`}>
+    <div className="bg-white border border-gray-200 rounded-xl px-5 py-4 shadow-sm hover:shadow-md transition-shadow">
+      <p className="text-xs text-gray-500 font-medium uppercase tracking-wide">{label}</p>
+      <p className={`font-bold tracking-tight ${accent} ${small ? 'text-base' : 'text-2xl'} mt-1 truncate`}>
         {value}
       </p>
     </div>
@@ -347,8 +352,8 @@ function Pagination({ currentPage, totalPages, onChange }) {
 
 function EmptyState({ hasAnyOrders, activeFilter, onClearFilter }) {
   return (
-    <div className="text-center py-20 px-4 bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-dashed border-gray-200">
-      <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-5">
+    <div className="text-center py-20 px-6 bg-gradient-to-br from-gray-50 to-white rounded-2xl border border-dashed border-gray-200">
+      <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
         <ShoppingBag className="w-10 h-10 text-gray-300" />
       </div>
       {hasAnyOrders ? (
@@ -356,21 +361,21 @@ function EmptyState({ hasAnyOrders, activeFilter, onClearFilter }) {
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
             Không có đơn hàng nào ở trạng thái này
           </h3>
-          <p className="text-sm text-gray-500 mb-5">
+          <p className="text-sm text-gray-500 mb-6 max-w-md mx-auto">
             Bạn có thể chọn tab khác để xem các đơn hàng khác.
           </p>
-          <Button onClick={onClearFilter} variant="outline" className="rounded-full">
+          <Button onClick={onClearFilter} variant="outline" className="rounded-full px-6">
             Xem tất cả đơn hàng
           </Button>
         </>
       ) : (
         <>
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Chưa có đơn hàng nào</h3>
-          <p className="text-sm text-gray-500 mb-5">
+          <p className="text-sm text-gray-500 mb-6 max-w-md mx-auto">
             Hãy khám phá các sản phẩm của chúng tôi và đặt đơn hàng đầu tiên của bạn!
           </p>
           <Link to="/products">
-            <Button className="rounded-full">Khám phá sản phẩm</Button>
+            <Button className="rounded-full px-6">Khám phá sản phẩm</Button>
           </Link>
         </>
       )}

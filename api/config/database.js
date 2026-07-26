@@ -1,7 +1,14 @@
-const { Pool } = require('pg');
+const { Pool, types } = require('pg');
 require('dotenv').config();
 
 const isProduction = process.env.NODE_ENV === 'production';
+
+// ÉP pg driver trả về DATE/TIMESTAMP dưới dạng string "YYYY-MM-DD" hoặc "YYYY-MM-DD HH:mm:ss"
+// thay vì Date object local timezone — tránh lỗi lùi ngày khi server timezone khác client.
+// OID 1082 = DATE, 1114 = TIMESTAMP, 1184 = TIMESTAMPTZ
+types.setTypeParser(1082, (val) => val);                       // DATE → "YYYY-MM-DD"
+types.setTypeParser(1114, (val) => val);                       // TIMESTAMP → "YYYY-MM-DD HH:mm:ss"
+types.setTypeParser(1184, (val) => new Date(val).toISOString()); // TIMESTAMPTZ → ISO string UTC
 
 // Railway/Heroku cấp DATABASE_URL — dùng nó nếu có, fallback về DB_HOST/DB_PORT/...
 const poolConfig = process.env.DATABASE_URL

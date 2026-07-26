@@ -34,6 +34,15 @@ export function useCart() {
     }
   }, [items]);
 
+  // Lắng nghe logout — giỏ hàng cũ KHÔNG được "lưu lại" cho user mới
+  useEffect(() => {
+    const handleLogout = () => {
+      setItems([]);
+    };
+    window.addEventListener('luxe:user-logged-out', handleLogout);
+    return () => window.removeEventListener('luxe:user-logged-out', handleLogout);
+  }, []);
+
   const addToCart = useCallback((product, quantity = 1, selectedSize = null, selectedColor = null) => {
     if (!product?.id) {
       console.warn('[useCart] addToCart: product.id bắt buộc');

@@ -211,32 +211,32 @@ export default function OrderCard({ order, expanded = false, onCancelled }) {
 
         {/* Progress timeline (only for active orders) */}
         {statusInfo.step >= 0 && statusInfo.color !== 'red' && statusInfo.color !== 'gray' && (
-          <div className="mt-5 pt-4 border-t border-gray-100">
-            <div className="flex items-center justify-between">
+          <div className="mt-4 pt-3 border-t border-gray-100">
+            <div className="flex items-center justify-between gap-1">
               {STEPS.map((step, idx) => {
                 const reached = statusInfo.step >= idx;
                 const isCurrent = statusInfo.step === idx;
                 return (
                   <React.Fragment key={step.key}>
-                    <div className="flex flex-col items-center gap-1.5 flex-1">
+                    <div className="flex flex-col items-center gap-1 flex-1 min-w-0">
                       <div
-                        className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold transition-all ${
+                        className={`w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold transition-all shrink-0 ${
                           reached
                             ? isCurrent
-                              ? 'bg-amber-500 text-white ring-4 ring-amber-100'
+                              ? 'bg-amber-500 text-white ring-2 ring-amber-100'
                               : 'bg-amber-500 text-white'
                             : 'bg-gray-200 text-gray-400'
                         }`}
                       >
                         {reached ? '✓' : idx + 1}
                       </div>
-                      <span className={`text-[10px] font-medium ${reached ? 'text-gray-700' : 'text-gray-400'}`}>
+                      <span className={`text-[9px] font-medium leading-tight text-center whitespace-nowrap ${reached ? 'text-gray-700' : 'text-gray-400'}`}>
                         {step.label}
                       </span>
                     </div>
                     {idx < STEPS.length - 1 && (
                       <div
-                        className={`h-0.5 flex-1 -mt-5 transition-all ${
+                        className={`h-0.5 flex-1 min-w-[8px] -mt-3 transition-all ${
                           statusInfo.step > idx ? 'bg-amber-500' : 'bg-gray-200'
                         }`}
                       />
@@ -287,7 +287,7 @@ export default function OrderCard({ order, expanded = false, onCancelled }) {
               </button>
             )}
             <Link
-              to={`/account/orders`}
+              to={`/account/orders/${order.id}`}
               className="px-3 py-1.5 text-xs font-semibold bg-black text-white rounded-full hover:bg-gray-800 inline-flex items-center gap-1"
             >
               Xem chi tiết <ChevronRight className="w-3.5 h-3.5" />
@@ -324,55 +324,30 @@ function PaymentInfo({ order }) {
   const info = getPaymentInfo(order.paymentMethod);
   const isPaid = order.paymentStatus === 'paid';
   const showBankDetails = order.paymentMethod === 'bank' && !isPaid;
+  const needsPaymentGuide = showBankDetails || (order.paymentMethod === 'momo' && !isPaid) || (order.paymentMethod === 'vietqr' && !isPaid);
 
   return (
-    <div className="text-xs text-gray-600 space-y-1 max-w-md">
-      <div className="flex items-center gap-2">
-        {order.paymentStatus === 'paid' ? (
-          <span className="inline-flex items-center gap-1 text-green-600 font-medium">
-            <CheckCircle2 className="w-3.5 h-3.5" /> Đã thanh toán
-          </span>
-        ) : (
-          <span className="inline-flex items-center gap-1 text-amber-700 font-medium">
-            <Clock className="w-3.5 h-3.5" /> Chưa thanh toán
-          </span>
-        )}
-        {order.trackingNumber && (
-          <>
-            <span>•</span>
-            <span className="text-gray-500">VC: {order.trackingNumber}</span>
-          </>
-        )}
-      </div>
-      {showBankDetails && (
-        <div className="bg-amber-50 border border-amber-200 rounded p-2 text-[11px] space-y-0.5">
-          <p className="font-medium text-amber-800">
-            Vui lòng chuyển khoản theo thông tin sau với nội dung: DH#{order.id}
-          </p>
-          <p><span className="text-gray-600">Ngân hàng:</span> <span className="font-medium">Vietcombank</span></p>
-          <p><span className="text-gray-600">STK:</span> <span className="font-mono font-semibold">1234 5678 9012</span></p>
-          <p><span className="text-gray-600">Chủ TK:</span> CONG TY TNHH LUXE JEWELRY</p>
-        </div>
+    <div className="text-xs text-gray-600 flex items-center gap-2 flex-wrap min-w-0">
+      <span className="font-medium text-gray-700">{info.label}</span>
+      {order.paymentStatus === 'paid' ? (
+        <span className="inline-flex items-center gap-1 text-green-600 font-medium">
+          <CheckCircle2 className="w-3.5 h-3.5" /> Đã TT
+        </span>
+      ) : (
+        <span className="inline-flex items-center gap-1 text-amber-700 font-medium">
+          <Clock className="w-3.5 h-3.5" /> Chưa TT
+        </span>
       )}
-      {order.paymentMethod === 'momo' && !isPaid && (
-        <div className="bg-pink-50 border border-pink-200 rounded p-2 text-[11px] space-y-0.5">
-          <p className="font-medium text-pink-800">Thanh toán qua MoMo</p>
-          <p><span className="text-gray-600">SĐT:</span> <span className="font-mono font-semibold">0865 577 745</span></p>
-          <p><span className="text-gray-600">Tên:</span> LUXE JEWELRY</p>
-        </div>
+      {order.trackingNumber && (
+        <span className="text-gray-500 truncate">VC: {order.trackingNumber}</span>
       )}
-      {order.paymentMethod === 'vietqr' && !isPaid && (
-        <div className="bg-amber-50 border border-amber-200 rounded p-2 text-[11px] space-y-1">
-          <p className="font-medium text-amber-800 inline-flex items-center gap-1">
-            <QrCode className="w-3 h-3" /> Thanh toán bằng mã QR ngân hàng
-          </p>
-          <Link
-            to={`/account/orders/${order.id}`}
-            className="text-primary hover:underline inline-block"
-          >
-            Mở chi tiết đơn để xem QR →
-          </Link>
-        </div>
+      {needsPaymentGuide && (
+        <Link
+          to={`/account/orders/${order.id}`}
+          className="text-primary hover:underline font-medium whitespace-nowrap"
+        >
+          Hướng dẫn thanh toán →
+        </Link>
       )}
     </div>
   );

@@ -107,6 +107,7 @@ app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/wishlist', require('./routes/wishlist'));
 app.use('/api/payment', require('./routes/payment'));
+app.use('/api/upload', require('./routes/uploads'));
 app.use('/', require('./routes/sitemap'));
 
 // Health check

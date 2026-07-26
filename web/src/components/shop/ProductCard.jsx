@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -508,6 +508,40 @@ export default function ProductCard({ product, index = 0 }) {
   const [showQuickView, setShowQuickView] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [adding, setAdding] = useState(false);
+  const hoverTimerRef = useRef(null);
+  const cardRef = useRef(null);
+
+  // Auto mở Quick View khi rê chuột 800ms (chỉ desktop, không phải touch)
+  useEffect(() => {
+    // Bỏ qua trên touch device
+    if (typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches) {
+      return;
+    }
+
+    if (isHovered && !showQuickView) {
+      hoverTimerRef.current = setTimeout(() => {
+        setShowQuickView(true);
+      }, 800);
+    }
+
+    return () => {
+      if (hoverTimerRef.current) {
+        clearTimeout(hoverTimerRef.current);
+        hoverTimerRef.current = null;
+      }
+    };
+  }, [isHovered, showQuickView]);
+
+  const handleMouseEnter = () => {
+    setIsHovered(true);
+  };
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
+  };
 
   const inWishlist = isInWishlist(product.id);
 
@@ -517,13 +551,17 @@ export default function ProductCard({ product, index = 0 }) {
   const images = product.images || [];
   const imageUrl = safeImage(images[0]);
 
+  // Build color swatches from product data
+  const colorSwatches = (product.colors && product.colors.length > 0)
+    ? product.colors.slice(0, 5).map((c) => (typeof c === 'string' ? { name: c, value: c } : c))
+    : [];
+
   const handleWishlist = async (e) => {
     e.preventDefault();
     e.stopPropagation();
     await toggleWishlist(product.id);
   };
 
-  // Hàm thêm vào giỏ dùng chung cho cả card và Quick View modal
   const handleAdd = async (prod, qty = 1) => {
     if (!prod || prod.stock <= 0) {
       toast.error('Sản phẩm đã hết hàng');
@@ -546,202 +584,188 @@ export default function ProductCard({ product, index = 0 }) {
     }
   };
 
-  const salePercent = originalPrice && originalPrice > price 
-    ? Math.round((1 - price / originalPrice) * 100) 
+  const salePercent = originalPrice && originalPrice > price
+    ? Math.round((1 - price / originalPrice) * 100)
     : 0;
+
+  const isOutOfStock = product.stock <= 0;
+  const isLowStock = product.stock > 0 && product.stock <= 5;
 
   return (
     <>
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
+      <motion.article
+        ref={cardRef}
+        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: index * 0.05, ease: 'easeOut' }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        className="relative"
+        transition={{ duration: 0.6, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        className="group relative h-full"
       >
-        <Link to={`/product/${product.id}`}>
-          <Card className="group overflow-hidden border-border bg-white hover:shadow-2xl transition-all duration-500 relative">
+        <Link to={`/product/${product.id}`} className="block h-full">
+          {/* Modern Glass Card */}
+          <div className="relative flex flex-col h-full rounded-3xl overflow-hidden bg-white/70 backdrop-blur-xl ring-1 ring-neutral-200/60 hover:ring-amber-400/40 transition-all duration-500 hover:-translate-y-1.5 hover:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15),0_0_0_1px_rgba(251,191,36,0.1)]">
             {/* Image Container */}
-            <div className="relative aspect-square overflow-hidden bg-gradient-to-br from-gray-100 to-gray-50">
+            <div className="relative aspect-square overflow-hidden bg-neutral-100">
               {/* Skeleton loader */}
               {!imageLoaded && (
-                <div className="absolute inset-0 bg-gradient-to-br from-gray-200 to-gray-100 animate-pulse" />
+                <div className="absolute inset-0 bg-gradient-to-br from-neutral-200 to-neutral-100 animate-pulse" />
               )}
-              
+
+              {/* Primary image with smooth zoom */}
               <img
                 src={imageUrl}
                 alt={product.name}
                 onLoad={() => setImageLoaded(true)}
-                className={`w-full h-full object-cover transition-all duration-700 ${
+                className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-out ${
                   isHovered ? 'scale-110' : 'scale-100'
                 } ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
               />
-              
-              {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              
-              {/* Action buttons */}
-              <div className={`absolute top-3 right-3 flex flex-col gap-2 transition-all duration-300 ${
-                isHovered ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-4'
-              }`}>
-                <motion.button
-                  initial={{ scale: 0 }}
-                  animate={{ scale: isHovered ? 1 : 0 }}
-                  transition={{ delay: 0.1, duration: 0.2 }}
-                  onClick={handleWishlist}
-                  className={`w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-md transition-all duration-300 ${
-                    inWishlist
-                      ? 'bg-red-500 text-white' 
-                      : 'bg-white/95 text-gray-600 hover:bg-red-500 hover:text-white shadow-lg'
-                  }`}
-                  aria-label="Yêu thích"
-                >
-                  <Heart className={`w-5 h-5 ${inWishlist ? 'fill-current' : ''}`} />
-                </motion.button>
-                
-                <motion.button
-                  initial={{ scale: 0 }}
-                  animate={{ scale: isHovered ? 1 : 0 }}
-                  transition={{ delay: 0.15, duration: 0.2 }}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    setShowQuickView(true);
-                  }}
-                  className="w-10 h-10 rounded-full bg-white/95 backdrop-blur-md flex items-center justify-center text-gray-600 hover:bg-primary hover:text-black transition-all duration-300 shadow-lg"
-                  aria-label="Xem nhanh"
-                >
-                  <Eye className="w-5 h-5" />
-                </motion.button>
+
+              {/* Glass gradient overlay on hover for button readability */}
+              <div
+                className={`absolute inset-0 bg-gradient-to-t from-black/40 via-black/5 to-transparent transition-opacity duration-500 ${
+                  isHovered ? 'opacity-100' : 'opacity-0'
+                }`}
+              />
+
+              {/* Top-left glass chips */}
+              <div className="absolute top-3 left-3 flex flex-col items-start gap-1.5 z-10">
+                {salePercent > 0 && (
+                  <span className="inline-flex items-center bg-rose-500/95 backdrop-blur-md text-white text-[11px] font-bold px-2.5 py-1 rounded-full shadow-lg shadow-rose-500/30">
+                    -{salePercent}%
+                  </span>
+                )}
+                {product.is_new && (
+                  <span className="inline-flex items-center bg-white/70 backdrop-blur-md text-neutral-900 text-[11px] font-semibold px-2.5 py-1 rounded-full border border-white/40 shadow-sm">
+                    Mới
+                  </span>
+                )}
               </div>
-              
-              {/* Add to cart button */}
-              <motion.div 
-                className={`absolute bottom-0 left-0 right-0 p-3 transition-all duration-300 ${
-                  isHovered ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
+
+              {/* Wishlist - top right, glass pill */}
+              <button
+                onClick={handleWishlist}
+                aria-label={inWishlist ? 'Bỏ yêu thích' : 'Yêu thích'}
+                className={`absolute top-3 right-3 z-10 w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-md transition-all duration-300 hover:scale-110 active:scale-90 ${
+                  inWishlist
+                    ? 'bg-rose-500/95 text-white shadow-lg shadow-rose-500/40'
+                    : 'bg-white/70 text-neutral-700 hover:bg-white hover:text-rose-500 border border-white/40 shadow-sm'
                 }`}
               >
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    handleAdd(product);
-                  }}
-                  disabled={product.stock <= 0 || adding}
-                  className="w-full py-3 bg-black/95 backdrop-blur-md text-white rounded-xl flex items-center justify-center gap-2 hover:bg-primary hover:text-black transition-all duration-300 font-medium shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <ShoppingBag className="w-5 h-5" />
-                  Thêm vào giỏ
-                </button>
-              </motion.div>
-              
-              {/* Badges */}
-              <div className="absolute top-3 left-3 flex flex-col gap-2">
-                {product.is_new && (
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.2 }}
-                  >
-                    <Badge className="bg-black/90 backdrop-blur-md text-white text-[11px] font-semibold px-2.5 py-1 uppercase tracking-wider shadow-lg">
-                      ✨ Mới
-                    </Badge>
-                  </motion.div>
-                )}
-                {product.is_featured && (
-                  <motion.div
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.25 }}
-                  >
-                    <Badge className="bg-primary/90 backdrop-blur-md text-black text-[11px] font-semibold px-2.5 py-1 uppercase tracking-wider shadow-lg">
-                      Nổi bật
-                    </Badge>
-                  </motion.div>
-                )}
-              </div>
-              
-              {/* Sale Badge */}
-              {salePercent > 0 && (
-                <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ delay: 0.1, type: 'spring' }}
-                  className="absolute top-3 right-14"
-                >
-                  <div className="w-14 h-14 bg-gradient-to-br from-red-500 to-red-600 rounded-full flex flex-col items-center justify-center text-white shadow-xl shadow-red-500/30">
-                    <span className="text-[9px] font-bold leading-none">GIẢM</span>
-                    <span className="text-sm font-bold leading-none">{salePercent}%</span>
-                  </div>
-                </motion.div>
-              )}
+                <Heart
+                  className={`w-[18px] h-[18px] ${inWishlist ? 'fill-current' : ''}`}
+                  strokeWidth={2}
+                />
+              </button>
+
+              {/* Centered floating add-to-cart button - glass */}
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  handleAdd(product);
+                }}
+                disabled={isOutOfStock || adding}
+                aria-label="Thêm vào giỏ"
+                className={`absolute left-1/2 -translate-x-1/2 bottom-4 z-10 h-11 px-5 bg-white/90 backdrop-blur-md text-neutral-900 text-[13px] font-semibold rounded-full flex items-center gap-2 shadow-xl hover:bg-neutral-900 hover:text-white transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed border border-white/40 ${
+                  isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3 pointer-events-none'
+                }`}
+              >
+                <ShoppingBag className="w-4 h-4" strokeWidth={2} />
+                {adding ? 'Đang thêm' : 'Thêm vào giỏ'}
+              </button>
+
+              {/* Quick view - bottom right corner, glass - luôn hiện trên mobile, hover trên desktop */}
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setShowQuickView(true);
+                }}
+                aria-label="Xem nhanh"
+                title="Xem nhanh"
+                className={`absolute bottom-4 right-3 z-10 w-10 h-10 rounded-full bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border border-white/40 dark:border-neutral-700 shadow-sm flex items-center justify-center text-neutral-700 dark:text-neutral-200 hover:bg-neutral-900 hover:text-white dark:hover:bg-amber-500 dark:hover:text-white transition-all duration-300 ${
+                  isHovered
+                    ? 'opacity-100 translate-y-0'
+                    : 'opacity-0 translate-y-3 pointer-events-none sm:opacity-0'
+                }`}
+              >
+                <Eye className="w-4 h-4" strokeWidth={2} />
+              </button>
             </div>
-            
+
             {/* Content */}
-            <CardContent className="p-4 space-y-3">
-              {/* Category */}
-              <p className="text-xs text-muted-foreground uppercase tracking-wider">
-                {product.category || 'Thời trang'}
+            <div className="flex flex-col flex-1 p-5">
+              {/* Category eyebrow */}
+              <p className="text-[10px] text-amber-600 font-semibold uppercase tracking-[0.2em] mb-2">
+                {product.category || 'LUXE'}
               </p>
-              
+
               {/* Name */}
-              <h3 className="font-semibold text-base leading-snug line-clamp-2 group-hover:text-primary transition-colors duration-300 min-h-[2.5rem]">
+              <h3 className="text-[15px] font-semibold leading-snug text-neutral-900 line-clamp-2 min-h-[2.7em] group-hover:text-amber-600 transition-colors duration-300">
                 {product.name}
               </h3>
-              
-              {/* Price & Stock */}
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-baseline gap-0.5 flex-wrap">
-                  <span className="text-xl font-bold text-primary tracking-tight">
-                    {price.toLocaleString('vi-VN')}
+
+              {/* Price row */}
+              <div className="flex items-baseline gap-2 mt-3">
+                <span className="price-value text-[18px] font-bold text-neutral-900">
+                  {price.toLocaleString('vi-VN')}
+                  <span className="text-[15px] font-semibold ml-0.5">₫</span>
+                </span>
+                {originalPrice && originalPrice > price && (
+                  <span className="price-value text-[12px] text-neutral-400 line-through font-normal">
+                    {originalPrice.toLocaleString('vi-VN')}₫
                   </span>
-                  <span className="text-sm font-medium text-primary">₫</span>
-                  {originalPrice && originalPrice > price && (
-                    <span className="text-sm text-muted-foreground line-through ml-2 whitespace-nowrap">
-                      {originalPrice.toLocaleString('vi-VN')}₫
+                )}
+              </div>
+
+              {/* Footer row: color + stock */}
+              <div className="flex items-center justify-between mt-4 pt-3 border-t border-neutral-200/60">
+                {/* Color swatches */}
+                {colorSwatches.length > 0 ? (
+                  <div className="flex items-center gap-1.5">
+                    {colorSwatches.slice(0, 4).map((color, idx) => (
+                      <span
+                        key={idx}
+                        title={color.name}
+                        className="w-4 h-4 rounded-full border-2 border-white ring-1 ring-neutral-200 shadow-sm transition-transform hover:scale-110"
+                        style={{ backgroundColor: color.value }}
+                      />
+                    ))}
+                    {colorSwatches.length > 4 && (
+                      <span className="text-[10px] text-neutral-500 ml-1 font-medium">
+                        +{colorSwatches.length - 4}
+                      </span>
+                    )}
+                  </div>
+                ) : (
+                  <span />
+                )}
+
+                {/* Stock indicator */}
+                <div>
+                  {isOutOfStock ? (
+                    <span className="text-[10px] text-neutral-400 font-semibold uppercase tracking-wider">
+                      Hết hàng
+                    </span>
+                  ) : isLowStock ? (
+                    <span className="inline-flex items-center gap-1 text-[10px] text-amber-600 font-semibold uppercase tracking-wider">
+                      <span className="w-1.5 h-1.5 bg-amber-500 rounded-full animate-pulse" />
+                      Còn {product.stock}
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-[10px] text-emerald-600 font-semibold uppercase tracking-wider">
+                      <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full" />
+                      Còn hàng
                     </span>
                   )}
                 </div>
-                
-                {product.stock > 0 ? (
-                  <span className="text-xs text-green-600 flex items-center gap-1.5 bg-green-50 px-2 py-1 rounded-full">
-                    <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                    Còn hàng
-                  </span>
-                ) : (
-                  <span className="text-xs text-red-500 flex items-center gap-1.5 bg-red-50 px-2 py-1 rounded-full">
-                    <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
-                    Hết hàng
-                  </span>
-                )}
               </div>
-              
-              {/* Color swatches */}
-              <div className="flex items-center gap-2 pt-1">
-                <div className="flex -space-x-1.5">
-                  <span className="w-5 h-5 rounded-full bg-black border-2 border-white ring-1 ring-gray-200"></span>
-                  <span className="w-5 h-5 rounded-full bg-white border-2 border-gray-200"></span>
-                  <span className="w-5 h-5 rounded-full bg-amber-700 border-2 border-white ring-1 ring-gray-200"></span>
-                </div>
-                <span className="text-xs text-muted-foreground">+{Math.floor(Math.random() * 5) + 2} màu</span>
-              </div>
-              
-              {/* Low stock warning */}
-              {product.stock > 0 && product.stock <= 5 && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
-                  className="text-xs text-orange-600 bg-orange-50 px-3 py-2 rounded-lg flex items-center gap-2"
-                >
-                  <span className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></span>
-                  Sắp hết hàng - Chỉ còn {product.stock} sản phẩm
-                </motion.div>
-              )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         </Link>
-      </motion.div>
+      </motion.article>
 
       {/* Quick View Modal */}
       <QuickViewModal
