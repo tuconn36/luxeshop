@@ -134,7 +134,7 @@ export default function BannersPage() {
                         <div className="w-24 h-14 rounded-lg bg-slate-100 overflow-hidden ring-1 ring-slate-200 shrink-0">
                           {b.image_url ? (
                             <img
-                              src={b.image_url.startsWith('http') ? b.image_url : imgUrl(b.image_url)}
+                              src={(typeof b.image_url === 'string' && b.image_url.startsWith('http')) ? b.image_url : imgUrl(b.image_url)}
                               alt={b.title}
                               className="w-full h-full object-cover"
                               onError={(e) => { e.currentTarget.style.display = 'none' }}
@@ -385,7 +385,7 @@ function BannerFormModal({ banner, onClose, onSaved }) {
           {form.image_url && (
             <div className="mt-2 rounded-lg overflow-hidden bg-slate-100 ring-1 ring-slate-200 max-w-md aspect-[21/9]">
               <img
-                src={form.image_url.startsWith('http') ? form.image_url : imgUrl(form.image_url)}
+                src={(typeof form.image_url === 'string' && form.image_url.startsWith('http')) ? form.image_url : imgUrl(form.image_url)}
                 alt=""
                 className="w-full h-full object-cover"
                 onError={(e) => { e.currentTarget.style.display = 'none' }}

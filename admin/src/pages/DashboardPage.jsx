@@ -185,7 +185,7 @@ export default function DashboardPage() {
                   <div className="w-10 h-10 rounded-lg bg-slate-100 overflow-hidden shrink-0">
                     {p.images?.[0] ? (
                       <img
-                        src={p.images[0].startsWith('http') ? p.images[0] : imgUrl(p.images[0])}
+                        src={(typeof p.images[0] === 'string' && p.images[0].startsWith('http')) ? p.images[0] : imgUrl(p.images[0])}
                         alt={p.name}
                         className="w-full h-full object-cover"
                         onError={(e) => { e.currentTarget.style.display = 'none' }}

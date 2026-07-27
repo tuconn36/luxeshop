@@ -114,13 +114,19 @@ export function getVipTier(totalSpent = 0) {
 
 // Resolves a stored image path (e.g. "/uploads/x.jpg") to a full URL
 // pointing at the API host. Uses VITE_API_URL when available so dev/prod
-// always stay in sync.
+// always stay in sync. Defensive against null/undefined/non-string inputs
+// to avoid breaking the UI when a record is missing an image field.
 export function imgUrl(path) {
-  if (!path) return ''
+  if (path === null || path === undefined) return ''
   if (typeof path !== 'string') return ''
-  if (path.startsWith('http://') || path.startsWith('https://') || path.startsWith('data:')) return path
-  const apiBase = (import.meta.env.VITE_API_URL || 'http://localhost:5001/api').replace(/\/api\/?$/, '')
-  const clean = path.startsWith('/') ? path : `/${path}`
+  const trimmed = path.trim()
+  if (!trimmed) return ''
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://') || trimmed.startsWith('data:') || trimmed.startsWith('blob:')) return trimmed
+  const apiBase = (import.meta.env.VITE_ASSET_BASE
+    || import.meta.env.VITE_API_URL
+    || 'http://localhost:5001/api'
+  ).replace(/\/api\/?$/, '')
+  const clean = trimmed.startsWith('/') ? trimmed : `/${trimmed}`
   return `${apiBase}${clean}`
 }
 

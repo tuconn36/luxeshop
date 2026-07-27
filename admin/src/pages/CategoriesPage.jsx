@@ -107,7 +107,7 @@ export default function CategoriesPage() {
                         <div className="w-11 h-11 rounded-lg bg-slate-100 overflow-hidden ring-1 ring-slate-200 shrink-0">
                           {c.image ? (
                             <img
-                              src={c.image.startsWith('http') ? c.image : imgUrl(c.image)}
+                              src={(typeof c.image === 'string' && c.image.startsWith('http')) ? c.image : imgUrl(c.image)}
                               alt={c.name}
                               className="w-full h-full object-cover"
                               onError={(e) => { e.currentTarget.style.display = 'none' }}
@@ -274,7 +274,7 @@ function CategoryFormModal({ category, onClose, onSaved }) {
             {form.image && (
               <div className="mt-2 w-20 h-20 rounded-lg overflow-hidden bg-slate-100 ring-1 ring-slate-200">
                 <img
-                  src={form.image.startsWith('http') ? form.image : imgUrl(form.image)}
+                  src={(typeof form.image === 'string' && form.image.startsWith('http')) ? form.image : imgUrl(form.image)}
                   alt=""
                   className="w-full h-full object-cover"
                   onError={(e) => { e.currentTarget.style.display = 'none' }}

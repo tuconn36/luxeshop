@@ -190,13 +190,13 @@ function ReviewRow({ review, onDelete }) {
               {images.map((img, i) => (
                 <a
                   key={i}
-                  href={img.startsWith('http') ? img : imgUrl(img)}
+                  href={(typeof img === 'string' && img.startsWith('http')) ? img : imgUrl(img)}
                   target="_blank"
                   rel="noreferrer"
                   className="block w-16 h-16 rounded-lg overflow-hidden ring-1 ring-slate-200 hover:ring-brand-400"
                 >
                   <img
-                    src={img.startsWith('http') ? img : imgUrl(img)}
+                    src={(typeof img === 'string' && img.startsWith('http')) ? img : imgUrl(img)}
                     alt=""
                     className="w-full h-full object-cover"
                     onError={(e) => { e.currentTarget.style.display = 'none' }}

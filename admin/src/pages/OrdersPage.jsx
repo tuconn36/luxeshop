@@ -335,7 +335,7 @@ function OrderDetailModal({ order, loading, onClose, onUpdateStatus }) {
                         <img
                           src={(() => {
                             const src = it.image || it.images[0]
-                            return src.startsWith('http') ? src : imgUrl(src)
+                            return (typeof src === 'string' && src.startsWith('http')) ? src : imgUrl(src)
                           })()}
                           alt={it.name}
                           className="w-full h-full object-cover"

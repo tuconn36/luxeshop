@@ -171,7 +171,7 @@ export default function ProductsPage() {
                           <div className="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden shrink-0 ring-1 ring-slate-200">
                             {p.images?.[0] ? (
                               <img
-                                src={p.images[0].startsWith('http') ? p.images[0] : imgUrl(p.images[0])}
+                                src={(typeof p.images[0] === 'string' && p.images[0].startsWith('http')) ? p.images[0] : imgUrl(p.images[0])}
                                 alt={p.name}
                                 className="w-full h-full object-cover"
                                 onError={(e) => { e.currentTarget.style.display = 'none' }}
@@ -508,7 +508,7 @@ function ProductFormModal({ product, onClose, onSaved }) {
                 <li key={i} className="flex items-center gap-2 text-sm bg-slate-50 rounded-lg p-2.5">
                   <div className="w-11 h-11 rounded bg-white overflow-hidden shrink-0 ring-1 ring-slate-200">
                     <img
-                      src={img.startsWith('http') ? img : imgUrl(img)}
+                      src={(typeof img === 'string' && img.startsWith('http')) ? img : imgUrl(img)}
                       alt=""
                       className="w-full h-full object-cover"
                       onError={(e) => { e.currentTarget.style.display = 'none' }}

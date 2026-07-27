@@ -14,7 +14,10 @@ import {
   ShoppingBag, Crown, BadgeCheck, Lock
 } from 'lucide-react'
 
-const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:5001/api').replace(/\/api\/?$/, '')
+const API_BASE = (import.meta.env.VITE_ASSET_BASE
+  || import.meta.env.VITE_API_URL
+  || 'http://localhost:5001'
+).replace(/\/api\/?$/, '')
 
 const ROLE_OPTIONS = [
   { value: 'user',  label: 'Khách hàng', color: 'bg-slate-100 text-slate-700' },
