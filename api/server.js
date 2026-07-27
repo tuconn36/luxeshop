@@ -36,6 +36,8 @@ app.options('*', cors({
 const PORT = parseInt(process.env.PORT || '5001', 10);
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
+console.log('PORT ENV =', process.env.PORT);
+console.log('PORT USED =', PORT);
 // ============ TRUST PROXY ============
 // Railway / Render / Nginx / Cloudflare đều chạy qua reverse proxy.
 // Cần bật trust proxy để express-rate-limit dùng đúng IP thật của client.
