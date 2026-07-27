@@ -123,14 +123,13 @@ app.use('/api/upload', require('./routes/uploads'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/', require('./routes/sitemap'));
 
-// Health check
+// Health check - respond immediately, no DB call, no rate-limit dependency
 app.get('/health', (req, res) => {
-  res.json({
+  res.status(200).json({
     status: 'ok',
     env: NODE_ENV,
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
-    database: pool.healthCheck ? 'configured' : 'unknown',
   });
 });
 

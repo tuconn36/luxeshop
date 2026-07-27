@@ -10,6 +10,6 @@
     "restartPolicyMaxRetries": 10,
     "startCommand": "node server.js",
     "healthcheckPath": "/health",
-    "healthcheckTimeout": 30
+    "healthcheckTimeout": 100
   }
 }
