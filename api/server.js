@@ -5,9 +5,15 @@ const rateLimit = require('express-rate-limit');
 const slowDown = require('express-slow-down');
 const hpp = require('hpp');
 const pool = require('./config/database');
+
 require('dotenv').config();
 
+const productRoutes = require('./routes/products');
+const authRoutes = require('./routes/auth');
+const userRoutes = require('./routes/users');
+
 const app = express();
+
 const allowedOrigins = [
   'https://luxeshop-six.vercel.app',
   'https://www.luxeshop-six.vercel.app'
@@ -23,8 +29,7 @@ app.options('*', cors({
   credentials: true
 }));
 
-app.use('/api/products', productRoutes);
-const productRoutes = require('./routes/products');
+
 // Khi start locally (npm run dev) ưu tiên 5001 cho khớp với web/.env,
 // tránh xung đột với các API khác đang dùng 5000.
 const PORT = parseInt(process.env.PORT || '5001', 10);
