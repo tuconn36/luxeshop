@@ -33,7 +33,7 @@ app.options('*', cors({
 
 // Khi start locally (npm run dev) ưu tiên 5001 cho khớp với web/.env,
 // tránh xung đột với các API khác đang dùng 5000.
-const PORT = parseInt(process.env.PORT || '5001', 10);
+const PORT = process.env.PORT || 8080;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 console.log('PORT ENV =', process.env.PORT);
