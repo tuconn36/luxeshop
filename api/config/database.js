@@ -28,12 +28,19 @@ const poolConfig = process.env.DATABASE_URL
 
 const pool = new Pool({
   ...poolConfig,
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 5000, // Railway có thể chậm kết nối lần đầu
-  // Quan trọng: Kiểm tra connection trước khi sử dụng để tránh lỗi
-  // "Invalid attempt to read client when server is not processing a query"
-  allowExitOnIdle: false,
+  max: 10,                           // Giảm từ 20 để tránh quá tải Railway
+  min: 2,                            // Keep ít nhất 2 connection luôn sẵn sàng
+  idleTimeoutMillis: 10000,          // Giảm xuống 10s - Railway kill connection idle lâu
+  connectionTimeoutMillis: 10000,     // Tăng timeout lên 10s cho Railway
+  // Quan trọng: Keep connection alive để tránh bị Railway/Postgres kill
+  keepAlive: true,
+  keepAliveInitialDelayMillis: 5000, // Bắt đầu keep-alive sau 5s
+});
+
+console.log('[DB] Pool config:', {
+  max: pool.max,
+  min: pool.min,
+  idleTimeoutMillis: pool.idleTimeoutMillis,
 });
 
 // Validate connection trước khi sử dụng — tránh dùng connection đã chết
