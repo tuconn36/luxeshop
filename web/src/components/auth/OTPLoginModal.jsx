@@ -4,6 +4,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import IdentifierInput from '@/components/auth/IdentifierInput.jsx';
 import { toast } from 'sonner';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
 import { authAPI } from '@/lib/api.js';
@@ -256,27 +257,16 @@ export default function OTPLoginModal({ isOpen, onClose }) {
                 <DialogTitle className="text-xl font-bold text-center">Chào mừng trở lại</DialogTitle>
               </DialogHeader>
 
-              <div className="flex gap-2 p-1 bg-muted rounded-lg">
-                {['email', 'phone'].map((m) => (
-                  <button key={m} type="button" onClick={() => { setLoginMethod(m); setLoginId(''); setError(''); }}
-                    className={`flex-1 py-2 rounded-md text-sm font-medium transition-all ${loginMethod === m ? 'bg-white shadow-sm' : 'text-muted-foreground'}`}>
-                    {m === 'email' ? 'Email' : 'Số điện thoại'}
-                  </button>
-                ))}
-              </div>
-
-              <div className="space-y-2">
-                <Label>{loginMethod === 'email' ? 'Email' : 'Số điện thoại'}</Label>
-                <Input
-                  type={loginMethod === 'email' ? 'email' : 'tel'}
-                  placeholder={loginMethod === 'email' ? 'ten@email.com' : '0912345678'}
-                  value={loginId}
-                  onChange={(e) => { setLoginId(loginMethod === 'phone' ? e.target.value.replace(/\D/g, '') : e.target.value); setError(''); }}
-                  disabled={loading} required autoFocus
-                  maxLength={loginMethod === 'phone' ? 11 : undefined}
-                  inputMode={loginMethod === 'phone' ? 'numeric' : undefined}
-                  className={shakeClass} />
-              </div>
+              <IdentifierInput
+                method={loginMethod}
+                onMethodChange={(m) => { setLoginMethod(m); setLoginId(''); setError(''); }}
+                value={loginId}
+                onChange={(v) => { setLoginId(v); setError(''); }}
+                disabled={loading}
+                autoFocus
+                inputId="login-identifier"
+                inputClassName={shakeClass}
+              />
 
               <div className="space-y-2">
                 <Label>Mật khẩu</Label>
@@ -321,21 +311,16 @@ export default function OTPLoginModal({ isOpen, onClose }) {
                   <DialogHeader className="pb-0">
                     <DialogTitle className="text-xl font-bold text-center">Tạo tài khoản</DialogTitle>
                   </DialogHeader>
-                  <div className="flex gap-2 p-1 bg-muted rounded-lg">
-                    {['email', 'phone'].map((m) => (
-                      <button key={m} type="button" onClick={() => { setRegMethod(m); setRegId(''); setError(''); }}
-                        className={`flex-1 py-2 rounded-md text-sm font-medium transition-all ${regMethod === m ? 'bg-white shadow-sm' : 'text-muted-foreground'}`}>
-                        {m === 'email' ? 'Email' : 'Số điện thoại'}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="space-y-1">
-                    <Label>{regMethod === 'email' ? 'Email' : 'Số điện thoại'}</Label>
-                    <Input type={regMethod === 'email' ? 'email' : 'tel'} placeholder={regMethod === 'email' ? 'ten@email.com' : '0912345678'}
-                      value={regId} onChange={(e) => { setRegId(regMethod === 'phone' ? e.target.value.replace(/\D/g, '') : e.target.value); setError(''); }}
-                      disabled={loading} required maxLength={regMethod === 'phone' ? 11 : undefined} className={shakeClass} />
-                    <ErrorMsg msg={error} />
-                  </div>
+                  <IdentifierInput
+                    method={regMethod}
+                    onMethodChange={(m) => { setRegMethod(m); setRegId(''); setError(''); }}
+                    value={regId}
+                    onChange={(v) => { setRegId(v); setError(''); }}
+                    disabled={loading}
+                    inputId="reg-identifier"
+                    inputClassName={shakeClass}
+                  />
+                  <ErrorMsg msg={error} />
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Đang gửi...</> : 'Gửi mã OTP'}
                   </Button>
@@ -428,27 +413,17 @@ export default function OTPLoginModal({ isOpen, onClose }) {
                     <DialogTitle className="text-xl font-bold text-center">Quên mật khẩu</DialogTitle>
                   </DialogHeader>
                   <p className="text-sm text-center text-muted-foreground">Nhập email hoặc số điện thoại để nhận mã xác thực</p>
-                  <div className="flex gap-2 p-1 bg-muted rounded-lg">
-                    {['email', 'phone'].map((m) => (
-                      <button key={m} type="button" onClick={() => { setForgotMethod(m); setForgotId(''); setError(''); }}
-                        className={`flex-1 py-2 rounded-md text-sm font-medium transition-all ${forgotMethod === m ? 'bg-white shadow-sm' : 'text-muted-foreground'}`}>
-                        {m === 'email' ? 'Email' : 'Số điện thoại'}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="space-y-1">
-                    <Label>{forgotMethod === 'email' ? 'Email' : 'Số điện thoại'}</Label>
-                    <Input
-                      type={forgotMethod === 'email' ? 'email' : 'tel'}
-                      placeholder={forgotMethod === 'email' ? 'ten@email.com' : '0912345678'}
-                      value={forgotId}
-                      onChange={(e) => { setForgotId(forgotMethod === 'phone' ? e.target.value.replace(/\D/g, '') : e.target.value); setError(''); }}
-                      disabled={loading} required autoFocus
-                      maxLength={forgotMethod === 'phone' ? 11 : undefined}
-                      inputMode={forgotMethod === 'phone' ? 'numeric' : undefined}
-                      className={shakeClass} />
-                    <ErrorMsg msg={error} />
-                  </div>
+                  <IdentifierInput
+                    method={forgotMethod}
+                    onMethodChange={(m) => { setForgotMethod(m); setForgotId(''); setError(''); }}
+                    value={forgotId}
+                    onChange={(v) => { setForgotId(v); setError(''); }}
+                    disabled={loading}
+                    autoFocus
+                    inputId="forgot-identifier"
+                    inputClassName={shakeClass}
+                  />
+                  <ErrorMsg msg={error} />
                   <Button type="submit" className="w-full" disabled={loading}>
                     {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Đang gửi...</> : 'Gửi mã OTP'}
                   </Button>

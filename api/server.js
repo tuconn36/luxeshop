@@ -18,6 +18,7 @@ const app = express();
 const allowedOrigins = [
   'https://luxeshop-six.vercel.app',
   'https://www.luxeshop-six.vercel.app'
+  'https://luxeadmin.vercel.app'
 ];
 
 app.use(cors({
