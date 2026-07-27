@@ -5,6 +5,7 @@ import Header from '@/components/layout/Header.jsx';
 import Footer from '@/components/layout/Footer.jsx';
 import { Button } from '@/components/ui/button';
 import { X, Check, Minus } from 'lucide-react';
+import { formatVND } from '@/lib/utils';
 
 export default function ComparePage() {
   const { compareList, removeFromCompare, clearCompare } = useCompare();
@@ -40,8 +41,8 @@ export default function ComparePage() {
   const allSameCategory = categories.every(c => c === categories[0]);
 
   const specs = [
-    { key: 'price', label: 'Giá', render: (p) => `${Number(p.price)?.toLocaleString('vi-VN')}₫` },
-    { key: 'original_price', label: 'Giá gốc', render: (p) => p.original_price ? `${Number(p.original_price)?.toLocaleString('vi-VN')}₫` : '-' },
+    { key: 'price', label: 'Giá', render: (p) => formatVND(p.price) },
+    { key: 'original_price', label: 'Giá gốc', render: (p) => p.original_price ? formatVND(p.original_price) : '-' },
     { key: 'category', label: 'Danh mục', render: (p) => p.category },
     { key: 'stock', label: 'Tình trạng', render: (p) => p.stock > 0 ? `Còn hàng (${p.stock})` : 'Hết hàng' },
     { key: 'description', label: 'Mô tả', render: (p) => p.description?.slice(0, 100) + (p.description?.length > 100 ? '...' : '') },

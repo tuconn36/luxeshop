@@ -21,6 +21,7 @@ import {
 import { toast } from 'sonner';
 import { getPaymentInfo } from '@/lib/paymentInfo.js';
 import { ordersAPI } from '@/lib/api.js';
+import { formatVND } from '@/lib/utils';
 
 // Mapping trạng thái → label tiếng Việt + icon + màu
 export const ORDER_STATUSES = {
@@ -83,9 +84,7 @@ function parseItems(items) {
   }
 }
 
-function formatVND(n) {
-  return Number(n || 0).toLocaleString('vi-VN') + '₫';
-}
+// formatVND được import từ @/lib/utils để đồng bộ với toàn bộ app.
 
 export default function OrderCard({ order, expanded = false, onCancelled }) {
   const [cancelling, setCancelling] = useState(false);

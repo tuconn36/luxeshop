@@ -4,6 +4,7 @@ import { Search, X, TrendingUp, ArrowRight, Loader2, Tag } from 'lucide-react';
 import { highlightMatch } from '@/lib/highlightMatch.jsx';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { formatVND } from '@/lib/utils';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
 
@@ -15,9 +16,7 @@ function resolveImageUrl(url) {
   return `${API_BASE}/${url}`;
 }
 
-function formatVND(n) {
-  return Number(n || 0).toLocaleString('vi-VN') + '₫';
-}
+// formatVND được import từ @/lib/utils để đồng bộ.
 
 const POPULAR_SEARCHES = ['Áo thun', 'Quần jean', 'Giày sneaker', 'Túi xách', 'Áo khoác'];
 

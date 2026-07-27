@@ -13,6 +13,7 @@ import { useCart } from '@/hooks/useCart.js';
 import { useAuth } from '@/contexts/AuthContext.jsx';
 import { ordersAPI } from '@/lib/api.js';
 import { PAYMENT_METHODS, getPaymentInfo } from '@/lib/paymentInfo.js';
+import { formatVND } from '@/lib/utils';
 import { CITIES, getDistricts } from '@/lib/vietnamLocations.js';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,7 +26,8 @@ import { toast } from 'sonner';
 /* ────────────────────────────────────────────────────────────────
  *  HELPERS
  * ──────────────────────────────────────────────────────────────── */
-const fmtVND = (n) => `${(Number(n) || 0).toLocaleString('vi-VN')}₫`;
+// formatVND được import từ @/lib/utils (alias `fmtVND` để khỏi sửa nhiều chỗ).
+const fmtVND = formatVND;
 
 const PHONE_RE = /^(0|\+84)[3-9][0-9]{8}$/;
 

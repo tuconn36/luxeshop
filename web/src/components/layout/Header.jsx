@@ -13,6 +13,7 @@ import OTPLoginModal from '@/components/auth/OTPLoginModal.jsx';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import MegaMenu from '@/components/layout/MegaMenu.jsx';
 import SearchAutocomplete from '@/components/search/SearchAutocomplete.jsx';
+import { formatVND } from '@/lib/utils';
 
 
 export default function Header() {
@@ -445,7 +446,7 @@ export default function Header() {
                                     {item.selectedColor && `${item.selectedColor}`}
                                   </p>
                                   <p className="text-sm font-semibold text-primary mt-0.5">
-                                    {item.price.toLocaleString('vi-VN')}₫ × {item.quantity}
+                                    {formatVND(item.price)} × {item.quantity}
                                   </p>
                                 </div>
                               </div>
@@ -455,7 +456,7 @@ export default function Header() {
                             <div className="flex justify-between items-center mb-3">
                               <span className="text-sm text-muted-foreground">Tổng cộng</span>
                               <span className="text-lg font-bold text-primary">
-                                {getTotalPrice().toLocaleString('vi-VN')}₫
+                                {formatVND(getTotalPrice())}
                               </span>
                             </div>
                             <Button 

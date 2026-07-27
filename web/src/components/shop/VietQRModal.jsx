@@ -7,6 +7,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { paymentAPI, ordersAPI } from '@/lib/api.js';
+import { formatVND } from '@/lib/utils';
 import {
   QrCode, Copy, Check, Loader2, Building2, AlertCircle,
   CheckCircle2, Clock, Zap, Shield, X, Smartphone,
@@ -42,9 +43,7 @@ function CopyButton({ value, label = 'Sao chép' }) {
   );
 }
 
-function formatVND(n) {
-  return Number(n || 0).toLocaleString('vi-VN') + '₫';
-}
+// formatVND được import từ @/lib/utils.
 
 /* ───────────────────────────────────────────────────────────────
    QR Code Box  — auto-scan animation + glow

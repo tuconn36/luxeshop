@@ -29,6 +29,7 @@ import {
 } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import { resolveAssetUrl } from '@/lib/api';
+import { formatVND } from '@/lib/utils';
 
 const PLACEHOLDER_IMAGE = 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=400&h=400&fit=crop';
 
@@ -275,12 +276,12 @@ function QuickViewModal({ product, isOpen, onClose, onAddToCart }) {
               {/* Price */}
             <div className="flex items-baseline gap-3 flex-wrap bg-primary/5 px-4 py-3 rounded-xl">
               <span className="text-3xl font-bold text-primary">
-                {price.toLocaleString('vi-VN')}₫
+                {formatVND(price)}
               </span>
               {originalPrice && originalPrice > price && (
                 <>
                   <span className="text-base text-muted-foreground line-through">
-                    {originalPrice.toLocaleString('vi-VN')}₫
+                    {formatVND(originalPrice)}
                   </span>
                   <Badge className="bg-red-500 text-white text-xs">
                     -{Math.round((1 - price / originalPrice) * 100)}%
@@ -677,7 +678,7 @@ export default function ProductCard({ product, index = 0 }) {
                 </span>
                 {originalPrice && originalPrice > price && (
                   <span className="price-value text-[12px] text-neutral-400 line-through font-normal">
-                    {originalPrice.toLocaleString('vi-VN')}₫
+                    {formatVND(originalPrice)}
                   </span>
                 )}
               </div>

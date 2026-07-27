@@ -5,6 +5,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Slider } from '@/components/ui/slider';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
+import { formatVND } from '@/lib/utils';
 
 export default function FilterSidebar({ filters, onFilterChange, onReset }) {
   const categories = ['Nam', 'Nữ', 'Phụ kiện'];
@@ -59,7 +60,7 @@ export default function FilterSidebar({ filters, onFilterChange, onReset }) {
 
         <div>
           <Label className="text-base font-semibold mb-3 block">
-            Giá: {(filters.minPrice || 0).toLocaleString('vi-VN')}₫ - {(filters.maxPrice || 5000000).toLocaleString('vi-VN')}₫
+            Giá: {formatVND(filters.minPrice || 0)} - {formatVND(filters.maxPrice || 5000000)}
           </Label>
           <Slider
             min={0}

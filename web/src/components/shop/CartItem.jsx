@@ -2,6 +2,7 @@ import React from 'react';
 import { Minus, Plus, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { formatVND } from '@/lib/utils';
 
 const API_BASE = import.meta.env.VITE_API_URL
   ? import.meta.env.VITE_API_URL.replace(/\/api$/, '')
@@ -37,7 +38,7 @@ export default function CartItem({ item, onUpdateQuantity, onRemove }) {
               {item.selectedColor && <span>Màu: {item.selectedColor}</span>}
             </div>
             <p className="text-primary font-bold">
-              {item.price.toLocaleString('vi-VN')}₫
+              {formatVND(item.price)}
             </p>
           </div>
 

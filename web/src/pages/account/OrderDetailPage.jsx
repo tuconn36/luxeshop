@@ -34,6 +34,7 @@ import {
 } from 'lucide-react';
 import { ordersAPI, paymentAPI } from '@/lib/api.js';
 import { getPaymentInfo } from '@/lib/paymentInfo.js';
+import { formatVND } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import VietQRModal from '@/components/shop/VietQRModal.jsx';
 
@@ -98,9 +99,7 @@ function parseItems(items) {
   }
 }
 
-function formatVND(n) {
-  return Number(n || 0).toLocaleString('vi-VN') + '₫';
-}
+// formatVND được import từ @/lib/utils để đồng bộ với toàn bộ app.
 
 function PaymentMethodBadge({ method }) {
   const info = getPaymentInfo(method);

@@ -9,6 +9,7 @@ import { useCart } from '@/hooks/useCart.js';
 import { useAuth } from '@/contexts/AuthContext.jsx';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { formatVND } from '@/lib/utils';
 
 export default function CartPage() {
   const { items, updateQuantity, removeFromCart, getTotalPrice } = useCart();
@@ -70,24 +71,24 @@ export default function CartPage() {
                 <CardContent className="space-y-4">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Tạm tính</span>
-                    <span className="font-medium">{getTotalPrice().toLocaleString('vi-VN')}₫</span>
+                    <span className="font-medium">{formatVND(getTotalPrice())}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Phí vận chuyển</span>
                     <span className="font-medium">
-                      {shippingFee === 0 ? 'Miễn phí' : `${shippingFee.toLocaleString('vi-VN')}₫`}
+                      {shippingFee === 0 ? 'Miễn phí' : formatVND(shippingFee)}
                     </span>
                   </div>
                   {getTotalPrice() < 500000 && (
                     <p className="text-xs text-muted-foreground">
-                      Mua thêm {(500000 - getTotalPrice()).toLocaleString('vi-VN')}₫ để được miễn phí vận chuyển
+                      Mua thêm {formatVND(500000 - getTotalPrice())} để được miễn phí vận chuyển
                     </p>
                   )}
                   <div className="border-t border-border pt-4">
                     <div className="flex justify-between mb-4">
                       <span className="font-semibold">Tổng cộng</span>
                       <span className="text-2xl font-bold text-primary">
-                        {total.toLocaleString('vi-VN')}₫
+                        {formatVND(total)}
                       </span>
                     </div>
                     <Button size="lg" className="w-full" onClick={handleCheckout}>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { productsAPI, resolveAssetUrl } from '@/lib/api';
+import { formatVND } from '@/lib/utils';
 import { useCart } from '@/hooks/useCart.js';
 import { useAuth } from '@/contexts/AuthContext.jsx';
 import { useWishlist } from '@/contexts/WishlistContext.jsx';
@@ -398,15 +399,15 @@ export default function ProductDetailPage() {
               <div className="bg-gradient-to-br from-amber-50 via-orange-50/40 to-amber-50 border border-amber-200/60 rounded-2xl p-5">
                 <div className="flex items-baseline gap-3 flex-wrap">
                   <span className="text-4xl font-bold text-amber-900">
-                    {Number(product.price)?.toLocaleString('vi-VN')}₫
+                    {formatVND(product.price)}
                   </span>
                   {product.original_price && product.original_price > product.price && (
                     <>
                       <span className="text-xl text-gray-400 line-through">
-                        {Number(product.original_price)?.toLocaleString('vi-VN')}₫
+                        {formatVND(product.original_price)}
                       </span>
                       <span className="bg-red-100 text-red-700 text-xs font-bold px-2 py-1 rounded-md">
-                        Tiết kiệm {savings.toLocaleString('vi-VN')}₫
+                        Tiết kiệm {formatVND(savings)}
                       </span>
                     </>
                   )}
@@ -803,7 +804,7 @@ export default function ProductDetailPage() {
           <div className="min-w-0 flex-1">
             <p className="font-semibold text-sm text-gray-900 truncate">{product.name}</p>
             <p className="text-base font-bold text-amber-700">
-              {Number(product.price)?.toLocaleString('vi-VN')}₫
+              {formatVND(product.price)}
             </p>
           </div>
           <Button

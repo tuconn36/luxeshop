@@ -6,6 +6,7 @@ import Footer from '@/components/layout/Footer.jsx';
 import ProductCard from '@/components/shop/ProductCard.jsx';
 import { useProducts } from '@/hooks/useProducts.js';
 import { highlightMatch, tokenizeQuery } from '@/lib/highlightMatch.jsx';
+import { formatVND } from '@/lib/utils';
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
@@ -314,7 +315,7 @@ function ActiveFilters({ filters, onRemove, onReset }) {
             )}
             {(minPrice || maxPrice) && (
               <FilterChip
-                label={`${minPrice?.toLocaleString('vi-VN') || 0}₫ - ${maxPrice?.toLocaleString('vi-VN') || '∞'}₫`}
+                label={`${formatVND(minPrice || 0)} - ${formatVND(maxPrice || 5000000)}`}
                 onRemove={() => {
                   onRemove('minPrice');
                   onRemove('maxPrice');

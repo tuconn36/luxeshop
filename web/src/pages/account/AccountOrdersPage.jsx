@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext.jsx';
 import { ordersAPI, statsAPI } from '@/lib/api.js';
+import { formatVND } from '@/lib/utils';
 import OrderCard from '@/components/shop/OrderCard.jsx';
 import {
   Package,
@@ -173,7 +174,7 @@ export default function AccountOrdersPage() {
           />
           <StatBox
             label="Tổng chi tiêu"
-            value={totalSpent.toLocaleString('vi-VN') + '₫'}
+            value={formatVND(totalSpent)}
             color="amber"
             small
           />
