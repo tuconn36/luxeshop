@@ -10,12 +10,18 @@ types.setTypeParser(1082, (val) => val);                       // DATE → "YYYY
 types.setTypeParser(1114, (val) => val);                       // TIMESTAMP → "YYYY-MM-DD HH:mm:ss"
 types.setTypeParser(1184, (val) => new Date(val).toISOString()); // TIMESTAMPTZ → ISO string UTC
 
-// Railway/Heroku cấp DATABASE_URL — dùng nó nếu có, fallback về DB_HOST/DB_PORT/...
+// Railway/Render Postgres BẮT BUỘC SSL. rejectUnauthorized=false cho phép self-signed cert.
+// Render vẫn yêu cầu SSL ngay cả khi NODE_ENV=development, nên bật SSL theo sự tồn tại của DATABASE_URL.
+const useSsl = process.env.DATABASE_URL
+  ? { rejectUnauthorized: false }
+  : process.env.DB_SSL === 'true'
+    ? { rejectUnauthorized: false }
+    : false;
+
 const poolConfig = process.env.DATABASE_URL
   ? {
       connectionString: process.env.DATABASE_URL,
-      // Railway Postgres BẮT BUỘC SSL. rejectUnauthorized=false cho phép self-signed cert.
-      ssl: isProduction ? { rejectUnauthorized: false } : false,
+      ssl: useSsl,
     }
   : {
       host: process.env.DB_HOST || 'localhost',
@@ -24,6 +30,7 @@ const poolConfig = process.env.DATABASE_URL
       user: process.env.DB_USER || 'postgres',
       // Dùng ?? để chỉ fallback khi biến môi trường THỰC SỰ không tồn tại (null/undefined).
       password: process.env.DB_PASSWORD ?? '1',
+      ssl: useSsl,
     };
 
 const pool = new Pool({

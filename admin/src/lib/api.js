@@ -61,7 +61,6 @@ export const productsAPI = {
       }, {})
     ).toString()
     const data = await apiCall(`/products${queryString ? `?${queryString}` : ''}`)
-    // Backend trả về { items, page, totalPages, totalItems }
     return {
       items: data.items || [],
       page: data.page || 1,
@@ -89,4 +88,51 @@ export const usersAPI = {
   getAll: () => apiCall('/users/all'),
   getById: (id) => apiCall(`/users/${id}`),
   update: (id, data) => apiCall(`/users/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  updateRole: (id, role) => apiCall(`/admin/users/${id}/role`, { method: 'PUT', body: JSON.stringify({ role }) }),
+  getStats: (id) => apiCall(`/users/${id}/stats`),
+  getAddresses: (id) => apiCall(`/users/${id}/addresses`),
+}
+
+export const categoriesAPI = {
+  getAll: () => apiCall('/admin/categories'),
+  create: (data) => apiCall('/admin/categories', { method: 'POST', body: JSON.stringify(data) }),
+  update: (id, data) => apiCall(`/admin/categories/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  delete: (id) => apiCall(`/admin/categories/${id}`, { method: 'DELETE' }),
+}
+
+export const promotionsAPI = {
+  getAll: () => apiCall('/admin/promotions'),
+  create: (data) => apiCall('/admin/promotions', { method: 'POST', body: JSON.stringify(data) }),
+  update: (id, data) => apiCall(`/admin/promotions/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  delete: (id) => apiCall(`/admin/promotions/${id}`, { method: 'DELETE' }),
+}
+
+export const bannersAPI = {
+  getAll: () => apiCall('/admin/banners'),
+  create: (data) => apiCall('/admin/banners', { method: 'POST', body: JSON.stringify(data) }),
+  update: (id, data) => apiCall(`/admin/banners/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  delete: (id) => apiCall(`/admin/banners/${id}`, { method: 'DELETE' }),
+}
+
+export const settingsAPI = {
+  getAll: () => apiCall('/admin/settings'),
+  update: (data) => apiCall('/admin/settings', { method: 'PUT', body: JSON.stringify(data) }),
+}
+
+export const reviewsAdminAPI = {
+  getAll: (params = {}) => {
+    const qs = new URLSearchParams(
+      Object.entries(params).reduce((acc, [k, v]) => {
+        if (v !== '' && v !== null && v !== undefined) acc[k] = v
+        return acc
+      }, {})
+    ).toString()
+    return apiCall(`/admin/reviews${qs ? `?${qs}` : ''}`)
+  },
+  delete: (id) => apiCall(`/admin/reviews/${id}`, { method: 'DELETE' }),
+}
+
+export const analyticsAPI = {
+  overview: () => apiCall('/admin/analytics/overview'),
+  dashboard: () => apiCall('/admin/dashboard-stats'),
 }

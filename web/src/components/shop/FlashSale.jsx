@@ -50,9 +50,9 @@ export default function FlashSale() {
     return () => clearInterval(id);
   }, []);
 
-  // Fetch a few discount products
+  // Fetch a few discount products (sort by newest for visibility)
   const { products: saleProducts, loading } = useProducts(
-    { is_featured: true },
+    { sort: '-created_at' },
     1,
     4
   );

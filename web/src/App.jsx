@@ -92,12 +92,12 @@ function App() {
             },
           }}
         />
-          <CompareBar />
-          <FloatingContact />
-        </Router>
-        </CompareProvider>
-      </WishlistProvider>
-    </AuthProvider>
+        <CompareBar />
+        <FloatingContact />
+      </Router>
+    </CompareProvider>
+  </WishlistProvider>
+</AuthProvider>
   );
 }
 

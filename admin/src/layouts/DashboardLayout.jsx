@@ -4,14 +4,41 @@ import { useAuth } from '../contexts/AuthContext'
 import { cn } from '../lib/utils'
 import {
   LayoutDashboard, Package, ShoppingCart, Users, LogOut, ChevronDown,
-  Menu, X, Gem, ExternalLink, UserCircle
+  Menu, X, Gem, ExternalLink, UserCircle, BarChart3, Tags, Ticket,
+  ImageIcon, MessageSquare, Settings, Star
 } from 'lucide-react'
 
-const navItems = [
-  { to: '/',         icon: LayoutDashboard, label: 'Tổng quan',  end: true },
-  { to: '/products', icon: Package,         label: 'Sản phẩm' },
-  { to: '/orders',   icon: ShoppingCart,    label: 'Đơn hàng' },
-  { to: '/users',    icon: Users,           label: 'Người dùng' },
+const navGroups = [
+  {
+    label: 'Tổng quan',
+    items: [
+      { to: '/',           icon: LayoutDashboard, label: 'Dashboard', end: true },
+      { to: '/analytics',  icon: BarChart3,       label: 'Phân tích' },
+    ],
+  },
+  {
+    label: 'Quản lý',
+    items: [
+      { to: '/products',   icon: Package,    label: 'Sản phẩm' },
+      { to: '/categories', icon: Tags,       label: 'Danh mục' },
+      { to: '/orders',     icon: ShoppingCart, label: 'Đơn hàng' },
+      { to: '/users',      icon: Users,      label: 'Khách hàng' },
+      { to: '/reviews',    icon: Star,       label: 'Đánh giá' },
+    ],
+  },
+  {
+    label: 'Marketing',
+    items: [
+      { to: '/promotions', icon: Ticket,     label: 'Mã khuyến mãi' },
+      { to: '/banners',    icon: ImageIcon,  label: 'Banner' },
+    ],
+  },
+  {
+    label: 'Hệ thống',
+    items: [
+      { to: '/settings',   icon: Settings,   label: 'Cấu hình' },
+    ],
+  },
 ]
 
 export default function DashboardLayout() {
@@ -27,10 +54,15 @@ export default function DashboardLayout() {
   }
 
   const getCurrentTitle = () => {
-    const item = navItems.find((n) =>
-      n.end ? location.pathname === n.to : location.pathname.startsWith(n.to)
-    )
-    return item?.label || 'Admin'
+    for (const group of navGroups) {
+      for (const item of group.items) {
+        const active = item.end
+          ? location.pathname === item.to
+          : location.pathname === item.to || location.pathname.startsWith(item.to + '/')
+        if (active) return item.label
+      }
+    }
+    return 'Admin'
   }
 
   return (
@@ -38,6 +70,7 @@ export default function DashboardLayout() {
       {/* Sidebar - desktop */}
       <aside className="hidden lg:flex w-64 flex-col bg-white border-r border-slate-200 fixed inset-y-0 left-0 z-30">
         <SidebarContent currentPath={location.pathname} />
+        <LogoutSection onLogout={handleLogout} user={user} />
       </aside>
 
       {/* Sidebar - mobile overlay */}
@@ -142,36 +175,55 @@ function SidebarContent({ currentPath, onNavigate }) {
         </div>
       </div>
 
-      <nav className="flex-1 px-3 py-5 space-y-1">
-        <p className="px-3 text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2">Quản lý</p>
-        {navItems.map(({ to, icon: Icon, label, end }) => {
-          const active = end
-            ? currentPath === to
-            : currentPath === to || currentPath.startsWith(to + '/')
-          return (
-            <NavLink
-              key={to}
-              to={to}
-              end={end}
-              onClick={onNavigate}
-              className={cn('nav-link', active && 'nav-link-active')}
-            >
-              <Icon className="w-[18px] h-[18px] shrink-0" />
-              <span>{label}</span>
-            </NavLink>
-          )
-        })}
-      </nav>
-
-      <div className="p-3 border-t border-slate-100">
-        <div className="rounded-lg bg-gradient-to-br from-brand-50 to-brand-100 p-3">
-          <div className="flex items-center gap-2 mb-1">
-            <UserCircle className="w-4 h-4 text-brand-700" />
-            <p className="text-xs font-semibold text-brand-800">Đang đăng nhập</p>
+      <nav className="flex-1 px-3 py-5 space-y-5 overflow-y-auto">
+        {navGroups.map((group) => (
+          <div key={group.label}>
+            <p className="px-3 text-[10px] font-semibold text-slate-400 uppercase tracking-widest mb-2">
+              {group.label}
+            </p>
+            <div className="space-y-1">
+              {group.items.map(({ to, icon: Icon, label, end }) => {
+                const active = end
+                  ? currentPath === to
+                  : currentPath === to || currentPath.startsWith(to + '/')
+                return (
+                  <NavLink
+                    key={to}
+                    to={to}
+                    end={end}
+                    onClick={onNavigate}
+                    className={cn('nav-link', active && 'nav-link-active')}
+                  >
+                    <Icon className="w-[18px] h-[18px] shrink-0" />
+                    <span>{label}</span>
+                  </NavLink>
+                )
+              })}
+            </div>
           </div>
-          <p className="text-xs text-brand-700/80">Phiên quản trị đang hoạt động</p>
-        </div>
-      </div>
+        ))}
+      </nav>
     </>
+  )
+}
+
+function LogoutSection({ user, onLogout }) {
+  return (
+    <div className="p-3 border-t border-slate-100">
+      <div className="rounded-lg bg-gradient-to-br from-brand-50 to-brand-100 p-3 mb-2">
+        <div className="flex items-center gap-2 mb-1">
+          <UserCircle className="w-4 h-4 text-brand-700" />
+          <p className="text-xs font-semibold text-brand-800">Đang đăng nhập</p>
+        </div>
+        <p className="text-xs text-brand-700/80 truncate">{user?.email}</p>
+      </div>
+      <button
+        onClick={onLogout}
+        className="w-full flex items-center gap-2 px-3 py-2 text-sm text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+      >
+        <LogOut className="w-4 h-4" />
+        Đăng xuất
+      </button>
+    </div>
   )
 }

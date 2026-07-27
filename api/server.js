@@ -108,6 +108,7 @@ app.use('/api/users', require('./routes/users'));
 app.use('/api/wishlist', require('./routes/wishlist'));
 app.use('/api/payment', require('./routes/payment'));
 app.use('/api/upload', require('./routes/uploads'));
+app.use('/api/admin', require('./routes/admin'));
 app.use('/', require('./routes/sitemap'));
 
 // Health check
@@ -121,6 +122,79 @@ app.get('/', (req, res) => {
     version: '1.0.0',
     env: NODE_ENV,
     docs: '/api',
+  });
+});
+
+app.get('/api', (req, res) => {
+  res.json({
+    name: 'Luxe Jewelry API',
+    version: '1.0.0',
+    auth: {
+      requestOtp: 'POST /api/auth/request-otp',
+      verifyOtp: 'POST /api/auth/verify-otp',
+      login: 'POST /api/auth/login',
+      register: 'POST /api/auth/register',
+      setPassword: 'POST /api/auth/set-password',
+      changePassword: 'POST /api/auth/change-password',
+      checkAuthMethod: 'POST /api/auth/check-auth-method',
+    },
+    products: {
+      list: 'GET /api/products?category=&brand=&minPrice=&maxPrice=&search=&sort=&page=&limit=',
+      suggestions: 'GET /api/products/search/suggestions?q=&limit=',
+      get: 'GET /api/products/:id',
+      create: 'POST /api/products (admin)',
+      update: 'PUT /api/products/:id (admin)',
+      delete: 'DELETE /api/products/:id (admin)',
+    },
+    orders: {
+      listAll: 'GET /api/orders/all (admin)',
+      byUser: 'GET /api/orders/user/:userId',
+      get: 'GET /api/orders/:id',
+      create: 'POST /api/orders',
+      cancel: 'POST /api/orders/:id/cancel (user, own order)',
+      updateStatus: 'PUT /api/orders/:id/status (admin)',
+    },
+    reviews: {
+      byProduct: 'GET /api/reviews/product/:productId',
+      create: 'POST /api/reviews',
+      helpful: 'POST /api/reviews/:id/helpful',
+      delete: 'DELETE /api/reviews/:id (auth)',
+    },
+    users: {
+      get: 'GET /api/users/:id',
+      update: 'PUT /api/users/:id (owner/admin)',
+      avatar: 'POST /api/users/:id/avatar (owner/admin)',
+      addresses: 'GET/POST/PUT/DELETE /api/users/:id/addresses[/:addressId]',
+      setDefaultAddress: 'PUT /api/users/:id/addresses/:addressId/default',
+      measurements: 'GET/PUT /api/users/:id/measurements',
+      stats: 'GET /api/users/:id/stats',
+    },
+    wishlist: {
+      get: 'GET /api/wishlist',
+      add: 'POST /api/wishlist',
+      remove: 'DELETE /api/wishlist/:productId',
+    },
+    payment: {
+      sepayWebhook: 'POST /api/payment/sepay-webhook',
+    },
+    uploads: {
+      image: 'POST /api/upload/image',
+    },
+    admin: {
+      categories: 'GET/POST /api/admin/categories, PUT/DELETE /api/admin/categories/:id',
+      promotions: 'GET/POST /api/admin/promotions, PUT/DELETE /api/admin/promotions/:id',
+      banners: 'GET/POST /api/admin/banners, PUT/DELETE /api/admin/banners/:id',
+      settings: 'GET/PUT /api/admin/settings',
+      reviews: 'GET/DELETE /api/admin/reviews[/:id]',
+      analyticsOverview: 'GET /api/admin/analytics/overview',
+      dashboardStats: 'GET /api/admin/dashboard-stats',
+      updateUserRole: 'PUT /api/admin/users/:id/role',
+    },
+    notes: [
+      'Tất cả endpoints /api/admin yêu cầu JWT admin role.',
+      'Đăng nhập qua /api/auth/login → lấy token → gửi Bearer token.',
+      'Mọi response lỗi có dạng { error: string }.',
+    ],
   });
 });
 

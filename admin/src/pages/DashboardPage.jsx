@@ -1,7 +1,9 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { productsAPI, ordersAPI, usersAPI } from '../lib/api'
-import { formatVND, formatDateShort, getStatusInfo, imgUrl } from '../lib/utils'
+import { productsAPI, ordersAPI, usersAPI, analyticsAPI } from '../lib/api'
+import {
+  formatVND, formatDateShort, getStatusInfo, imgUrl, getVipTier, formatVNDShort
+} from '../lib/utils'
 import PageHeader from '../components/ui/PageHeader'
 import StatCard from '../components/ui/StatCard'
 import StatusBadge from '../components/ui/StatusBadge'
@@ -9,13 +11,14 @@ import Spinner from '../components/ui/Spinner'
 import EmptyState from '../components/ui/EmptyState'
 import {
   Package, ShoppingCart, Users, TrendingUp, AlertTriangle,
-  ArrowRight, Calendar, BarChart3
+  ArrowRight, Calendar, BarChart3, Crown, Star, Truck, MessageSquare
 } from 'lucide-react'
 
 export default function DashboardPage() {
   const [products, setProducts] = useState([])
   const [orders, setOrders] = useState([])
   const [users, setUsers] = useState([])
+  const [analytics, setAnalytics] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -25,14 +28,16 @@ export default function DashboardPage() {
   const loadAll = async () => {
     setLoading(true)
     try {
-      const [p, o, u] = await Promise.all([
+      const [p, o, u, a] = await Promise.all([
         productsAPI.getAll({ limit: 200 }),
         ordersAPI.getAll(),
         usersAPI.getAll(),
+        analyticsAPI.dashboard().catch(() => null),
       ])
       setProducts(p.items || [])
       setOrders(o || [])
       setUsers(u || [])
+      setAnalytics(a)
     } catch (e) {
       console.error('Failed to load dashboard:', e)
     } finally {
@@ -44,7 +49,7 @@ export default function DashboardPage() {
     const totalRevenue = orders
       .filter((o) => o.status !== 'cancelled')
       .reduce((s, o) => s + Number(o.totalPrice || o.total_amount || 0), 0)
-    const pendingOrders = orders.filter((o) => o.status === 'pending').length
+    const pendingOrders = orders.filter((o) => o.status === 'pending' || o.status === 'pending_payment').length
     const lowStock = products.filter((p) => Number(p.stock) > 0 && Number(p.stock) <= 10).length
     const outOfStock = products.filter((p) => Number(p.stock) === 0).length
 
@@ -61,14 +66,38 @@ export default function DashboardPage() {
 
   const recentOrders = useMemo(() => orders.slice(0, 6), [orders])
   const lowStockProducts = useMemo(
-    () => products
+    () => (analytics?.lowStock?.length ? analytics.lowStock : products
       .filter((p) => Number(p.stock) > 0 && Number(p.stock) <= 10)
       .sort((a, b) => a.stock - b.stock)
-      .slice(0, 5),
-    [products]
+      .slice(0, 5)
+    ),
+    [analytics, products]
   )
 
-  const chartData = useMemo(() => buildLast7Days(orders), [orders])
+  const chartData = useMemo(
+    () => buildChartData(analytics?.last7Days, orders),
+    [analytics, orders]
+  )
+
+  // Top khách hàng theo tổng chi tiêu (tính nhanh phía client)
+  const topCustomers = useMemo(() => {
+    const spent = {}
+    for (const o of orders) {
+      if (o.status === 'cancelled') continue
+      const uid = o.userId || o.user_id
+      const amt = Number(o.totalPrice || o.total_amount || 0)
+      if (!uid) continue
+      spent[uid] = (spent[uid] || 0) + amt
+    }
+    return Object.entries(spent)
+      .map(([uid, total]) => {
+        const u = users.find((x) => String(x.id) === String(uid))
+        return { uid: Number(uid), total, user: u }
+      })
+      .filter((x) => x.user)
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 5)
+  }, [orders, users])
 
   if (loading) {
     return (
@@ -185,6 +214,81 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Top customers + recent reviews */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <div className="card p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-base font-semibold text-slate-900">Khách hàng VIP</h3>
+              <p className="text-xs text-slate-500 mt-0.5">Top chi tiêu</p>
+            </div>
+            <Link to="/users" className="text-xs font-medium text-brand-700 hover:text-brand-800 flex items-center gap-1">
+              Xem tất cả <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+          {topCustomers.length === 0 ? (
+            <EmptyState icon={Users} title="Chưa có khách mua" />
+          ) : (
+            <ul className="space-y-3">
+              {topCustomers.map(({ uid, total, user: u }) => {
+                const tier = getVipTier(total)
+                return (
+                  <li key={uid} className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-brand-400 to-brand-600 text-white flex items-center justify-center text-sm font-semibold shrink-0">
+                      {(u.name || u.email || '?').charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-900 truncate">{u.name || u.email}</p>
+                      <p className="text-xs text-slate-500">{formatVNDShort(total)} đã chi</p>
+                    </div>
+                    <span className="badge bg-amber-100 text-amber-700 ring-amber-200 inline-flex items-center gap-1">
+                      <Crown className="w-3 h-3" /> {tier.name}
+                    </span>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+        </div>
+
+        <div className="card p-5">
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-base font-semibold text-slate-900">Đánh giá mới nhất</h3>
+              <p className="text-xs text-slate-500 mt-0.5">5 đánh giá gần đây</p>
+            </div>
+            <Link to="/reviews" className="text-xs font-medium text-brand-700 hover:text-brand-800 flex items-center gap-1">
+              Xem tất cả <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
+          {!analytics?.recentReviews?.length ? (
+            <EmptyState icon={MessageSquare} title="Chưa có đánh giá" />
+          ) : (
+            <ul className="space-y-3">
+              {analytics.recentReviews.map((r) => (
+                <li key={r.id} className="border-b border-slate-100 last:border-0 pb-3 last:pb-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="flex items-center">
+                      {Array.from({ length: 5 }, (_, i) => (
+                        <Star
+                          key={i}
+                          className={`w-3.5 h-3.5 ${i < Number(r.rating || 0) ? 'fill-amber-400 text-amber-400' : 'text-slate-200'}`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-xs text-slate-500">{formatDateShort(r.created_at)}</span>
+                  </div>
+                  <p className="text-sm text-slate-700 line-clamp-2">{r.comment || 'Không có nhận xét'}</p>
+                  <p className="text-xs text-slate-500 mt-1">
+                    {r.user_name} • <span className="text-slate-700">{r.product_name}</span>
+                  </p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+
       {/* Recent orders */}
       <div className="card overflow-hidden">
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
@@ -246,7 +350,16 @@ export default function DashboardPage() {
   )
 }
 
-function buildLast7Days(orders) {
+function buildChartData(apiDays, orders) {
+  // Ưu tiên dữ liệu từ /admin/dashboard-stats (đã group theo DATE).
+  if (Array.isArray(apiDays) && apiDays.length > 0) {
+    return apiDays.map((d) => ({
+      label: new Intl.DateTimeFormat('vi-VN', { day: '2-digit', month: '2-digit' }).format(new Date(d.day)),
+      count: Number(d.orders || 0),
+      revenue: Number(d.revenue || 0),
+    }))
+  }
+  // Fallback: tính phía client
   const days = []
   for (let i = 6; i >= 0; i--) {
     const d = new Date()
