@@ -4,13 +4,14 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const slowDown = require('express-slow-down');
 const hpp = require('hpp');
-const pool = require('./config/database');
 
-require('dotenv').config();
+const pool = require('./config/database');
 
 const productRoutes = require('./routes/products');
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
+
+require('dotenv').config();
 
 const app = express();
 
@@ -134,15 +135,9 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/uploads', require('express').static(require('path').join(__dirname, 'uploads')));
 
 // Routes
-app.use('/api/auth', require('./routes/auth'));
-app.use('/api/products', require('./routes/products'));
-app.use('/api/orders', require('./routes/orders'));
-app.use('/api/reviews', require('./routes/reviews'));
-app.use('/api/users', require('./routes/users'));
-app.use('/api/wishlist', require('./routes/wishlist'));
-app.use('/api/payment', require('./routes/payment'));
-app.use('/api/upload', require('./routes/uploads'));
-app.use('/api/admin', require('./routes/admin'));
+app.use('/api/products', productRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 app.use('/', require('./routes/sitemap'));
 
 // Health check - respond immediately, no DB call, no rate-limit dependency
