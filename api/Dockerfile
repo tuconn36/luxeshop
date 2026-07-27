@@ -1,5 +1,5 @@
-# ===== Runtime stage (single-stage để giảm network calls) =====
-FROM node:20-slim
+# ===== Runtime stage =====
+FROM node:20-alpine
 
 WORKDIR /app
 
@@ -9,10 +9,6 @@ RUN npm ci --omit=dev
 
 # Source code
 COPY . .
-
-# Tạo user non-root
-RUN groupadd -S app && useradd -S app -G app && chown -R app:app /app
-USER app
 
 ENV NODE_ENV=production
 ENV PORT=5000
