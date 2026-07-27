@@ -3,12 +3,14 @@ FROM node:20-alpine
 WORKDIR /app
 
 COPY package*.json ./
-RUN npm ci --omit=dev
+RUN npm ci --omit=dev || npm install --omit=dev --no-audit --no-fund
 
 COPY . .
 
+ENV NODE_ENV=production
+ENV PORT=5000
 EXPOSE 5000
 
-# Railway sẽ set PORT từ env (mặc định 8080 nếu không set)
-# Code sẽ listen theo PORT, EXPOSE chỉ để document
+RUN node -e "console.log('Build OK: node', process.versions.node)"
+
 CMD ["node", "server.js"]

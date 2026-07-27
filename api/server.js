@@ -4,10 +4,13 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const slowDown = require('express-slow-down');
 const hpp = require('hpp');
+const pool = require('./config/database');
 require('dotenv').config();
 
 const app = express();
-const PORT = parseInt(process.env.PORT || '5000', 10);
+// Khi start locally (npm run dev) ưu tiên 5001 cho khớp với web/.env,
+// tránh xung đột với các API khác đang dùng 5000.
+const PORT = parseInt(process.env.PORT || '5001', 10);
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // ============ TRUST PROXY ============
@@ -47,7 +50,8 @@ const authLimiter = rateLimit({
 const speedLimiter = slowDown({
   windowMs: 15 * 60 * 1000,
   delayAfter: 200,
-  delayMs: (used) => (used - 200) * 250,
+  delayMs: () => 250,
+  validate: { delayMs: false },
 });
 
 // 4. HPP - Chống HTTP Parameter Pollution
@@ -95,6 +99,14 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use((req, res, next) => {
+  const startedAt = Date.now();
+  res.on('finish', () => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl} -> ${res.statusCode} (${Date.now() - startedAt}ms)`);
+  });
+  next();
+});
+
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use('/uploads', require('express').static(require('path').join(__dirname, 'uploads')));
@@ -113,7 +125,13 @@ app.use('/', require('./routes/sitemap'));
 
 // Health check
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', env: NODE_ENV, timestamp: new Date().toISOString() });
+  res.json({
+    status: 'ok',
+    env: NODE_ENV,
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    database: pool.healthCheck ? 'configured' : 'unknown',
+  });
 });
 
 app.get('/', (req, res) => {

@@ -119,40 +119,4 @@ CREATE INDEX IF NOT EXISTS idx_users_phone ON users(phone);
 CREATE INDEX IF NOT EXISTS idx_user_addresses_user_id ON user_addresses(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_addresses_is_default ON user_addresses(user_id, is_default);
 
--- Insert sample data for products
-INSERT INTO products (name, description, price, original_price, category, stock, featured, images, materials, sizes, colors, tags) VALUES
-('Diamond Solitaire Ring', 'Classic diamond solitaire engagement ring in 18k white gold', 2499.00, 2999.00, 'Rings', 15, true,
-    '["ring1.jpg", "ring1-2.jpg"]',
-    '["18k White Gold", "0.5ct Diamond"]',
-    '["5", "6", "7", "8", "9"]',
-    '["White Gold"]',
-    '["engagement", "diamond", "luxury"]'
-),
-('Pearl Necklace', 'Elegant freshwater pearl necklace with 14k gold clasp', 899.00, 1099.00, 'Necklaces', 25, true,
-    '["necklace1.jpg"]',
-    '["Freshwater Pearls", "14k Gold"]',
-    '["16 inch", "18 inch", "20 inch"]',
-    '["White", "Pink"]',
-    '["pearl", "classic", "elegant"]'
-),
-('Gold Chain Bracelet', 'Delicate 14k gold chain bracelet', 599.00, NULL, 'Bracelets', 30, false,
-    '["bracelet1.jpg"]',
-    '["14k Yellow Gold"]',
-    '["7 inch", "8 inch"]',
-    '["Yellow Gold"]',
-    '["gold", "chain", "minimalist"]'
-),
-('Diamond Stud Earrings', 'Classic diamond stud earrings in 18k gold', 1299.00, 1499.00, 'Earrings', 20, true,
-    '["earring1.jpg"]',
-    '["18k Gold", "0.25ct Diamonds"]',
-    '["One Size"]',
-    '["White Gold", "Yellow Gold"]',
-    '["diamond", "stud", "everyday"]'
-),
-('Luxury Swiss Watch', 'Automatic mechanical watch with leather strap', 3999.00, 4999.00, 'Watches', 10, true,
-    '["watch1.jpg"]',
-    '["Stainless Steel", "Sapphire Crystal", "Leather"]',
-    '["One Size"]',
-    '["Black", "Brown"]',
-    '["luxury", "automatic", "swiss"]'
-);
+-- Product data is seeded by scripts/seedFullProducts.js after the schema is ready.
