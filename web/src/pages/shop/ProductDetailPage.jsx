@@ -19,6 +19,7 @@ import { toast } from 'sonner';
 import ReviewSection from '@/components/shop/ReviewSection.jsx';
 import RelatedProducts from '@/components/shop/RelatedProducts.jsx';
 import Lightbox from 'yet-another-react-lightbox';
+import ErrorBoundary from '@/components/common/ErrorBoundary.jsx';
 
 const SIZE_CHART = [
   { size: 'S',   chest: '86-90',  waist: '70-74',  height: '160-170' },
@@ -777,12 +778,16 @@ export default function ProductDetailPage() {
 
           {/* Reviews */}
           <div className="mt-8">
-            <ReviewSection productId={id} onStatsUpdate={setReviewStats} />
+            <ErrorBoundary fallback={<div className="text-center py-8 text-gray-500">Không thể tải đánh giá</div>}>
+              <ReviewSection productId={id} onStatsUpdate={setReviewStats} />
+            </ErrorBoundary>
           </div>
 
           {/* Related Products */}
           <div className="mt-12">
-            <RelatedProducts category={product.category} currentId={product.id} />
+            <ErrorBoundary fallback={null}>
+              <RelatedProducts category={product.category} currentId={product.id} />
+            </ErrorBoundary>
           </div>
         </div>
       </main>

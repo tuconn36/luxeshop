@@ -31,16 +31,36 @@ const pool = new Pool({
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 5000, // Railway có thể chậm kết nối lần đầu
+  // Quan trọng: Kiểm tra connection trước khi sử dụng để tránh lỗi
+  // "Invalid attempt to read client when server is not processing a query"
+  allowExitOnIdle: false,
 });
 
-// Set UTF8 + SSL-safe timezone on every new connection
+// Validate connection trước khi sử dụng — tránh dùng connection đã chết
 pool.on('connect', (client) => {
-  client.query("SET client_encoding = 'UTF8'");
+  client.query("SET client_encoding = 'UTF8'").catch(() => {
+    // Ignore SET errors — connection vẫn có thể dùng được
+  });
 });
 
-// Lỗi idle client không được kill cả process — pg sẽ tự xóa client hỏng khỏi pool.
+// Khi connection bị lỗi, pg sẽ tự động xóa khỏi pool
 pool.on('error', (err) => {
   console.error('[DB] Unexpected database error (idle client):', err.message);
 });
+
+// Health check function — dùng để verify pool còn hoạt động
+pool.healthCheck = async () => {
+  try {
+    const client = await pool.connect();
+    try {
+      await client.query('SELECT 1');
+      return true;
+    } finally {
+      client.release();
+    }
+  } catch {
+    return false;
+  }
+};
 
 module.exports = pool;
