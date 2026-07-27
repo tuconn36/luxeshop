@@ -36,7 +36,6 @@ import { ordersAPI, paymentAPI } from '@/lib/api.js';
 import { getPaymentInfo } from '@/lib/paymentInfo.js';
 import { Button } from '@/components/ui/button';
 import VietQRModal from '@/components/shop/VietQRModal.jsx';
-import OrderTimeline from '@/components/order/OrderTimeline.jsx';
 
 const ORDER_STATUSES = {
   pending: { label: 'Chờ xác nhận', icon: Clock, color: 'yellow', step: 0 },
@@ -574,12 +573,8 @@ export default function OrderDetailPage() {
         </span>
       </div>
 
-      <div className="mb-5">
-        <OrderTimeline
-          order={order}
-          onCancel={statusInfo?.color === 'amber' ? handleCancel : undefined}
-          pollInterval={order?.status === 'shipping' || order?.status === 'processing' ? 30000 : 0}
-        />
+      <div className="bg-white border border-gray-200 rounded-2xl px-6 py-5 mb-5">
+        <StatusTimeline step={statusInfo.step} />
       </div>
 
       <ShippingJourney order={order} />

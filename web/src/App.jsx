@@ -3,7 +3,6 @@ import { Route, Routes, BrowserRouter as Router } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext.jsx';
 import { WishlistProvider } from './contexts/WishlistContext.jsx';
 import { CompareProvider } from './contexts/CompareContext.jsx';
-import { ThemeProvider } from './contexts/ThemeContext.jsx';
 import { Toaster } from '@/components/ui/sonner';
 import ScrollToTop from './components/layout/ScrollToTop.jsx';
 import ProtectedRoute from './components/common/ProtectedRoute.jsx';
@@ -41,13 +40,12 @@ import PolicyPage from './pages/policy/PolicyPage.jsx';
 
 function App() {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <WishlistProvider>
-          <CompareProvider>
-            <Router>
-              <ScrollToTop />
-              <Routes>
+    <AuthProvider>
+      <WishlistProvider>
+        <CompareProvider>
+          <Router>
+            <ScrollToTop />
+            <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/new-arrivals" element={<NewArrivalsPage />} />
             <Route path="/sale" element={<SalePage />} />
@@ -121,7 +119,6 @@ function App() {
         </CompareProvider>
       </WishlistProvider>
     </AuthProvider>
-    </ThemeProvider>
   );
 }
 

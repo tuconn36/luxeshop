@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { AnimatePresence } from 'framer-motion';
 import { Search, ShoppingCart, User, Menu, X, Phone, Globe, Tag, Moon, Sun, ChevronDown, ArrowUp, Crown } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext.jsx';
-import { useTheme } from '@/contexts/ThemeContext.jsx';
 import { useCart } from '@/hooks/useCart.js';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,7 +10,6 @@ import { statsAPI } from '@/lib/api.js';
 import { getVipTier } from '@/lib/vip.js';
 import { toast } from 'sonner';
 import OTPLoginModal from '@/components/auth/OTPLoginModal.jsx';
-import SearchSuggestions from '@/components/search/SearchSuggestions.jsx';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import MegaMenu from '@/components/layout/MegaMenu.jsx';
 
@@ -115,14 +112,24 @@ export default function Header() {
   };
 
   const [lang, setLang] = useState(() => localStorage.getItem('lang') || 'vi');
+  const [isDark, setIsDark] = useState(() => document.documentElement.classList.contains('dark'));
 
-  // Theme — dùng ThemeContext toàn cục (đồng bộ với mọi nơi)
-  // eslint-disable-next-line no-unused-vars
-  const { isDark, toggleTheme } = useTheme();
-  // Backward-compat alias
-  const setIsDark = () => {};
-  // local handler gọi qua context
-  const toggleDark = toggleTheme;
+  const toggleDark = () => {
+    const html = document.documentElement;
+    html.classList.toggle('dark');
+    const dark = html.classList.contains('dark');
+    setIsDark(dark);
+    localStorage.setItem('theme', dark ? 'dark' : 'light');
+  };
+
+  // Khởi tạo theme từ localStorage
+  React.useEffect(() => {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'dark') {
+      document.documentElement.classList.add('dark');
+      setIsDark(true);
+    }
+  }, []);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -761,20 +768,6 @@ export default function Header() {
                 Tìm
               </Button>
             </form>
-
-            {/* Autocomplete suggestions */}
-            <AnimatePresence>
-              {isSearchOpen && (
-                <div className="mt-3">
-                  <SearchSuggestions
-                    query={searchQuery}
-                    onClose={() => setIsSearchOpen(false)}
-                    onPick={(q) => setSearchQuery(q)}
-                  />
-                </div>
-              )}
-            </AnimatePresence>
-
             <div className="mt-5 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
               <span className="mr-1">Gợi ý:</span>
               {['Áo thun', 'Quần jean', 'Giày sneaker', 'Túi xách', 'Áo khoác'].map((kw) => (

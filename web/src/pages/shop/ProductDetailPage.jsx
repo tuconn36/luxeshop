@@ -17,10 +17,6 @@ import Footer from '@/components/layout/Footer.jsx';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import ReviewSection from '@/components/shop/ReviewSection.jsx';
-import { Skeleton } from '@/components/ui/skeleton';
-import RecentlyViewedCarousel from '@/components/shop/RecentlyViewedCarousel.jsx';
-import CompleteTheLook from '@/components/shop/CompleteTheLook.jsx';
-import { useTrackView } from '@/hooks/useRecentlyViewed';
 import RelatedProducts from '@/components/shop/RelatedProducts.jsx';
 import Lightbox from 'yet-another-react-lightbox';
 
@@ -71,9 +67,6 @@ export default function ProductDetailPage() {
   const ctaRef = useRef(null);
   const tabsRef = useRef(null);
 
-  // Track view (mount) + duration (unmount) — Recently Viewed
-  useTrackView(product);
-
   useEffect(() => {
     const fetchProduct = async () => {
       try {
@@ -107,59 +100,13 @@ export default function ProductDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-neutral-950">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Breadcrumb skeleton */}
-          <div className="flex items-center gap-2 mb-6">
-            <Skeleton className="h-3 w-12" />
-            <Skeleton className="h-3 w-3" />
-            <Skeleton className="h-3 w-16" />
-            <Skeleton className="h-3 w-3" />
-            <Skeleton className="h-3 w-32" />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50/30 to-orange-50/20">
+        <div className="text-center">
+          <div className="relative w-16 h-16 mx-auto">
+            <div className="absolute inset-0 rounded-full border-4 border-amber-200"></div>
+            <div className="absolute inset-0 rounded-full border-4 border-amber-600 border-t-transparent animate-spin"></div>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
-            {/* Gallery skeleton */}
-            <div className="space-y-4">
-              <Skeleton className="aspect-square rounded-2xl" />
-              <div className="grid grid-cols-4 gap-2">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <Skeleton key={i} className="aspect-square rounded-lg" />
-                ))}
-              </div>
-            </div>
-            {/* Info skeleton */}
-            <div className="space-y-5">
-              <Skeleton className="h-3 w-20" />
-              <Skeleton className="h-9 w-3/4" />
-              <div className="flex items-center gap-2">
-                {Array.from({ length: 4 }).map((_, i) => (
-                  <Skeleton key={i} className="h-4 w-4 rounded-full" />
-                ))}
-                <Skeleton className="h-4 w-8" />
-              </div>
-              <Skeleton className="h-8 w-40" />
-              <div className="space-y-2">
-                <Skeleton className="h-3 w-16" />
-                <div className="flex gap-2">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Skeleton key={i} className="h-10 w-12 rounded-md" />
-                  ))}
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Skeleton className="h-3 w-16" />
-                <div className="flex gap-2">
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <Skeleton key={i} className="h-10 w-10 rounded-full" />
-                  ))}
-                </div>
-              </div>
-              <div className="flex gap-3 pt-4">
-                <Skeleton className="h-12 flex-1 rounded-lg" />
-                <Skeleton className="h-12 flex-1 rounded-lg" />
-              </div>
-            </div>
-          </div>
+          <p className="mt-4 text-sm text-gray-500 font-medium">Đang tải sản phẩm...</p>
         </div>
       </div>
     );
@@ -840,111 +787,37 @@ export default function ProductDetailPage() {
         </div>
       </main>
 
-      {/* Sticky add-to-cart bar — tối ưu mobile (hiện khi CTA trên màn hình bị cuộn qua) */}
+      {/* Sticky add-to-cart bar */}
       <div
-        className={`fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-neutral-950/95 backdrop-blur-xl border-t border-gray-200 dark:border-neutral-800 shadow-[0_-8px_30px_rgb(0,0,0,0.08)] dark:shadow-[0_-8px_30px_rgb(0,0,0,0.4)] transition-transform duration-300 ease-out pb-[env(safe-area-inset-bottom)] ${
-          showStickyCta ? 'translate-y-0' : 'translate-y-full pointer-events-none'
+        className={`fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-gray-200 shadow-2xl transition-transform duration-300 ${
+          showStickyCta ? 'translate-y-0' : 'translate-y-full'
         }`}
-        role="region"
-        aria-label="Thêm vào giỏ hàng nhanh"
       >
-        {/* Low stock warning bar */}
-        {product.stock > 0 && product.stock <= 5 && (
-          <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-semibold px-4 py-1.5 flex items-center justify-center gap-1.5">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-white" />
-            </span>
-            Chỉ còn {product.stock} sản phẩm — Nhanh tay kẻo hết!
-          </div>
-        )}
-
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-3 flex items-center gap-2 sm:gap-4">
-          {/* Product thumbnail - ẩn trên mobile cỡ nhỏ */}
-          <img
-            src={resolvedImages[0]}
-            alt=""
-            className="hidden sm:block w-12 h-12 rounded-lg object-cover shrink-0 ring-1 ring-gray-200 dark:ring-neutral-700"
-          />
-
-          {/* Product info */}
-          <div className="min-w-0 flex-1 hidden sm:block">
-            <p className="font-semibold text-sm text-gray-900 dark:text-white truncate">{product.name}</p>
-            <p className="text-base font-bold text-amber-700 dark:text-amber-400">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center gap-4">
+          <img src={resolvedImages[0]} alt="" className="w-12 h-12 rounded-lg object-cover shrink-0" />
+          <div className="min-w-0 flex-1">
+            <p className="font-semibold text-sm text-gray-900 truncate">{product.name}</p>
+            <p className="text-base font-bold text-amber-700">
               {Number(product.price)?.toLocaleString('vi-VN')}₫
             </p>
           </div>
-
-          {/* Mobile: chỉ hiện tên + giá gọn */}
-          <div className="sm:hidden min-w-0 flex-1">
-            <p className="font-semibold text-xs text-gray-900 dark:text-white truncate">{product.name}</p>
-            <p className="text-sm font-bold text-amber-700 dark:text-amber-400">
-              {Number(product.price)?.toLocaleString('vi-VN')}₫
-            </p>
-          </div>
-
-          {/* Quantity controls - inline */}
-          <div className="hidden md:flex items-center border border-gray-300 dark:border-neutral-700 rounded-lg overflow-hidden">
-            <button
-              type="button"
-              onClick={() => setQuantity(q => Math.max(1, q - 1))}
-              disabled={quantity <= 1}
-              className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-neutral-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              aria-label="Giảm số lượng"
-            >
-              <Minus className="w-3.5 h-3.5" />
-            </button>
-            <span className="w-8 text-center text-sm font-semibold tabular-nums">{quantity}</span>
-            <button
-              type="button"
-              onClick={() => setQuantity(q => Math.min(product.stock, q + 1))}
-              disabled={quantity >= product.stock}
-              className="w-8 h-8 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-neutral-800 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-              aria-label="Tăng số lượng"
-            >
-              <Plus className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          {/* Add to cart button - outline */}
           <Button
             onClick={handleAddToCart}
             variant="outline"
-            className="border-amber-600 text-amber-700 dark:text-amber-400 dark:border-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10 h-10 px-3 sm:px-4"
-            disabled={product.stock <= 0 || addingToCart}
-            aria-label="Thêm vào giỏ hàng"
+            className="hidden sm:inline-flex border-amber-600 text-amber-700 hover:bg-amber-50"
+            disabled={product.stock <= 0}
           >
-            <ShoppingBag className="w-4 h-4 mr-0 sm:mr-2" />
-            <span className="hidden sm:inline">Thêm giỏ</span>
+            <ShoppingBag className="w-4 h-4 mr-2" /> Thêm giỏ
           </Button>
-
-          {/* Buy now button - primary CTA */}
           <Button
             onClick={handleBuyNow}
-            className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700 dark:from-amber-500 dark:to-orange-500 h-10 px-3 sm:px-5 shadow-lg shadow-amber-600/20"
+            className="bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-700 hover:to-orange-700"
             disabled={product.stock <= 0 || addingToCart}
-            aria-label="Mua ngay"
           >
-            {product.stock <= 0 ? (
-              <>
-                <X className="w-4 h-4 mr-0 sm:mr-2" />
-                <span className="hidden sm:inline">Hết hàng</span>
-              </>
-            ) : (
-              <>
-                <Zap className="w-4 h-4 mr-0 sm:mr-2 fill-current" />
-                <span className="hidden sm:inline">Mua ngay</span>
-              </>
-            )}
+            <Zap className="w-4 h-4 mr-2 fill-current" /> Mua ngay
           </Button>
         </div>
       </div>
-
-      {/* Complete the look */}
-      <CompleteTheLook product={product} />
-
-      {/* Recently Viewed */}
-      <RecentlyViewedCarousel excludeId={product.id} />
 
       {/* Size chart modal */}
       {sizeChartOpen && (

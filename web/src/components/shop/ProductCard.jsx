@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
@@ -508,40 +508,6 @@ export default function ProductCard({ product, index = 0 }) {
   const [showQuickView, setShowQuickView] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [adding, setAdding] = useState(false);
-  const hoverTimerRef = useRef(null);
-  const cardRef = useRef(null);
-
-  // Auto mở Quick View khi rê chuột 800ms (chỉ desktop, không phải touch)
-  useEffect(() => {
-    // Bỏ qua trên touch device
-    if (typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches) {
-      return;
-    }
-
-    if (isHovered && !showQuickView) {
-      hoverTimerRef.current = setTimeout(() => {
-        setShowQuickView(true);
-      }, 800);
-    }
-
-    return () => {
-      if (hoverTimerRef.current) {
-        clearTimeout(hoverTimerRef.current);
-        hoverTimerRef.current = null;
-      }
-    };
-  }, [isHovered, showQuickView]);
-
-  const handleMouseEnter = () => {
-    setIsHovered(true);
-  };
-  const handleMouseLeave = () => {
-    setIsHovered(false);
-    if (hoverTimerRef.current) {
-      clearTimeout(hoverTimerRef.current);
-      hoverTimerRef.current = null;
-    }
-  };
 
   const inWishlist = isInWishlist(product.id);
 
@@ -594,12 +560,11 @@ export default function ProductCard({ product, index = 0 }) {
   return (
     <>
       <motion.article
-        ref={cardRef}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
         className="group relative h-full"
       >
         <Link to={`/product/${product.id}`} className="block h-full">
@@ -676,7 +641,7 @@ export default function ProductCard({ product, index = 0 }) {
                 {adding ? 'Đang thêm' : 'Thêm vào giỏ'}
               </button>
 
-              {/* Quick view - bottom right corner, glass - luôn hiện trên mobile, hover trên desktop */}
+              {/* Quick view - bottom right corner, glass */}
               <button
                 onClick={(e) => {
                   e.preventDefault();
@@ -684,11 +649,8 @@ export default function ProductCard({ product, index = 0 }) {
                   setShowQuickView(true);
                 }}
                 aria-label="Xem nhanh"
-                title="Xem nhanh"
-                className={`absolute bottom-4 right-3 z-10 w-10 h-10 rounded-full bg-white/80 dark:bg-neutral-900/80 backdrop-blur-md border border-white/40 dark:border-neutral-700 shadow-sm flex items-center justify-center text-neutral-700 dark:text-neutral-200 hover:bg-neutral-900 hover:text-white dark:hover:bg-amber-500 dark:hover:text-white transition-all duration-300 ${
-                  isHovered
-                    ? 'opacity-100 translate-y-0'
-                    : 'opacity-0 translate-y-3 pointer-events-none sm:opacity-0'
+                className={`absolute bottom-4 right-3 z-10 w-10 h-10 rounded-full bg-white/70 backdrop-blur-md border border-white/40 shadow-sm flex items-center justify-center text-neutral-700 hover:bg-neutral-900 hover:text-white transition-all duration-300 ${
+                  isHovered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-3 pointer-events-none'
                 }`}
               >
                 <Eye className="w-4 h-4" strokeWidth={2} />

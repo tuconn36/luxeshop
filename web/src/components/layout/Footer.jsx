@@ -221,10 +221,7 @@ export default function Footer() {
               alt="Verified"
               className="w-14 h-14"
             />
-            <div className="text-xs text-gray-400">
-              <div className="font-semibold text-white">ĐÃ THÔNG BÁO</div>
-              <div></div>
-            </div>
+            
           </div>
         </div>
       </div>

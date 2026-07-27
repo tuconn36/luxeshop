@@ -9,7 +9,6 @@ import ProductCard from '@/components/shop/ProductCard.jsx';
 import HeroCarousel from '@/components/shop/HeroCarousel.jsx';
 import FlashSale from '@/components/shop/FlashSale.jsx';
 import SectionHeader from '@/components/shop/SectionHeader.jsx';
-import RecentlyViewedCarousel from '@/components/shop/RecentlyViewedCarousel.jsx';
 import { useProducts } from '@/hooks/useProducts.js';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -744,8 +743,6 @@ export default function HomePage() {
           </motion.div>
         </div>
       </section>
-
-      <RecentlyViewedCarousel />
 
       <Footer />
     </>
