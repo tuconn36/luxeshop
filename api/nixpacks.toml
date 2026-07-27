@@ -1,0 +1,12 @@
+# NIXPACKS config for Luxe Jewelry API
+# Ép dùng npm thay vì pnpm/yarn để tránh bị NIXPACKS auto-detect sai.
+# Chỉ build folder api/, không đụng tới web/.
+
+[phases.setup]
+nixPkgs = ["nodejs-20_x"]
+
+[phases.install]
+cmds = ["npm ci --omit=dev=false || npm install"]
+
+[start]
+cmd = "node scripts/migrate.js && node server.js"

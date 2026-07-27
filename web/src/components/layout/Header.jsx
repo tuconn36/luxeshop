@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import OTPLoginModal from '@/components/auth/OTPLoginModal.jsx';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import MegaMenu from '@/components/layout/MegaMenu.jsx';
+import SearchAutocomplete from '@/components/search/SearchAutocomplete.jsx';
 
 
 export default function Header() {
@@ -131,8 +132,7 @@ export default function Header() {
     }
   }, []);
 
-  const handleSearch = (e) => {
-    e.preventDefault();
+  const handleSearch = () => {
     if (searchQuery.trim()) {
       navigate(`/products?search=${encodeURIComponent(searchQuery)}`);
       setSearchQuery('');
@@ -540,16 +540,21 @@ export default function Header() {
             <div className={`md:hidden py-5 border-t animate-fade-in-down ${
               isOverlay ? 'border-white/10' : 'border-border'
             }`}>
-              <form onSubmit={handleSearch} className="relative mb-5">
-                <Input
-                  type="text"
-                  placeholder="Tìm kiếm sản phẩm..."
+              <div className="relative mb-5">
+                <SearchAutocomplete
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 rounded-full"
+                  onChange={setSearchQuery}
+                  onSubmit={() => {
+                    if (searchQuery.trim()) {
+                      navigate(`/products?search=${encodeURIComponent(searchQuery)}`);
+                      setSearchQuery('');
+                      setMobileMenuOpen(false);
+                    }
+                  }}
+                  placeholder="Tìm kiếm sản phẩm..."
+                  className="w-full"
                 />
-                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              </form>
+              </div>
               <nav className="flex flex-col gap-1">
                 {[
                   { to: '/', label: 'Trang chủ' },
@@ -751,30 +756,26 @@ export default function Header() {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <form onSubmit={handleSearch} className="relative">
-              <Input
-                ref={searchInputRef}
-                type="text"
-                placeholder="Bạn muốn tìm gì hôm nay? (áo, quần, giày, túi...)"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full h-14 pl-14 pr-32 rounded-full text-base border-2 border-border focus:border-primary"
-              />
-              <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
-              <Button
-                type="submit"
-                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full px-5 h-10"
-              >
-                Tìm
-              </Button>
-            </form>
+            <SearchAutocomplete
+              value={searchQuery}
+              onChange={setSearchQuery}
+              onSubmit={handleSearch}
+              onClose={closeSearch}
+              placeholder="Bạn muốn tìm gì hôm nay? (áo, quần, giày, túi...)"
+              autoFocus
+              className="w-full"
+            />
             <div className="mt-5 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
               <span className="mr-1">Gợi ý:</span>
               {['Áo thun', 'Quần jean', 'Giày sneaker', 'Túi xách', 'Áo khoác'].map((kw) => (
                 <button
                   key={kw}
                   type="button"
-                  onClick={() => setSearchQuery(kw)}
+                  onClick={() => {
+                    setSearchQuery(kw);
+                    navigate(`/products?search=${encodeURIComponent(kw)}`);
+                    setIsSearchOpen(false);
+                  }}
                   className="px-3 py-1 rounded-full border border-border hover:border-primary hover:text-primary transition-colors"
                 >
                   {kw}

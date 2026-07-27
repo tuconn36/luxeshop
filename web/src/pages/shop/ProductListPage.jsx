@@ -6,14 +6,13 @@ import Header from '@/components/layout/Header.jsx';
 import Footer from '@/components/layout/Footer.jsx';
 import ProductCard from '@/components/shop/ProductCard.jsx';
 import { useProducts } from '@/hooks/useProducts.js';
+import { highlightMatch, tokenizeQuery } from '@/lib/highlightMatch.jsx';
+import { Search, X, TrendingUp, Sparkles, Lightbulb } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  ChevronLeft, ChevronRight, Package, 
-  Search, X, TrendingUp 
-} from 'lucide-react';
+import { ChevronLeft, ChevronRight, Package } from 'lucide-react';
 
 export default function ProductListPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -88,12 +87,13 @@ export default function ProductListPage() {
   };
 
   const getPageTitle = () => {
-    if (filters.search) return `Kết quả tìm kiếm: "${filters.search}"`;
+    if (filters.search) return 'Kết quả tìm kiếm';
     if (filters.category) return `Thời trang ${filters.category}`;
     return 'Tất cả sản phẩm';
   };
 
   const hasActiveFilters = filters.category || filters.search || filters.minPrice || filters.maxPrice;
+  const isNoResult = !loading && products.length === 0 && (filters.search || filters.category);
 
   return (
     <>
@@ -137,10 +137,15 @@ export default function ProductListPage() {
               animate={{ opacity: 1, y: 0 }}
               className="space-y-2"
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
                 <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
                   {getPageTitle()}
                 </h1>
+                {filters.search && (
+                  <span className="text-2xl md:text-3xl font-bold text-primary">
+                    "{highlightMatch(filters.search, filters.search)}"
+                  </span>
+                )}
                 {filters.category === '' && !filters.search && (
                   <span className="px-3 py-1 bg-gradient-to-r from-primary/20 to-primary/10 rounded-full">
                     <TrendingUp className="w-4 h-4 inline mr-1" />
@@ -150,7 +155,14 @@ export default function ProductListPage() {
               </div>
               <div className="flex items-center gap-2 text-muted-foreground">
                 <Package className="w-5 h-5" />
-                <span className="font-medium">{totalItems || products.length} sản phẩm</span>
+                <span className="font-medium">
+                  {totalItems || products.length} sản phẩm
+                  {filters.search && tokenizeQuery(filters.search).length > 1 && (
+                    <span className="text-xs text-muted-foreground/70 ml-1.5">
+                      ({tokenizeQuery(filters.search).length} từ khoá)
+                    </span>
+                  )}
+                </span>
                 {filters.category || filters.search ? (
                   <span className="text-sm">• Đang lọc</span>
                 ) : null}
@@ -317,21 +329,15 @@ export default function ProductListPage() {
                   ))}
                 </div>
               ) : products.length === 0 ? (
-                <div className="text-center py-20 bg-gradient-to-br from-gray-50 to-white rounded-3xl">
-                  <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                    <Package className="w-12 h-12 text-gray-400" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-gray-900 mb-3">Không tìm thấy sản phẩm</h3>
-                  <p className="text-gray-500 mb-6 max-w-md mx-auto">
-                    Không có sản phẩm nào phù hợp với bộ lọc của bạn.
-                  </p>
-                  <Button 
-                    onClick={handleResetFilters}
-                    className="bg-black hover:bg-gray-800 text-white rounded-full"
-                  >
-                    Xóa bộ lọc
-                  </Button>
-                </div>
+                <SmartEmptyState
+                  search={filters.search}
+                  category={filters.category}
+                  onClear={handleResetFilters}
+                  onSearch={(q) => {
+                    setSearchInput(q);
+                    handleFilterChange('search', q);
+                  }}
+                />
               ) : (
                 <>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
@@ -411,5 +417,97 @@ export default function ProductListPage() {
 
       <Footer />
     </>
+  );
+}
+
+// ========== SmartEmptyState: thông minh hơn khi 0 kết quả ==========
+function SmartEmptyState({ search, category, onClear, onSearch }) {
+  const isSearchEmpty = search && search.trim().length > 0;
+  const tokens = isSearchEmpty ? tokenizeQuery(search) : [];
+
+  // Gợi ý từ khoá liên quan (khi tìm "áo" → gợi ý "quần", "phụ kiện"...)
+  const SUGGESTIONS = {
+    'ao': ['Áo thun', 'Áo sơ mi', 'Áo khoác', 'Áo len'],
+    'quan': ['Quần jean', 'Quần tây', 'Quần short', 'Quần kaki'],
+    'giay': ['Giày sneaker', 'Giày da', 'Sandal', 'Dép'],
+    'tui': ['Túi xách', 'Túi đeo chéo', 'Balo', 'Ví'],
+    'phu kien': ['Thắt lưng', 'Kính', 'Mũ', 'Khăn'],
+    'vay': ['Váy dài', 'Váy ngắn', 'Chân váy', 'Đầm'],
+  };
+
+  // Tìm gợi ý dựa trên token đầu tiên
+  const suggestFromToken = (() => {
+    if (tokens.length === 0) return [];
+    const first = tokens[0];
+    for (const [key, vals] of Object.entries(SUGGESTIONS)) {
+      if (first.includes(key) || key.includes(first)) return vals;
+    }
+    return ['Áo thun', 'Quần jean', 'Túi xách', 'Phụ kiện'];
+  })();
+
+  return (
+    <div className="text-center py-16 px-4 bg-gradient-to-br from-amber-50/30 via-white to-rose-50/20 rounded-3xl border border-dashed border-amber-200/60">
+      <div className="w-24 h-24 bg-gradient-to-br from-amber-100 to-rose-100 rounded-full flex items-center justify-center mx-auto mb-6">
+        <Sparkles className="w-12 h-12 text-amber-500" />
+      </div>
+
+      {isSearchEmpty ? (
+        <>
+          <h3 className="text-2xl font-bold text-gray-900 mb-2">
+            Không tìm thấy sản phẩm cho "{search}"
+          </h3>
+          <p className="text-gray-500 mb-6 max-w-md mx-auto">
+            Thử từ khoá khác, bỏ bớt bộ lọc, hoặc khám phá các danh mục bên dưới.
+          </p>
+
+          <div className="mb-8 max-w-2xl mx-auto">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 inline-flex items-center gap-1.5">
+              <Lightbulb className="w-3.5 h-3.5" /> Có thể bạn muốn tìm
+            </p>
+            <div className="flex flex-wrap gap-2 justify-center">
+              {suggestFromToken.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => onSearch(s)}
+                  className="px-4 py-2 rounded-full bg-white border border-amber-200 hover:border-amber-500 hover:bg-amber-50 hover:text-amber-700 text-sm font-medium transition-colors"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2 justify-center">
+            <Button onClick={onClear} className="bg-black hover:bg-gray-800 text-white rounded-full">
+              <X className="w-4 h-4 mr-1.5" /> Xóa tất cả bộ lọc
+            </Button>
+            <Link to="/products">
+              <Button variant="outline" className="rounded-full">
+                Xem tất cả sản phẩm
+              </Button>
+            </Link>
+          </div>
+        </>
+      ) : (
+        <>
+          <h3 className="text-2xl font-bold text-gray-900 mb-3">Chưa có sản phẩm trong danh mục này</h3>
+          <p className="text-gray-500 mb-6 max-w-md mx-auto">
+            Danh mục {category} hiện đang được cập nhật. Vui lòng quay lại sau hoặc khám phá danh mục khác.
+          </p>
+          <div className="flex flex-wrap gap-2 justify-center">
+            <Link to="/products">
+              <Button className="bg-black hover:bg-gray-800 text-white rounded-full">
+                Xem tất cả sản phẩm
+              </Button>
+            </Link>
+            <Link to="/new-arrivals">
+              <Button variant="outline" className="rounded-full">
+                Sản phẩm mới
+              </Button>
+            </Link>
+          </div>
+        </>
+      )}
+    </div>
   );
 }
