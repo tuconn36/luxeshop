@@ -48,12 +48,10 @@ function isPhone(s) {
 }
 
 function normalizePhone(s) {
-  // Convert local 0xxxxxxxxx -> +84xxxxxxxxx (mặc định cho Việt Nam)
-  let p = String(s).replace(/\s/g, '');
-  if (p.startsWith('0') && p.length === 10) {
-    p = '+84' + p.slice(1);
-  }
-  return p;
+  // Chỉ strip whitespace, không ép +84 — để từng SMS provider tự quyết định format.
+  // - Twilio: cần E.164 (+84...)
+  // - eSMS.vn: cần local VN (0xxxxxxxxx)
+  return String(s).replace(/\s/g, '');
 }
 
 /**

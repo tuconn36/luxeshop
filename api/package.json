@@ -10,7 +10,8 @@
     "db:seed": "node scripts/seedFullProducts.js",
     "db:add-otp": "node scripts/addOtpTable.js",
     "create-admin": "node scripts/createAdmin.js",
-    "test:otp": "node scripts/testOtp.js"
+    "test:otp": "node scripts/testOtp.js",
+    "mail:mock": "node scripts/mockSmtpServer.js"
   },
   "keywords": [
     "jewelry",
@@ -39,6 +40,7 @@
   },
   
   "optionalDependencies": {
-    "twilio": "^4.19.0"
+    "twilio": "^4.19.0",
+    "smtp-server": "^3.13.6"
   }
 }

@@ -65,7 +65,7 @@ async function sendOtpEmail(toEmail, code) {
   const appName = process.env.APP_NAME || 'Luxe Jewelry';
   const expireMinutes = parseInt(process.env.OTP_EXPIRE_MINUTES || '10', 10);
 
-  const hasSmtp = !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+  const hasSmtp = !!(process.env.SMTP_HOST && process.env.SMTP_PORT);
 
   // Dev fallback: không có SMTP config → chỉ log ra console/file
   if (!hasSmtp) {
@@ -88,10 +88,9 @@ async function sendOtpEmail(toEmail, code) {
     host: process.env.SMTP_HOST,
     port: parseInt(process.env.SMTP_PORT || '465', 10),
     secure: String(process.env.SMTP_SECURE || 'true').toLowerCase() === 'true',
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS,
-    },
+    auth: process.env.SMTP_USER && process.env.SMTP_PASS
+      ? { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS }
+      : undefined,
     pool: true,
     maxConnections: 3,
   });

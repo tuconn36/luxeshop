@@ -47,6 +47,29 @@ function buildBody(code, appName = 'Luxe Jewelry', expireMinutes = 10) {
   return `[${appName}] Ma xac thuc cua ban la: ${code}. Hieu luc ${expireMinutes} phut. Neu ban khong yeu cau, vui long bo qua.`;
 }
 
+/**
+ * Chuẩn hoá SĐT theo provider:
+ *  - twilio: E.164  (+84xxxxxxxxx)
+ *  - esms:    local VN (0xxxxxxxxx) — eSMS không nhận E.164
+ */
+function formatPhoneForProvider(toPhone, provider) {
+  const digits = String(toPhone || '').replace(/\D/g, '');
+  if (!digits) return toPhone;
+
+  if (provider === 'twilio') {
+    if (digits.startsWith('84') && digits.length === 11) return '+' + digits;
+    if (digits.startsWith('0') && digits.length === 10) return '+84' + digits.slice(1);
+    return '+' + digits;
+  }
+
+  if (provider === 'esms') {
+    if (digits.startsWith('84') && digits.length === 11) return '0' + digits.slice(2);
+    return digits;
+  }
+
+  return toPhone;
+}
+
 async function sendTwilio(toPhone, body) {
   // Twilio SDK được lazy-load để tránh lỗi khi user không dùng SMS
   let twilio;
@@ -105,24 +128,25 @@ async function sendOtpSms(toPhone, code) {
   }
 
   const body = buildBody(code, appName, expireMinutes);
+  const phone = formatPhoneForProvider(toPhone, provider);
 
   try {
     let result;
     if (provider === 'twilio') {
-      result = await sendTwilio(toPhone, body);
+      result = await sendTwilio(phone, body);
     } else if (provider === 'esms') {
-      result = await sendEsms(toPhone, body);
+      result = await sendEsms(phone, body);
     } else {
       throw new Error(`unknown_sms_provider: ${provider}`);
     }
-    logToFile(toPhone, code, 'SMS-SENT');
-    console.log(`📱 [OTP SMS SENT] ${toPhone} provider=${provider}`);
+    logToFile(phone, code, 'SMS-SENT');
+    console.log(`📱 [OTP SMS SENT] ${phone} provider=${provider}`);
     return { ok: true, channel: provider, ...result };
   } catch (err) {
     console.error('[sms] send error:', err.message);
-    const entry = logToFile(toPhone, code, 'SMS-ERROR');
+    const entry = logToFile(phone, code, 'SMS-ERROR');
     return { ok: false, channel: provider, error: err.message, log: entry };
   }
 }
 
-module.exports = { sendOtpSms };
+module.exports = { sendOtpSms, formatPhoneForProvider };
