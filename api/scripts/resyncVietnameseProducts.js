@@ -10,6 +10,25 @@
 require('dotenv').config();
 const pool = require('../config/database');
 
+// Cho phép override DB host/port/db/user/password qua CLI khi gặp local DB.
+//   node resyncVietnameseProducts.js --host=localhost --port=5432 --db=luxe --user=postgres --password=xxx
+function applyCliOverrides() {
+  const args = process.argv.slice(2);
+  const get = (key) => {
+    const arg = args.find((a) => a.startsWith(`--${key}=`));
+    return arg ? arg.split('=').slice(1).join('=') : undefined;
+  };
+  if (get('host')) pool.options.host = get('host');
+  if (get('port')) pool.options.port = parseInt(get('port'), 10);
+  if (get('db')) pool.options.database = get('db');
+  if (get('user')) pool.options.user = get('user');
+  if (get('password')) pool.options.password = get('password');
+  if (get('database-url')) {
+    pool.options = { ...pool.options, connectionString: get('database-url') };
+  }
+}
+applyCliOverrides();
+
 // Ép giá trị thành số nguyên VNĐ thuần (loại bỏ mọi ký tự không phải số)
 function toVNNumber(value) {
   if (value === null || value === undefined || value === '') return null;
@@ -101,6 +120,7 @@ function viDesc(input) {
 
     console.log(`\n✅ Đã cập nhật ${updated}/${rows.length} sản phẩm.`);
     console.log(`💰 Số sản phẩm có giá được chuẩn hoá: ${priceFixed}.`);
+    console.log('\nGợi ý: cũng có thể chạy `node scripts/seedFullProducts.js` để seed lại toàn bộ.');
   } catch (err) {
     console.error('❌ Lỗi:', err.message);
     process.exitCode = 1;
