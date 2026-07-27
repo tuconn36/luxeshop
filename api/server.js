@@ -18,13 +18,13 @@ app.use(cors({
   credentials: true
 }));
 
-app.use(cors());      // PHẢI nằm trên routes
-app.use(express.json());
-app.use('/api/products', productRoutes);
 app.options('*', cors({
   origin: allowedOrigins,
   credentials: true
 }));
+
+app.use('/api/products', productRoutes);
+const productRoutes = require('./routes/products');
 // Khi start locally (npm run dev) ưu tiên 5001 cho khớp với web/.env,
 // tránh xung đột với các API khác đang dùng 5000.
 const PORT = parseInt(process.env.PORT || '5001', 10);
