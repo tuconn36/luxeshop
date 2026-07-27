@@ -15,31 +15,28 @@ require('dotenv').config();
 
 const app = express();
 
-const allowedOrigins = [
+const DEFAULT_ALLOWED_ORIGINS = [
   'https://luxeshop-six.vercel.app',
   'https://www.luxeshop-six.vercel.app',
-  'https://luxeadmin.vercel.app'
-   
+  'https://luxeadmin.vercel.app',
+  'https://www.luxeadmin.vercel.app',
 ];
 
-app.use(cors({
-  origin: allowedOrigins,
-  credentials: true
-}));
-
-app.options('*', cors({
-  origin: allowedOrigins,
-  credentials: true
-}));
-
-
+const HOST = process.env.HOST || '0.0.0.0';
 // Khi start locally (npm run dev) ưu tiên 5001 cho khớp với web/.env,
 // tránh xung đột với các API khác đang dùng 5000.
 const PORT = process.env.PORT || 8080;
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
+// Nếu không set CORS_ORIGIN và đang production → dùng danh sách mặc định
+// (tránh vô tình đóng CORS khi deploy mà quên set env).
+const allowedOrigins = process.env.CORS_ORIGIN
+  ? process.env.CORS_ORIGIN.split(/[,\s]+/).map((s) => s.trim()).filter(Boolean)
+  : (NODE_ENV === 'production' ? DEFAULT_ALLOWED_ORIGINS : []);
+
 console.log('PORT ENV =', process.env.PORT);
 console.log('PORT USED =', PORT);
+console.log('CORS allowed origins =', allowedOrigins);
 // ============ TRUST PROXY ============
 // Railway / Render / Nginx / Cloudflare đều chạy qua reverse proxy.
 // Cần bật trust proxy để express-rate-limit dùng đúng IP thật của client.
@@ -86,14 +83,8 @@ app.use(hpp());
 
 // 5. CORS - Cho phép nhiều domain (web + admin + localhost)
 function parseOrigins() {
-  const raw = process.env.CORS_ORIGIN || '';
-  if (!raw) {
-    return NODE_ENV === 'production'
-      ? []
-      : ['http://localhost:3000', 'http://localhost:3001', 'http://localhost:5173', 'http://127.0.0.1:3000', 'http://127.0.0.1:3001', 'http://localhost:4173'];
-  }
-  // Hỗ trợ cả dấu phẩy và khoảng trắng
-  return raw.split(/[,\s]+/).map((s) => s.trim()).filter(Boolean);
+  // Đã được resolve sẵn ở trên (allowedOrigins)
+  return allowedOrigins;
 }
 
 const corsOptions = {
@@ -244,11 +235,16 @@ app.use((req, res) => {
 // Error handler
 app.use((err, req, res, next) => {
   console.error(err.stack);
+  // Lỗi CORS từ cors() thường đi vào đây khi origin bị reject.
+  // Trả 403 thay vì 500 để client thấy đúng bản chất lỗi.
+  if (err && typeof err.message === 'string' && err.message.startsWith('CORS blocked')) {
+    return res.status(403).json({ error: err.message });
+  }
   res.status(500).json({ error: 'Something went wrong!' });
 });
 
 // Bind 0.0.0.0 để chạy được trong container (Railway/Render/Docker)
-const HOST = process.env.HOST || '0.0.0.0';
+// (HOST đã được khai báo ở đầu file)
 app.listen(PORT, HOST, () => {
   console.log(`🚀 Server running on ${HOST}:${PORT} (${NODE_ENV})`);
   console.log(`🔍 Health: /health`);
