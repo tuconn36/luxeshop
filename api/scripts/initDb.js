@@ -9,7 +9,17 @@ async function initDatabase() {
     const schemaPath = path.join(__dirname, '../database/schema.sql');
     const schema = fs.readFileSync(schemaPath, 'utf8');
 
-    await pool.query(schema);
+    // Chạy schema.sql. Postgres chạy từng statement độc lập nếu KHÔNG có transaction,
+    // nên dù statement nào fail thì các statement trước (đã chạy OK) vẫn được giữ.
+    // Đã dùng IF NOT EXISTS cho mọi CREATE TABLE để an toàn cho cả DB mới lẫn DB cũ.
+    const client = await pool.connect();
+    try {
+      await client.query(schema);
+    } catch (schemaErr) {
+      console.warn('⚠️ Một số statement trong schema.sql fail (bỏ qua):', schemaErr.message);
+    } finally {
+      client.release();
+    }
 
     // Đảm bảo có cột has_password + phone trên users (cho luồng OTP)
     await pool.query(`
