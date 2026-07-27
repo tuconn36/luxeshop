@@ -8,6 +8,17 @@ const pool = require('./config/database');
 require('dotenv').config();
 
 const app = express();
+const allowedOrigins = [
+  'https://luxeshop-six.vercel.app',
+  'https://www.luxeshop-six.vercel.app'
+];
+
+app.use(cors({
+  origin: allowedOrigins,
+  credentials: true
+}));
+
+app.options('*', cors());
 // Khi start locally (npm run dev) ưu tiên 5001 cho khớp với web/.env,
 // tránh xung đột với các API khác đang dùng 5000.
 const PORT = parseInt(process.env.PORT || '5001', 10);
