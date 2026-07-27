@@ -59,12 +59,12 @@ export default function AccountLayout() {
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [stats, setStats] = useState(null);
 
-  // Guard: nếu chưa đăng nhập → đẩy về login
+  // Guard: nếu chưa đăng nhập → đẩy về login (chỉ chạy khi layout đã render, tức là ProtectedRoute đã cho qua)
   useEffect(() => {
     if (!initialLoading && !currentUser) {
-      navigate('/login', { replace: true });
+      navigate(`/signup?redirect=${encodeURIComponent(location.pathname)}`, { replace: true });
     }
-  }, [initialLoading, currentUser, navigate]);
+  }, [initialLoading, currentUser, navigate, location.pathname]);
 
   // Load stats từ API
   useEffect(() => {

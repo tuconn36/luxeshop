@@ -16,6 +16,7 @@ import CartPage from './pages/shop/CartPage.jsx';
 import CheckoutPage from './pages/shop/CheckoutPage.jsx';
 import OrderHistoryPage from './pages/account/OrderHistoryPage.jsx';
 import AccountLayout from './pages/account/AccountLayout.jsx';
+import ErrorBoundary from './components/common/ErrorBoundary.jsx';
 import ProfilePage from './pages/account/ProfilePage.jsx';
 import AddressPage from './pages/account/AddressPage.jsx';
 import MeasurementsPage from './pages/account/MeasurementsPage.jsx';
@@ -61,48 +62,26 @@ function App() {
             <Route path="/products" element={<ProductListPage />} />
             <Route path="/product/:id" element={<ProductDetailPage />} />
             <Route path="/compare" element={<ComparePage />} />
-          <Route
-            path="/cart"
-            element={
-              <ProtectedRoute>
-                <CartPage />
-              </ProtectedRoute>
-            }
-          />
           <Route path="/signup" element={<AuthModalPage />} />
-          <Route
-            path="/checkout"
-            element={
-              <ProtectedRoute>
-                <CheckoutPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/orders"
-            element={
-              <ProtectedRoute>
-                <OrderHistoryPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/account"
-            element={
-              <ProtectedRoute>
+          <Route element={<ProtectedRoute />}>
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/orders" element={<OrderHistoryPage />} />
+            <Route path="/account" element={
+              <ErrorBoundary>
                 <AccountLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<MyAccountPage />} />
-            <Route path="profile" element={<ProfilePage />} />
-            <Route path="change-password" element={<ChangePasswordPage />} />
-            <Route path="address" element={<AddressPage />} />
-            <Route path="measurements" element={<MeasurementsPage />} />
-            <Route path="orders" element={<AccountOrdersPage />} />
-            <Route path="orders/:id" element={<OrderDetailPage />} />
-            <Route path="wishlist" element={<WishlistPage />} />
-            <Route path="vip" element={<VipPage />} />
+              </ErrorBoundary>
+            }>
+              <Route index element={<ErrorBoundary><MyAccountPage /></ErrorBoundary>} />
+              <Route path="profile" element={<ProfilePage />} />
+              <Route path="change-password" element={<ChangePasswordPage />} />
+              <Route path="address" element={<AddressPage />} />
+              <Route path="measurements" element={<MeasurementsPage />} />
+              <Route path="orders" element={<AccountOrdersPage />} />
+              <Route path="orders/:id" element={<OrderDetailPage />} />
+              <Route path="wishlist" element={<WishlistPage />} />
+              <Route path="vip" element={<VipPage />} />
+            </Route>
           </Route>
         </Routes>
         <Toaster

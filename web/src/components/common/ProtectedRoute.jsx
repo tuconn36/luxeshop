@@ -1,8 +1,8 @@
 import React from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext.jsx';
 
-export default function ProtectedRoute({ children }) {
+export default function ProtectedRoute() {
   const { currentUser, initialLoading } = useAuth();
   const location = useLocation();
 
@@ -22,5 +22,5 @@ export default function ProtectedRoute({ children }) {
     return <Navigate to={`/signup?redirect=${encodeURIComponent(location.pathname)}`} replace />;
   }
 
-  return children;
+  return <Outlet />;
 }

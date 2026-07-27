@@ -32,7 +32,7 @@ export default function VipAvatarFrame({
 
   const inner = (
     <div className={`relative ${className}`} style={{ width: size, height: size }}>
-      <Frame tier={tier} size={size}>
+      <Frame tier={tier} size={size} compact={compact}>
         <div
           className="absolute inset-0 rounded-full overflow-hidden"
           style={{ width: size, height: size }}
@@ -91,7 +91,7 @@ export default function VipAvatarFrame({
  * Tier 7-8: glowing ring + rotating sparkle
  * Tier 9-10: animated gold ring + particles + crown
  */
-function Frame({ tier, size, children }) {
+function Frame({ tier, size, compact, children }) {
   const inner = children;
   const sizeStyle = { width: size, height: size };
 
